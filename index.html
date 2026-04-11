@@ -40,12 +40,17 @@ async function login() {
   if (!data || data.length === 0) {
     let name = prompt("Enter your name");
 
-    if (name) {
-      await client.from('users').insert([
-        { mobile: mobile, name: name, plan: 'trial', start_date: new Date() }
-      ]);
-    }
+   if (name) {
+  let res = await client.from('users').insert([
+    { mobile: mobile, name: name }
+  ]);
+
+  if (res.error) {
+    alert("Error: " + res.error.message);
+  } else {
+    alert("User created");
   }
+}
 
   // ALWAYS show app
   localStorage.setItem("mobile", mobile);
