@@ -5,11 +5,7 @@
 <title>Salon App</title>
 
 <style>
-body {
-font-family: Arial;
-background:#f2f2f2;
-margin:0;
-}
+body { font-family: Arial; background:#f2f2f2; margin:0; }
 
 .card {
 background:white;
@@ -31,16 +27,8 @@ border:none;
 border-radius:6px;
 }
 
-.blue {
-background:#2563eb;
-color:white;
-}
-
-.gray {
-background:#ddd;
-width:100%;
-margin-top:10px;
-}
+.blue { background:#2563eb; color:white; }
+.gray { background:#ddd; width:100%; margin-top:10px; }
 
 input, select {
 width:100%;
@@ -49,6 +37,9 @@ margin:5px 0;
 border-radius:6px;
 border:1px solid #ccc;
 }
+
+table { width:100%; border-collapse:collapse; }
+td, th { padding:8px; border-bottom:1px solid #ddd; text-align:left; }
 </style>
 
 </head>
@@ -58,22 +49,25 @@ border:1px solid #ccc;
 <div id="app"></div>
 
 <script>
+
 let app = document.getElementById("app");
+
 // ===== DATA =====
-let customers = [];
-let services = [
+let customers = JSON.parse(localStorage.getItem("customers")) || [];
+let services = JSON.parse(localStorage.getItem("services")) || [
 { name:"Haircut", price:150 },
 { name:"Shaving", price:80 }
 ];
+let visits = JSON.parse(localStorage.getItem("visits")) || [];
 
 // ===== HELPERS =====
 function formatName(name){
 return name.toLowerCase().split(" ").filter(w=>w).map(w=>w[0].toUpperCase()+w.slice(1)).join(" ");
 }
-
 function normalize(name){
 return name.toLowerCase().replace(/\s+/g,' ').trim();
 }
+function val(id){ return document.getElementById(id).value; }
 
 // ===== LOGIN =====
 function showLogin(){
@@ -84,10 +78,7 @@ app.innerHTML = `
 <button class="blue" onclick="sendOTP()">Send OTP</button>
 </div>`;
 }
-
-function sendOTP(){
-showOTP();
-}
+function sendOTP(){ showOTP(); }
 
 function showOTP(){
 app.innerHTML = `
@@ -103,44 +94,28 @@ if(!localStorage.getItem("user")){
 app.innerHTML = `
 <div class="card">
 <h2>Register</h2>
-
 <input id="name" placeholder="Name">
 <input id="shop" placeholder="Shop Name">
 <input id="city" placeholder="City">
 <input id="state" placeholder="State">
-
 <button class="blue" onclick="register()">Register</button>
 </div>`;
-}else{
-showHome();
-}
+}else showHome();
 }
 
 function register(){
+let name=val("name"), shop=val("shop"), city=val("city"), state=val("state");
+if(!name||!shop||!city||!state){ alert("Fill all fields"); return; }
 
-let name = document.getElementById("name").value;
-let shop = document.getElementById("shop").value;
-let city = document.getElementById("city").value;
-let state = document.getElementById("state").value;
-
-if(!name || !shop || !city || !state){
-alert("Please fill all fields");
-return;
-}
-
-localStorage.setItem("user", name);
-localStorage.setItem("shop", shop);
-localStorage.setItem("city", city);
-localStorage.setItem("state", state);
-
+localStorage.setItem("user",name);
+localStorage.setItem("shop",shop);
 showHome();
 }
 
 // ===== HOME =====
 function showHome(){
-
-let name = localStorage.getItem("user");
-let shop = localStorage.getItem("shop");
+let name=localStorage.getItem("user");
+let shop=localStorage.getItem("shop");
 
 app.innerHTML = `
 <div class="card">
@@ -148,19 +123,14 @@ app.innerHTML = `
 <p>${shop}</p>
 
 <div class="grid">
-
 <button class="blue" onclick="showVisit()">Add Visit</button>
 <button class="blue" onclick="showMaster()">Master</button>
-
 <button class="blue" onclick="showReports()">Reports</button>
 <button class="blue" onclick="showReminder()">Reminder</button>
-
 </div>
 
 <button class="gray" onclick="logout()">Logout</button>
-
-</div>
-`;
+</div>`;
 }
 
 // ===== MASTER =====
@@ -168,37 +138,68 @@ function showMaster(){
 app.innerHTML = `
 <div class="card">
 <h2>Master</h2>
-
 <button class="blue" onclick="showCustomerMaster()">Customer Master</button>
 <button class="blue" onclick="showServiceMaster()">Service Master</button>
-
 <button class="gray" onclick="showHome()">Back</button>
-</div>
-`;
+</div>`;
 }
 
 // ===== CUSTOMER MASTER =====
-window.showCustomerMaster = function(){
+function showCustomerMaster(){
 
-let list = "";
-
-if(customers.length === 0){
-list = "<p>No customers yet</p>";
-} else {
-list = "<ul>" + customers.map(c => `<li>${c}</li>`).join("") + "</ul>";
-}
+let list = customers.length===0
+? "<p>No customers yet</p>"
+: `<table>
+<tr><th>Name</th><th>Mobile</th></tr>
+${customers.map(c=>`
+<tr><td>${c.name}</td><td>${c.mobile}</td></tr>`).join("")}
+</table>`;
 
 app.innerHTML = `
 <div class="card">
 <h2>Customer Master</h2>
 
+<button class="blue" onclick="showAddCustomer()">+ Add Customer</button>
+
 ${list}
 
 <button class="gray" onclick="showMaster()">Back</button>
-</div>
-`;
+</div>`;
 }
-  // ===== SERVICE MASTER =====
+
+function showAddCustomer(){
+app.innerHTML = `
+<div class="card">
+<h2>Add Customer</h2>
+
+<input id="custName" placeholder="Name">
+<input id="custMobile" placeholder="Mobile No">
+<input id="custAddress" placeholder="Address (optional)">
+
+<button class="blue" onclick="saveCustomer()">Save</button>
+<button class="gray" onclick="showCustomerMaster()">Back</button>
+</div>`;
+}
+
+function saveCustomer(){
+
+let name=formatName(val("custName"));
+let mobile=val("custMobile");
+let address=val("custAddress");
+
+if(!name||!mobile){ alert("Name & Mobile required"); return; }
+
+let exists = customers.find(c=>normalize(c.name)===normalize(name));
+
+if(!exists){
+customers.push({name,mobile,address});
+localStorage.setItem("customers",JSON.stringify(customers));
+}
+
+showCustomerMaster();
+}
+
+// ===== SERVICE MASTER =====
 function showServiceMaster(){
 app.innerHTML = `
 <div class="card">
@@ -213,20 +214,15 @@ ${services.map(s=>`<li>${s.name} ₹${s.price}</li>`).join("")}
 
 <button class="blue" onclick="addService()">Add Service</button>
 <button class="gray" onclick="showMaster()">Back</button>
-</div>
-`;
+</div>`;
 }
 
 function addService(){
-let name=document.getElementById("sname").value;
-let price=document.getElementById("sprice").value;
-
-if(!name || !price){
-alert("Enter service and price");
-return;
-}
+let name=val("sname"), price=val("sprice");
+if(!name||!price){ alert("Fill all"); return; }
 
 services.push({name,price});
+localStorage.setItem("services",JSON.stringify(services));
 showServiceMaster();
 }
 
@@ -239,20 +235,14 @@ app.innerHTML = `
 <div class="card">
 <h2>Add Visit</h2>
 
-<select id="custSelect">
-<option value="">Select Customer</option>
-${customers.map(c=>`<option>${c}</option>`).join("")}
-</select>
-
-<input id="custInput" placeholder="Or type new customer">
+<input id="custInput" placeholder="Customer Name">
 
 <h3>Services</h3>
 ${services.map((s,i)=>`
 <label>
 <input type="checkbox" value="${i}">
 ${s.name} ₹${s.price}
-</label><br>
-`).join("")}
+</label><br>`).join("")}
 
 <input type="date" id="date" value="${today}">
 <input id="reminder" placeholder="Reminder Days">
@@ -265,63 +255,132 @@ ${s.name} ₹${s.price}
 // ===== SAVE VISIT =====
 function saveVisit(){
 
-let name = document.getElementById("custInput").value || document.getElementById("custSelect").value;
+let name=formatName(val("custInput"));
+let date=val("date");
+let reminderDays=parseInt(val("reminder")||0);
 
-name = formatName(name);
+if(!name){ alert("Enter customer"); return; }
 
-if(!name){
-alert("Enter customer name");
-return;
-}
+// services
+let selected=[];
+document.querySelectorAll("input[type=checkbox]:checked").forEach(cb=>{
+selected.push(services[cb.value]);
+});
 
-let exists = customers.find(c => normalize(c) === normalize(name));
+let total=selected.reduce((s,x)=>s+Number(x.price),0);
 
+// customer auto create
+let exists=customers.find(c=>normalize(c.name)===normalize(name));
 if(!exists){
-customers.push(name);
+customers.push({name,mobile:"",address:""});
+localStorage.setItem("customers",JSON.stringify(customers));
 }
 
-alert("Visit Saved for " + name);
+// save visit
+visits.push({name,date,services:selected,total,reminderDays});
+localStorage.setItem("visits",JSON.stringify(visits));
+
+alert("Visit Saved ₹"+total);
 showHome();
 }
 
 // ===== REPORT =====
 function showReports(){
+
 app.innerHTML = `
 <div class="card">
 <h2>Reports</h2>
-<p>Today Total: ₹0</p>
+
+<button class="blue" onclick="todayReport()">Today</button>
+
+<input type="date" id="from">
+<input type="date" id="to">
+<button class="blue" onclick="rangeReport()">Show</button>
+
+<button class="blue" onclick="downloadCSV()">Download CSV</button>
+
+<div id="report"></div>
+
 <button class="gray" onclick="showHome()">Back</button>
 </div>`;
+}
+
+function todayReport(){
+let today=new Date().toISOString().split("T")[0];
+render(visits.filter(v=>v.date===today));
+}
+
+function rangeReport(){
+let from=val("from"), to=val("to");
+render(visits.filter(v=>v.date>=from && v.date<=to));
+}
+
+function render(list){
+let total=list.reduce((s,v)=>s+v.total,0);
+
+document.getElementById("report").innerHTML=`
+<p>Total Visits: ${list.length}</p>
+<p>Total Amount: ₹${total}</p>
+
+<table>
+<tr><th>Name</th><th>Date</th><th>Amount</th></tr>
+${list.map(v=>`
+<tr><td>${v.name}</td><td>${v.date}</td><td>${v.total}</td></tr>`).join("")}
+</table>`;
+}
+
+function downloadCSV(){
+let rows=[["Name","Date","Amount"]];
+visits.forEach(v=>rows.push([v.name,v.date,v.total]));
+
+let csv=rows.map(r=>r.join(",")).join("\n");
+
+let blob=new Blob([csv],{type:"text/csv"});
+let url=URL.createObjectURL(blob);
+
+let a=document.createElement("a");
+a.href=url;
+a.download="report.csv";
+a.click();
 }
 
 // ===== REMINDER =====
 function showReminder(){
 
-let shop = localStorage.getItem("shop");
-let name = customers[0] || "Customer";
-let mobile = "9876543210";
+let today=new Date();
 
-let msg = `Hello ${name},
+let list=visits.filter(v=>{
+let d=new Date(v.date);
+let next=new Date(d);
+next.setDate(next.getDate()+v.reminderDays);
 
-It’s time to pamper and groom yourself 😊
+let r=new Date(next);
+r.setDate(r.getDate()-3);
 
-We would love to welcome you again at ${shop}.
+return r.toDateString()===today.toDateString();
+});
 
-Please visit us at your convenience.
+let html=list.length===0?"<p>No reminders</p>":
+list.map(v=>{
+let c=customers.find(x=>x.name===v.name)||{};
+let msg=`Hello ${v.name},
 
-Thank you!`;
+It’s time to pamper and groom yourself 😊`;
 
-let url = "https://wa.me/91"+mobile+"?text="+encodeURIComponent(msg);
+let url="https://wa.me/91"+(c.mobile||"")+"?text="+encodeURIComponent(msg);
 
-app.innerHTML = `
+return `
+<div class="card">
+<p>${v.name}</p>
+<p>${c.mobile||""}</p>
+<button class="blue" onclick="window.open('${url}')">WhatsApp</button>
+</div>`;
+}).join("");
+
+app.innerHTML=`
 <div class="card">
 <h2>Reminder</h2>
-
-<p>${name}</p>
-<p>${mobile}</p>
-
-<button class="blue" onclick="window.open('${url}')">WhatsApp</button>
-
+${html}
 <button class="gray" onclick="showHome()">Back</button>
 </div>`;
 }
@@ -332,7 +391,7 @@ localStorage.clear();
 showLogin();
 }
 
-// ===== START =====
+// START
 showLogin();
 
 </script>
