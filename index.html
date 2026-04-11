@@ -25,7 +25,7 @@
 <script>
 const client = supabase.createClient(
   "https://txfifgqslatvaiwpbhek.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcW5ua3pvempza3ppYWl6YWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Mjk1ODAsImV4cCI6MjA4ODUwNTU4MH0.sEYeWnm0dvuw8bLSVnQhqmgV8LB-pELjpuVIa3Us1Gg"
+  "YOUR_ANON_KEY"
 );
 
 async function login() {
@@ -37,25 +37,23 @@ async function login() {
     .eq('mobile', mobile)
     .single();
 
-  if (data) {
-    localStorage.setItem("mobile", mobile);
-
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("appBox").style.display = "block";
-
-    document.getElementById("welcome").innerText = "Welcome " + mobile;
-
-  } else {
+  if (!data) {
     let name = prompt("Enter your name");
 
     if (name) {
       await client.from('users').insert([
         { mobile: mobile, name: name, plan: 'trial', start_date: new Date() }
       ]);
-
-      alert("User created");
     }
   }
+
+  // 👉 ALWAYS show app after login/create
+  localStorage.setItem("mobile", mobile);
+
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("appBox").style.display = "block";
+
+  document.getElementById("welcome").innerText = "Welcome " + mobile;
 }
 </script>
 
