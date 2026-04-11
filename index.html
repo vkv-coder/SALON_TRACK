@@ -35,7 +35,7 @@ async function login() {
 
     if (name) {
       await client.from('users').insert([
-        { mobile: mobile, plan: 'trial', start_date: new Date() }
+{ mobile: mobile, name: name, plan: 'trial', start_date: new Date() }
       ]);
 
       alert("User created");
