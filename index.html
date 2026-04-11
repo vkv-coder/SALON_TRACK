@@ -1,101 +1,134 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Salon Track</title>
+    <title>Salon Track</title>
 </head>
 
 <body>
 
 <h2>Salon Track</h2>
 
-<div id="loginBox">
-  <input type="text" id="mobile" placeholder="Enter Mobile">
-  <button onclick="login()">Login</button>
+<!-- LOGIN -->
+<div id="loginDiv">
+    <input type="text" id="mobile" placeholder="Enter Mobile">
+    <button onclick="login()">Login</button>
 </div>
 
-<div id="appBox" style="display:none;">
-  <h3 id="welcome"></h3>
+<!-- DASHBOARD -->
+<div id="dashboard" style="display:none;">
+    <h3 id="welcome"></h3>
 
-  <button onclick="showCustomerForm()">Add Customer</button>
-  <button onclick="alert('New Visit')">New Visit</button>
+    <button onclick="showCustomerForm()">Add Customer</button>
+    <button onclick="alert('New Visit coming next')">New Visit</button>
 
-  <div id="customerForm" style="display:none; margin-top:20px;">
-    <input type="text" id="cust_name" placeholder="Customer Name"><br><br>
-    <input type="text" id="cust_mobile" placeholder="Mobile"><br><br>
-    <button onclick="saveCustomer()">Save Customer</button>
-  </div>
+    <!-- CUSTOMER FORM -->
+    <div id="customerForm" style="display:none; margin-top:20px;">
+        <input type="text" id="cust_name" placeholder="Customer Name"><br><br>
+        <input type="text" id="cust_mobile" placeholder="Mobile"><br><br>
+        <button onclick="saveCustomer()">Save Customer</button>
+    </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <script>
-const { createClient } = supabase;
-
-const client = createClient(
-  "https://jqqnnkzozjskziaizajg.supabase.co",
-  "sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P"
+const client = supabase.createClient(
+    "https://jqqnnkzozjskziaizajg.supabase.co",  // YOUR PROJECT URL
+    "sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P"           // YOUR KEY
 );
 
+
+// ================= LOGIN =================
 async function login() {
-  let mobile = document.getElementById("mobile").value;
+    let mobile = document.getElementById("mobile").value.trim();
 
-  let { data } = await client
-    .from('users')
-    .select('*')
-    .eq('mobile', mobile);
-
-  if (!data || data.length === 0) {
-    let name = prompt("Enter your name");
-
-    if (name) {
-      let res = await client.from('users').insert([
-        { mobile: mobile, name: name }
-      ]);
-
-      if (res.error) {
-        alert(res.error.message);
+    if (!mobile) {
+        alert("Enter mobile number");
         return;
-      }
     }
-  }
 
-  localStorage.setItem("mobile", mobile);
+    let { data, error } = await client
+        .from('users')
+        .select('*')
+        .eq('mobile', mobile)
+        .limit(1);
 
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("appBox").style.display = "block";
+    if (error) {
+        alert(error.message);
+        return;
+    }
 
-  document.getElementById("welcome").innerText = "Welcome " + mobile;
+    // FIRST TIME USER
+    if (!data || data.length === 0) {
+        let name = prompt("Enter your name");
+
+        if (!name) return;
+
+        let { error: insertError } = await client
+            .from('users')
+            .insert([{ mobile: mobile, name: name }]);
+
+        if (insertError) {
+            alert(insertError.message);
+            return;
+        }
+    }
+
+    // SAVE SESSION
+    localStorage.setItem("mobile", mobile);
+
+    showDashboard(mobile);
 }
 
+
+// ================= DASHBOARD =================
+function showDashboard(mobile) {
+    document.getElementById("loginDiv").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+
+    document.getElementById("welcome").innerText = "Welcome " + mobile;
+}
+
+
+// ================= AUTO LOGIN =================
+window.onload = function () {
+    let savedMobile = localStorage.getItem("mobile");
+    if (savedMobile) {
+        showDashboard(savedMobile);
+    }
+};
+
+
+// ================= CUSTOMER FORM =================
 function showCustomerForm() {
-  document.getElementById("customerForm").style.display = "block";
+    document.getElementById("customerForm").style.display = "block";
 }
 
+
+// ================= SAVE CUSTOMER =================
 async function saveCustomer() {
-  let name = document.getElementById("cust_name").value;
-  let mobile = document.getElementById("cust_mobile").value;
+    let name = document.getElementById("cust_name").value.trim();
+    let mobile = document.getElementById("cust_mobile").value.trim();
 
-  let userMobile = localStorage.getItem("mobile");
-
-  let { data: user } = await client
-    .from('users')
-    .select('*')
-    .eq('mobile', userMobile)
-    .single();
-
-  let res = await client.from('salon_customers').insert([
-    {
-      user_id: user.id,
-      name: name,
-      mobile: mobile
+    if (!name || !mobile) {
+        alert("Enter all details");
+        return;
     }
-  ]);
 
-  if (res.error) {
-    alert(res.error.message);
-  } else {
-    alert("Customer saved");
-  }
+    let { error } = await client
+        .from('salon_customers')
+        .insert([{ name: name, mobile: mobile }]);
+
+    if (error) {
+        alert(error.message);
+        return;
+    }
+
+    alert("Customer Saved");
+
+    document.getElementById("cust_name").value = "";
+    document.getElementById("cust_mobile").value = "";
 }
 </script>
 
