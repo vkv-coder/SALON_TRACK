@@ -11,46 +11,73 @@
 <input type="text" id="mobile" placeholder="Enter Mobile">
 <button id="loginBtn">Login</button>
 
-<!-- NEW Supabase v2 -->
+<!-- Supabase v2 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const client = supabase.createClient(
-  "https://txfifgqslatvaiwpbhek.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcW5ua3pvempza3ppYWl6YWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Mjk1ODAsImV4cCI6MjA4ODUwNTU4MH0.sEYeWnm0dvuw8bLSVnQhqmgV8LB-pELjpuVIa3Us1Gg"
-);
 
+// 🔴 REPLACE THIS WITH YOUR VALUES
+const SUPABASE_URL = "https://txfifgqslatvaiwpbhek.supabase.co";
+const SUPABASE_KEY = "sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P";
+
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Button click
 document.getElementById("loginBtn").addEventListener("click", login);
 
 async function login() {
+
   let mobile = document.getElementById("mobile").value;
 
+  if (!mobile) {
+    alert("Enter mobile number");
+    return;
+  }
+
+  // Check user
   const { data, error } = await client
     .from('users')
     .select('*')
     .eq('mobile', mobile);
 
-  if (data && data.length > 0) {
-    alert("Login success");
-  } else {
+  console.log("SELECT:", data, error);
+
+  if (error) {
+    alert("Error: " + error.message);
+    return;
+  }
+
+  // New user
+  if (!data || data.length === 0) {
+
     let today = new Date();
     let expiry = new Date();
     expiry.setDate(today.getDate() + 7);
 
-    const { error: insertError } = await client.from('users').insert([
-      {
-        mobile: mobile,
-        expiry_date: expiry.toISOString().split('T')[0]
-      }
-    ]);
+    const { error: insertError } = await client
+      .from('users')
+      .insert([
+        {
+          mobile: mobile,
+          start_date: today.toISOString().split('T')[0],
+          expiry_date: expiry.toISOString().split('T')[0]
+        }
+      ]);
+
+    console.log("INSERT:", insertError);
 
     if (insertError) {
-      alert("Error: " + insertError.message);
-    } else {
-      alert("Trial started for 7 days");
+      alert("Insert Error: " + insertError.message);
+      return;
     }
+
+    alert("Trial started for 7 days");
+
+  } else {
+    alert("Login success");
   }
 }
+
 </script>
 
 </body>
