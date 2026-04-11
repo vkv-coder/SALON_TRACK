@@ -14,7 +14,7 @@ const client = supabase.createClient(
 async function login() {
   let mobile = document.getElementById("mobile").value;
 
-  const { data, error } = await supabase
+  const { data, error } = await client
     .from('users')
     .select('*')
     .eq('mobile', mobile)
