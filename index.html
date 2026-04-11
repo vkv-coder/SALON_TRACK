@@ -8,24 +8,25 @@
 
 <h2>Salon Track</h2>
 
-<input type="text" id="mobile" placeholder="Enter Mobile">
-<button onclick="login()">Login</button>
+<div id="loginBox">
+  <input type="text" id="mobile" placeholder="Enter Mobile">
+  <button onclick="login()">Login</button>
+</div>
+
+<div id="appBox" style="display:none;">
+  <h3 id="welcome"></h3>
+</div>
 
 <script>
 function login() {
   let mobile = document.getElementById("mobile").value;
-
-  if (!mobile) {
-    alert("Enter mobile number");
-    return;
-  }
 
   let users = JSON.parse(localStorage.getItem("users")) || [];
 
   let existing = users.find(u => u.mobile === mobile);
 
   if (existing) {
-    alert("Login success");
+    showApp(mobile);
   } else {
     let today = new Date();
     let expiry = new Date();
@@ -39,7 +40,14 @@ function login() {
     localStorage.setItem("users", JSON.stringify(users));
 
     alert("Trial started for 7 days");
+    showApp(mobile);
   }
+}
+
+function showApp(mobile) {
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("appBox").style.display = "block";
+  document.getElementById("welcome").innerText = "Welcome: " + mobile;
 }
 </script>
 
