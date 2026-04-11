@@ -9,21 +9,18 @@
 <h2>Salon Track</h2>
 
 <input type="text" id="mobile" placeholder="Enter Mobile">
-<button id="loginBtn">Login</button>
+<button onclick="login()">Login</button>
 
-<!-- Supabase v2 -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- ✅ Supabase v1 (IMPORTANT CHANGE) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1"></script>
 
 <script>
 
-// 🔴 REPLACE THIS WITH YOUR VALUES
+// ✅ USE ANON KEY (eyJhbGc...)
 const SUPABASE_URL = "https://txfifgqslatvaiwpbhek.supabase.co";
-const SUPABASE_KEY = "sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P";
+const SUPABASE_KEY = "PASTE_ANON_KEY_HERE";
 
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// Button click
-document.getElementById("loginBtn").addEventListener("click", login);
 
 async function login() {
 
@@ -34,20 +31,18 @@ async function login() {
     return;
   }
 
-  // Check user
   const { data, error } = await client
     .from('users')
     .select('*')
     .eq('mobile', mobile);
 
-  console.log("SELECT:", data, error);
+  console.log(data, error);
 
   if (error) {
-    alert("Error: " + error.message);
+    alert(error.message);
     return;
   }
 
-  // New user
   if (!data || data.length === 0) {
 
     let today = new Date();
@@ -64,10 +59,8 @@ async function login() {
         }
       ]);
 
-    console.log("INSERT:", insertError);
-
     if (insertError) {
-      alert("Insert Error: " + insertError.message);
+      alert(insertError.message);
       return;
     }
 
