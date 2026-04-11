@@ -19,15 +19,23 @@
 
 <script>
 function login() {
+
   let mobile = document.getElementById("mobile").value;
+
+  if (!mobile) {
+    alert("Enter mobile");
+    return;
+  }
 
   let users = JSON.parse(localStorage.getItem("users")) || [];
 
   let existing = users.find(u => u.mobile === mobile);
 
   if (existing) {
+    alert("Login success");
     showApp(mobile);
   } else {
+
     let today = new Date();
     let expiry = new Date();
     expiry.setDate(today.getDate() + 7);
