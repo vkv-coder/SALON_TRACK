@@ -2,224 +2,99 @@
 <html>
 <head>
 <title>Salon Track</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
-body { font-family: Arial; padding: 15px; background:#f5f5f5; }
-button { width:100%; padding:15px; margin:8px 0; font-size:16px; border:none; border-radius:6px; }
-.green { background:#28a745; color:white; }
-.blue { background:#007bff; color:white; }
-.card { background:white; padding:15px; margin-top:15px; border-radius:10px; }
-.hidden { display:none; }
+.green{
+background: green;
+color: white;
+padding: 10px;
+border: none;
+margin-top: 10px;
+}
 </style>
 </head>
 
 <body>
 
-<h2>Salon Track</h2>
+<div id="app"></div>
 
-<!-- LOGIN -->
-<div id="loginDiv" class="card">
-<input id="mobile" placeholder="Enter Mobile">
-<button class="green" onclick="login()">Login</button>
-</div>
+<script>
 
-<!-- MAIN -->
-<div id="main" class="hidden">
+// ✅ SHOW VISIT FORM
+function showVisitForm(){
 
-<button class="green" onclick="showVisit()">Record Visit</button>
-<button class="blue" onclick="showCustomer()">Add Customer</button>
-<button class="green" onclick="showReport()">Today Report</button>
-<button onclick="showSupport()">Support</button>
-<button onclick="logout()">Logout</button>
+let div = document.getElementById("app");
 
-</div>
+div.innerHTML = `
+<h2>Add Visit</h2>
 
-<!-- VISIT -->
-<div id="visitDiv" class="card hidden">
-<select id="visit_customer"></select>
+<input id="visit_customer" placeholder="Customer Name"><br><br>
 
 <select id="visit_service">
 <option>Haircut</option>
 <option>Shave</option>
 <option>Facial</option>
-</select>
+</select><br><br>
 
-<input id="visit_amount" type="number" placeholder="Amount">
-<input id="visit_date" type="date">
-<button id="saveBtn" class="green" onclick="saveVisit()">Save Visit</button>
+<input id="visit_amount" type="number" placeholder="Amount"><br><br>
+<input id="visit_date" type="date"><br><br>
 
-</div>
-
-<!-- CUSTOMER -->
-<div id="customerDiv" class="card hidden">
-<input id="cust_name" placeholder="Name">
-<input id="cust_mobile" placeholder="Mobile">
-<input id="cust_address" placeholder="Address (optional)">
-<input id="cust_birthday" type="date">
-
-<button class="green" onclick="saveCustomer()">Save Customer</button>
-</div>
-
-<!-- REPORT -->
-<div id="reportDiv" class="card hidden"></div>
-
-<!-- SUPPORT -->
-<div id="supportDiv" class="card hidden">
-<p>Email: vkvcoder.support@gmail.com</p>
+<button id="saveBtn" class="green">Save Visit</button>
 <button onclick="back()">Back</button>
-</div>
+`;
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
-<script>
-const client = supabase.createClient(
-"https://jqqnnkzozjskziaizajg.supabase.co",
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcW5ua3pvempza3ppYWl6YWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Mjk1ODAsImV4cCI6MjA4ODUwNTU4MH0.sEYeWnm0dvuw8bLSVnQhqmgV8LB-pELjpuVIa3Us1Gg"
-);
-
-
-// LOGIN
-async function login(){
-let m=document.getElementById("mobile").value;
-
-let {data}=await client.from('users').select('*').eq('mobile',m);
-
-if(!data || data.length===0){
-let name=prompt("Enter your name");
-await client.from('users').insert([{mobile:m,name}]);
+setTimeout(() => {
+let btn = document.getElementById("saveBtn");
+if(btn){
+btn.addEventListener("click", saveVisit);
 }
+}, 100);
 
-localStorage.setItem("mobile",m);
-document.getElementById("loginDiv").style.display="none";
-document.getElementById("main").classList.remove("hidden");
 }
 
 
-// LOGOUT
-function logout(){
-localStorage.clear();
-location.reload();
-}
-
-
-// SHOW VISIT
-async function showVisit(){
-hideAll();
-document.getElementById("visitDiv").classList.remove("hidden");
-
-let today=new Date().toISOString().split('T')[0];
-document.getElementById("visit_date").value=today;
-
-let {data}=await client.from('salon_customers').select('*');
-
-let d=document.getElementById("visit_customer");
-d.innerHTML="";
-data.forEach(c=>{
-let opt=document.createElement("option");
-opt.value=c.name;
-opt.text=c.name;
-d.appendChild(opt);
-});
-}
-
-
-// SAVE VISIT
+// ✅ SAVE VISIT
 async function saveVisit(){
-alert("clicked");
-let name=document.getElementById("visit_customer").value;
-let service=document.getElementById("visit_service").value;
-let amount=document.getElementById("visit_amount").value;
-let date=document.getElementById("visit_date").value;
 
-let {error}=await client.from('salon_visits').insert([{
+alert("clicked");   // confirm button working
+
+let name = document.getElementById("visit_customer").value;
+let service = document.getElementById("visit_service").value;
+let amount = document.getElementById("visit_amount").value;
+let date = document.getElementById("visit_date").value;
+
+// ⚠️ TEMP: comment API if not configured
+/*
+let {error} = await client.from('salon_visits').insert([{
 customer_name:name,
 service:service,
 amount:amount,
 visit_date:date
 }]);
 
-if(error) alert(error.message);
-else{
+if(error){
+alert(error.message);
+return;
+}
+*/
+
 alert("Visit Saved");
-console.log("BACK CALLED");
+
 back();
 }
-}
 
 
-// SHOW CUSTOMER
-function showCustomer(){
-hideAll();
-document.getElementById("customerDiv").classList.remove("hidden");
-}
-
-
-// SAVE CUSTOMER
-async function saveCustomer(){
-
-let name=document.getElementById("cust_name").value;
-let mobile=document.getElementById("cust_mobile").value;
-let address=document.getElementById("cust_address").value;
-let birthday=document.getElementById("cust_birthday").value;
-
-let {error}=await client.from('salon_customers').insert([{
-name,mobile,address,birthday
-}]);
-
-if(error) alert(error.message);
-else{
-alert("Customer Saved");
-back();
-}
-}
-
-
-// REPORT
-async function showReport(){
-hideAll();
-
-let div=document.getElementById("reportDiv");
-div.classList.remove("hidden");
-
-let today=new Date().toISOString().split('T')[0];
-
-let {data}=await client.from('salon_visits').select('*').eq('visit_date',today);
-
-let total=0;
-div.innerHTML="";
-
-data.forEach(v=>{
-total+=Number(v.amount||0);
-div.innerHTML+=`<p>${v.customer_name} - ${v.service} - ₹${v.amount}</p>`;
-});
-
-div.innerHTML+=`<h3>Total ₹${total}</h3><button onclick="back()">Back</button>`;
-}
-
-
-// SUPPORT
-function showSupport(){
-hideAll();
-document.getElementById("supportDiv").classList.remove("hidden");
-}
-
-
-// BACK
+// ✅ BACK FUNCTION
 function back(){
-hideAll();
-document.getElementById("main").classList.remove("hidden");
+document.getElementById("app").innerHTML = `
+<h2>Home</h2>
+<button onclick="showVisitForm()" class="green">Add Visit</button>
+`;
 }
 
 
-// HIDE ALL
-function hideAll(){
-document.getElementById("main").classList.add("hidden");
-document.getElementById("visitDiv").classList.add("hidden");
-document.getElementById("customerDiv").classList.add("hidden");
-document.getElementById("reportDiv").classList.add("hidden");
-document.getElementById("supportDiv").classList.add("hidden");
-}
+// ✅ START APP
+back();
+
 </script>
 
 </body>
