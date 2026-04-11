@@ -25,6 +25,7 @@
     <button onclick="saveCustomer()">Save Customer</button>
   </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <script>
@@ -36,34 +37,63 @@ const client = supabase.createClient(
 async function login() {
   let mobile = document.getElementById("mobile").value;
 
-  let { data, error } = await client
+  let { data } = await client
     .from('users')
     .select('*')
     .eq('mobile', mobile);
 
-  // if no user found
   if (!data || data.length === 0) {
     let name = prompt("Enter your name");
 
-   if (name) {
-  let res = await client.from('users').insert([
-    { mobile: mobile, name: name }
-  ]);
+    if (name) {
+      let res = await client.from('users').insert([
+        { mobile: mobile, name: name }
+      ]);
 
-  if (res.error) {
-    alert("Error: " + res.error.message);
-  } else {
-    alert("User created");
+      if (res.error) {
+        alert("Error: " + res.error.message);
+        return;
+      }
+    }
   }
-}
 
-  // ALWAYS show app
   localStorage.setItem("mobile", mobile);
 
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("appBox").style.display = "block";
 
   document.getElementById("welcome").innerText = "Welcome " + mobile;
+}
+
+function showCustomerForm() {
+  document.getElementById("customerForm").style.display = "block";
+}
+
+async function saveCustomer() {
+  let name = document.getElementById("cust_name").value;
+  let mobile = document.getElementById("cust_mobile").value;
+
+  let userMobile = localStorage.getItem("mobile");
+
+  let { data: user } = await client
+    .from('users')
+    .select('*')
+    .eq('mobile', userMobile)
+    .single();
+
+  let res = await client.from('salon_customers').insert([
+    {
+      user_id: user.id,
+      name: name,
+      mobile: mobile
+    }
+  ]);
+
+  if (res.error) {
+    alert("Error: " + res.error.message);
+  } else {
+    alert("Customer saved");
+  }
 }
 </script>
 
