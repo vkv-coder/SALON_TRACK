@@ -102,20 +102,15 @@ app.innerHTML = `
 function showMaster(){
 app.innerHTML = `
 <div class="card">
-<h2>Service Master</h2>
+<h2>Master</h2>
 
-<ul>
-${services.map(s=>`<li>${s.name} ₹${s.price}</li>`).join("")}
-</ul>
+<button class="blue" onclick="showCustomerMaster()">Customer Master</button>
+<button class="blue" onclick="showServiceMaster()">Service Master</button>
 
-<input id="sname" placeholder="Service Name">
-<input id="sprice" placeholder="Price">
-
-<button class="green" onclick="addService()">Add Service</button>
 <button class="gray" onclick="showHome()">Back</button>
-</div>`;
+</div>
+`;
 }
-
 function addService(){
 let name=document.getElementById("sname").value;
 let price=document.getElementById("sprice").value;
