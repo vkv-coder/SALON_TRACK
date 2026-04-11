@@ -179,20 +179,26 @@ app.innerHTML = `
 
 // ===== CUSTOMER MASTER =====
 function showCustomerMaster(){
+
+let list = "";
+
+if(customers.length === 0){
+list = "<p>No customers yet</p>";
+} else {
+list = "<ul>" + customers.map(c => `<li>${c}</li>`).join("") + "</ul>";
+}
+
 app.innerHTML = `
 <div class="card">
 <h2>Customer Master</h2>
 
-<ul>
-${customers.map(c=>`<li>${c}</li>`).join("")}
-</ul>
+${list}
 
 <button class="gray" onclick="showMaster()">Back</button>
 </div>
 `;
 }
-
-// ===== SERVICE MASTER =====
+  // ===== SERVICE MASTER =====
 function showServiceMaster(){
 app.innerHTML = `
 <div class="card">
