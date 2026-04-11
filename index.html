@@ -11,13 +11,15 @@
 <input type="text" id="mobile" placeholder="Enter Mobile">
 <button id="loginBtn">Login</button>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<!-- NEW Supabase v2 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 const client = supabase.createClient(
   "https://txfifgqslatvaiwpbhek.supabase.co",
   "sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P"
 );
+
 document.getElementById("loginBtn").addEventListener("click", login);
 
 async function login() {
@@ -27,8 +29,6 @@ async function login() {
     .from('users')
     .select('*')
     .eq('mobile', mobile);
-
-  console.log("SELECT:", data, error);
 
   if (data && data.length > 0) {
     alert("Login success");
@@ -43,8 +43,6 @@ async function login() {
         expiry_date: expiry.toISOString().split('T')[0]
       }
     ]);
-
-    console.log("INSERT ERROR:", insertError);
 
     if (insertError) {
       alert("Error: " + insertError.message);
