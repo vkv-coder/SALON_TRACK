@@ -28,10 +28,10 @@
 
 <script>
 
-// LOGIN FUNCTION
+// LOGIN
 function login() {
 
-  let mobile = document.getElementById("mobile").value;
+  let mobile = document.getElementById("mobile").value.trim();
 
   if (!mobile) {
     alert("Enter mobile");
@@ -63,7 +63,6 @@ function login() {
   }
 }
 
-
 // SHOW APP
 function showApp(mobile) {
   document.getElementById("loginBox").style.display = "none";
@@ -73,11 +72,13 @@ function showApp(mobile) {
   showCustomers();
 }
 
-
 // ADD CUSTOMER
 function addCustomer() {
 
-  let name = document.getElementById("custName").value;
+  let input = document.getElementById("custName");
+  let name = input.value.trim();
+
+  console.log("Entered Name:", name); // DEBUG
 
   if (!name) {
     alert("Enter customer name");
@@ -90,11 +91,10 @@ function addCustomer() {
 
   localStorage.setItem("customers", JSON.stringify(customers));
 
-  document.getElementById("custName").value = "";
+  input.value = ""; // clear box
 
   showCustomers();
 }
-
 
 // SHOW CUSTOMERS
 function showCustomers() {
