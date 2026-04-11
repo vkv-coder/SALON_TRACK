@@ -11,19 +11,8 @@
 <input type="text" id="mobile" placeholder="Enter Mobile">
 <button onclick="login()">Login</button>
 
-<!-- ✅ Supabase v1 (IMPORTANT CHANGE) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1"></script>
-
 <script>
-
-// ✅ USE ANON KEY (eyJhbGc...)
-const SUPABASE_URL = "https://txfifgqslatvaiwpbhek.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcW5ua3pvempza3ppYWl6YWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Mjk1ODAsImV4cCI6MjA4ODUwNTU4MH0.sEYeWnm0dvuw8bLSVnQhqmgV8LB-pELjpuVIa3Us1Gg";
-
-const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-async function login() {
-
+function login() {
   let mobile = document.getElementById("mobile").value;
 
   if (!mobile) {
@@ -31,46 +20,27 @@ async function login() {
     return;
   }
 
-  const { data, error } = await client
-    .from('users')
-    .select('*')
-    .eq('mobile', mobile);
+  let users = JSON.parse(localStorage.getItem("users")) || [];
 
-  console.log(data, error);
+  let existing = users.find(u => u.mobile === mobile);
 
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  if (!data || data.length === 0) {
-
+  if (existing) {
+    alert("Login success");
+  } else {
     let today = new Date();
     let expiry = new Date();
     expiry.setDate(today.getDate() + 7);
 
-    const { error: insertError } = await client
-      .from('users')
-      .insert([
-        {
-          mobile: mobile,
-          start_date: today.toISOString().split('T')[0],
-          expiry_date: expiry.toISOString().split('T')[0]
-        }
-      ]);
+    users.push({
+      mobile: mobile,
+      expiry_date: expiry.toISOString().split('T')[0]
+    });
 
-    if (insertError) {
-      alert(insertError.message);
-      return;
-    }
+    localStorage.setItem("users", JSON.stringify(users));
 
     alert("Trial started for 7 days");
-
-  } else {
-    alert("Login success");
   }
 }
-
 </script>
 
 </body>
