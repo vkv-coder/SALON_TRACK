@@ -14,7 +14,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <script>
-const supabase = supabase.createClient(
+const client = supabase.createClient(
   "https://txfifgqslatvaiwpbhek.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcW5ua3pvempza3ppYWl6YWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Mjk1ODAsImV4cCI6MjA4ODUwNTU4MH0.sEYeWnm0dvuw8bLSVnQhqmgV8LB-pELjpuVIa3Us1Gg"
 );
@@ -22,7 +22,7 @@ const supabase = supabase.createClient(
 async function login() {
   let mobile = document.getElementById("mobile").value;
 
-  let { data, error } = await supabase
+  let { data, error } = await client
     .from('users')
     .select('*')
     .eq('mobile', mobile)
@@ -34,7 +34,7 @@ async function login() {
     let name = prompt("Enter your name");
 
     if (name) {
-      await supabase.from('users').insert([
+      await client.from('users').insert([
         { mobile: mobile, plan: 'trial', start_date: new Date() }
       ]);
 
