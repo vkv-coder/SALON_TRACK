@@ -29,13 +29,11 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const { createClient } = supabase;
-const { createClient } = supabase;
-
-const client = createClient(
+const client = supabase.createClient(
   "https://jqqnnkzozjskziaizajg.supabase.co",
-  "sb_publishable_XXXXXXXX"
+  "sb_publishable_XXXXXXXXXXXX"
 );
+
 async function login() {
   let mobile = document.getElementById("mobile").value;
 
@@ -53,7 +51,7 @@ async function login() {
       ]);
 
       if (res.error) {
-        alert("Error: " + res.error.message);
+        alert(res.error.message);
         return;
       }
     }
@@ -92,7 +90,7 @@ async function saveCustomer() {
   ]);
 
   if (res.error) {
-    alert("Error: " + res.error.message);
+    alert(res.error.message);
   } else {
     alert("Customer saved");
   }
