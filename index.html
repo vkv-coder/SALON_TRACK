@@ -11,13 +11,12 @@
 <input type="text" id="mobile" placeholder="Enter Mobile">
 <button id="loginBtn">Login</button>
 
-<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <script>
 const client = supabase.createClient(
   "https://txfifgqslatvaiwpbhek.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcW5ua3pvempza3ppYWl6YWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Mjk1ODAsImV4cCI6MjA4ODUwNTU4MH0.sEYeWnm0dvuw8bLSVnQhqmgV8LB-pELjpuVIa3Us1Gg"
+  "YOUR_ANON_KEY"
 );
 
 document.getElementById("loginBtn").addEventListener("click", login);
@@ -28,20 +27,17 @@ async function login() {
   const { data, error } = await client
     .from('users')
     .select('*')
-    .eq('mobile', mobile)
-    .single();
+    .eq('mobile', mobile);
 
-  if (data) {
+  if (data && data.length > 0) {
     alert("Login success");
   } else {
-    // create new user with 7-day trial
     let today = new Date();
     let expiry = new Date();
     expiry.setDate(today.getDate() + 7);
 
     await client.from('users').insert([
       {
-        id: crypto.randomUUID(),
         mobile: mobile,
         expiry_date: expiry.toISOString().split('T')[0]
       }
