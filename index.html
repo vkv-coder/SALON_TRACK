@@ -16,10 +16,15 @@
 <div id="appBox" style="display:none;">
   <h3 id="welcome"></h3>
 
-  <button onclick="alert('Add Customer')">Add Customer</button>
+  <button onclick="showCustomerForm()">Add Customer</button>
   <button onclick="alert('New Visit')">New Visit</button>
-</div>
 
+  <div id="customerForm" style="display:none; margin-top:20px;">
+    <input type="text" id="cust_name" placeholder="Customer Name"><br><br>
+    <input type="text" id="cust_mobile" placeholder="Mobile"><br><br>
+    <button onclick="saveCustomer()">Save Customer</button>
+  </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <script>
