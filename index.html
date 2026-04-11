@@ -31,13 +31,13 @@ const client = supabase.createClient(
 async function login() {
   let mobile = document.getElementById("mobile").value;
 
-  let { data } = await client
+  let { data, error } = await client
     .from('users')
     .select('*')
-    .eq('mobile', mobile)
-    .single();
+    .eq('mobile', mobile);
 
-  if (!data) {
+  // if no user found
+  if (!data || data.length === 0) {
     let name = prompt("Enter your name");
 
     if (name) {
@@ -47,7 +47,7 @@ async function login() {
     }
   }
 
-  // 👉 ALWAYS show app after login/create
+  // ALWAYS show app
   localStorage.setItem("mobile", mobile);
 
   document.getElementById("loginBox").style.display = "none";
