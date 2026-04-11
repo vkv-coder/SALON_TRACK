@@ -16,7 +16,7 @@
 <script>
 const client = supabase.createClient(
   "https://txfifgqslatvaiwpbhek.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcW5ua3pvempza3ppYWl6YWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Mjk1ODAsImV4cCI6MjA4ODUwNTU4MH0.sEYeWnm0dvuw8bLSVnQhqmgV8LB-pELjpuVIa3Us1Gg"
+  "YOUR_ANON_KEY"
 );
 
 document.getElementById("loginBtn").addEventListener("click", login);
@@ -29,6 +29,8 @@ async function login() {
     .select('*')
     .eq('mobile', mobile);
 
+  console.log("SELECT:", data, error);
+
   if (data && data.length > 0) {
     alert("Login success");
   } else {
@@ -36,14 +38,20 @@ async function login() {
     let expiry = new Date();
     expiry.setDate(today.getDate() + 7);
 
-    await client.from('users').insert([
+    const { error: insertError } = await client.from('users').insert([
       {
         mobile: mobile,
         expiry_date: expiry.toISOString().split('T')[0]
       }
     ]);
 
-    alert("Trial started for 7 days");
+    console.log("INSERT ERROR:", insertError);
+
+    if (insertError) {
+      alert("Error: " + insertError.message);
+    } else {
+      alert("Trial started for 7 days");
+    }
   }
 }
 </script>
