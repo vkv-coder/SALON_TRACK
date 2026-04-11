@@ -2,7 +2,44 @@
 <html>
 <head>
     <title>Salon Track</title>
-    <link rel="icon" href="data:,">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        body {
+            font-family: Arial;
+            padding: 15px;
+            background: #f5f5f5;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 14px;
+            margin: 8px 0;
+            font-size: 16px;
+        }
+
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+        }
+
+        .secondary {
+            background: #007bff;
+        }
+
+        .card {
+            background: white;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 10px;
+        }
+    </style>
 </head>
 
 <body>
@@ -10,40 +47,50 @@
 <h2>Salon Track</h2>
 
 <!-- LOGIN -->
-<div id="loginDiv">
+<div id="loginDiv" class="card">
     <input type="text" id="mobile" placeholder="Enter Mobile">
     <button onclick="login()">Login</button>
 </div>
 
-<!-- DASHBOARD -->
-<div id="dashboard" style="display:none;">
-    <h3 id="welcome"></h3>
+<!-- MAIN APP -->
+<div id="app" style="display:none;">
 
-    <button onclick="showCustomerForm()">Add Customer</button>
-    <button onclick="showVisitForm()">New Visit</button>
+    <!-- VISIT ENTRY -->
+    <div class="card">
 
-    <!-- CUSTOMER FORM -->
-    <div id="customerForm" style="display:none; margin-top:20px;">
-        <input type="text" id="cust_name" placeholder="Customer Name"><br><br>
-        <input type="text" id="cust_mobile" placeholder="Mobile"><br><br>
-        <button onclick="saveCustomer()">Save Customer</button>
-    </div>
+        <select id="visit_customer"></select>
 
-    <!-- VISIT FORM -->
-    <div id="visitForm" style="display:none; margin-top:20px;">
-        
-        <select id="visit_customer"></select><br><br>
+        <select id="visit_service">
+            <option>Haircut</option>
+            <option>Shave</option>
+            <option>Facial</option>
+        </select>
 
-        <input type="text" id="visit_service" placeholder="Service"><br><br>
-        <input type="number" id="visit_amount" placeholder="Amount"><br><br>
-        <input type="date" id="visit_date"><br><br>
+        <input type="number" id="visit_amount" placeholder="Amount">
+
+        <input type="date" id="visit_date">
 
         <button onclick="saveVisit()">Save Visit</button>
     </div>
 
+    <!-- ACTIONS -->
+    <div class="card">
+        <button class="secondary" onclick="showCustomer()">Add Customer</button>
+        <button onclick="loadReport()">Today Report</button>
+    </div>
+
+    <!-- ADD CUSTOMER -->
+    <div id="customerDiv" class="card" style="display:none;">
+        <input type="text" id="cust_name" placeholder="Customer Name">
+        <input type="text" id="cust_mobile" placeholder="Mobile">
+        <button onclick="saveCustomer()">Save Customer</button>
+    </div>
+
+    <!-- REPORT -->
+    <div id="reportDiv" class="card" style="display:none;"></div>
+
 </div>
 
-<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <script>
@@ -55,104 +102,48 @@ const client = supabase.createClient(
 
 // LOGIN
 async function login() {
-    let mobile = document.getElementById("mobile").value.trim();
-
-    if (!mobile) {
-        alert("Enter mobile");
-        return;
-    }
+    let mobile = document.getElementById("mobile").value;
 
     let { data } = await client
         .from('users')
         .select('*')
-        .eq('mobile', mobile)
-        .limit(1);
+        .eq('mobile', mobile);
 
     if (!data || data.length === 0) {
         let name = prompt("Enter your name");
-
-        if (!name) return;
-
-        let { error } = await client
-            .from('users')
-            .insert([{ mobile: mobile, name: name }]);
-
-        if (error) {
-            alert(error.message);
-            return;
-        }
+        await client.from('users').insert([{ mobile, name }]);
     }
 
     localStorage.setItem("mobile", mobile);
-    showDashboard(mobile);
-}
 
-
-// DASHBOARD
-function showDashboard(mobile) {
     document.getElementById("loginDiv").style.display = "none";
-    document.getElementById("dashboard").style.display = "block";
+    document.getElementById("app").style.display = "block";
 
-    document.getElementById("welcome").innerText = "Welcome " + mobile;
+    loadCustomers();
+    setToday();
 }
 
 
-// AUTO LOGIN
-window.onload = function () {
-    let m = localStorage.getItem("mobile");
-    if (m) showDashboard(m);
-};
+// LOAD CUSTOMERS
+async function loadCustomers() {
+    let { data } = await client.from('salon_customers').select('*');
 
-
-// CUSTOMER FORM
-function showCustomerForm() {
-    document.getElementById("customerForm").style.display = "block";
-}
-
-
-// SAVE CUSTOMER
-async function saveCustomer() {
-    let name = document.getElementById("cust_name").value.trim();
-    let mobile = document.getElementById("cust_mobile").value.trim();
-
-    if (!name || !mobile) {
-        alert("Enter details");
-        return;
-    }
-
-    let { error } = await client
-        .from('salon_customers')
-        .insert([{ name: name, mobile: mobile }]);
-
-    if (error) {
-        alert(error.message);
-    } else {
-        alert("Customer Saved");
-    }
-}
-
-
-// SHOW VISIT FORM
-async function showVisitForm() {
-
-    document.getElementById("visitForm").style.display = "block";
-
-    let today = new Date().toISOString().split('T')[0];
-    document.getElementById("visit_date").value = today;
-
-    let { data } = await client
-        .from('salon_customers')
-        .select('*');
-
-    let dropdown = document.getElementById("visit_customer");
-    dropdown.innerHTML = "";
+    let d = document.getElementById("visit_customer");
+    d.innerHTML = "";
 
     data.forEach(c => {
         let opt = document.createElement("option");
         opt.value = c.name;
         opt.text = c.name;
-        dropdown.appendChild(opt);
+        d.appendChild(opt);
     });
+}
+
+
+// SET DATE
+function setToday() {
+    let today = new Date().toISOString().split('T')[0];
+    document.getElementById("visit_date").value = today;
 }
 
 
@@ -164,20 +155,66 @@ async function saveVisit() {
     let amount = document.getElementById("visit_amount").value;
     let date = document.getElementById("visit_date").value;
 
-    let { error } = await client
-        .from('salon_visits')
-        .insert([{
-            customer_name: name,
-            service: service,
-            amount: amount,
-            visit_date: date
-        }]);
+    let { error } = await client.from('salon_visits').insert([{
+        customer_name: name,
+        service: service,
+        amount: amount,
+        visit_date: date
+    }]);
 
     if (error) {
         alert(error.message);
     } else {
         alert("Visit Saved");
+        document.getElementById("visit_amount").value = "";
     }
+}
+
+
+// SHOW CUSTOMER
+function showCustomer() {
+    document.getElementById("customerDiv").style.display = "block";
+}
+
+
+// SAVE CUSTOMER
+async function saveCustomer() {
+    let name = document.getElementById("cust_name").value;
+    let mobile = document.getElementById("cust_mobile").value;
+
+    let { error } = await client
+        .from('salon_customers')
+        .insert([{ name, mobile }]);
+
+    if (error) alert(error.message);
+    else {
+        alert("Customer Saved");
+        loadCustomers();
+    }
+}
+
+
+// REPORT
+async function loadReport() {
+    let div = document.getElementById("reportDiv");
+    div.style.display = "block";
+
+    let today = new Date().toISOString().split('T')[0];
+
+    let { data } = await client
+        .from('salon_visits')
+        .select('*')
+        .eq('visit_date', today);
+
+    let total = 0;
+    div.innerHTML = "";
+
+    data.forEach(v => {
+        total += Number(v.amount || 0);
+        div.innerHTML += `<p>${v.customer_name} - ${v.service} - ₹${v.amount}</p>`;
+    });
+
+    div.innerHTML += `<h3>Total = ₹${total}</h3>`;
 }
 </script>
 
