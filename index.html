@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Salon Track</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salon App</title>
+
 <style>
-.green{
-background: green;
-color: white;
-padding: 10px;
-border: none;
-margin-top: 10px;
-}
+body { font-family: Arial; background:#f2f2f2; margin:0; }
+.card { background:white; padding:15px; margin:10px; border-radius:10px; }
+button { width:100%; padding:12px; margin:5px 0; border:none; border-radius:6px; }
+.green { background:#16a34a; color:white; }
+.gray { background:#ddd; }
+input, select { width:100%; padding:10px; margin:5px 0; border-radius:6px; border:1px solid #ccc; }
 </style>
+
 </head>
 
 <body>
@@ -19,81 +21,211 @@ margin-top: 10px;
 
 <script>
 
-// ✅ SHOW VISIT FORM
-function showVisitForm(){
+// ===== HELPERS =====
+function formatName(name){
+return name.toLowerCase().split(" ").filter(w=>w).map(w=>w[0].toUpperCase()+w.slice(1)).join(" ");
+}
 
-let div = document.getElementById("app");
+function normalize(name){
+return name.toLowerCase().replace(/\s+/g,' ').trim();
+}
 
-div.innerHTML = `
+// ===== DATA (TEMP LOCAL) =====
+let customers = [];
+let services = [
+{ name:"Haircut", price:150 },
+{ name:"Shaving", price:80 }
+];
+
+// ===== LOGIN =====
+function showLogin(){
+app.innerHTML = `
+<div class="card">
+<h2>Login</h2>
+<input id="mobile" placeholder="Mobile Number">
+<button class="green" onclick="sendOTP()">Send OTP</button>
+</div>`;
+}
+
+function sendOTP(){
+showOTP();
+}
+
+function showOTP(){
+app.innerHTML = `
+<div class="card">
+<h2>Enter OTP</h2>
+<input id="otp">
+<button class="green" onclick="verifyOTP()">Verify</button>
+</div>`;
+}
+
+function verifyOTP(){
+if(!localStorage.getItem("user")){
+app.innerHTML = `
+<div class="card">
+<h2>Register</h2>
+<input id="name" placeholder="Name">
+<input id="shop" placeholder="Shop Name">
+<button class="green" onclick="register()">Register</button>
+</div>`;
+}else showHome();
+}
+
+function register(){
+let name=document.getElementById("name").value;
+let shop=document.getElementById("shop").value;
+localStorage.setItem("user",name);
+localStorage.setItem("shop",shop);
+showHome();
+}
+
+// ===== HOME =====
+function showHome(){
+let name=localStorage.getItem("user");
+let shop=localStorage.getItem("shop");
+
+app.innerHTML = `
+<div class="card">
+<h3>Welcome ${name}</h3>
+<p>${shop}</p>
+
+<button class="green" onclick="showVisit()">Add Visit</button>
+<button class="green" onclick="showMaster()">Master</button>
+<button class="green" onclick="showReports()">Reports</button>
+<button class="green" onclick="showReminder()">Reminder</button>
+<button class="gray" onclick="logout()">Logout</button>
+</div>`;
+}
+
+// ===== MASTER =====
+function showMaster(){
+app.innerHTML = `
+<div class="card">
+<h2>Service Master</h2>
+
+<ul>
+${services.map(s=>`<li>${s.name} ₹${s.price}</li>`).join("")}
+</ul>
+
+<input id="sname" placeholder="Service Name">
+<input id="sprice" placeholder="Price">
+
+<button class="green" onclick="addService()">Add Service</button>
+<button class="gray" onclick="showHome()">Back</button>
+</div>`;
+}
+
+function addService(){
+let name=document.getElementById("sname").value;
+let price=document.getElementById("sprice").value;
+services.push({name,price});
+showMaster();
+}
+
+// ===== ADD VISIT =====
+function showVisit(){
+
+let today=new Date().toISOString().split("T")[0];
+
+app.innerHTML = `
+<div class="card">
 <h2>Add Visit</h2>
 
-<input id="visit_customer" placeholder="Customer Name"><br><br>
+<select id="custSelect">
+<option value="">Select Customer</option>
+${customers.map(c=>`<option>${c}</option>`).join("")}
+</select>
 
-<select id="visit_service">
-<option>Haircut</option>
-<option>Shave</option>
-<option>Facial</option>
-</select><br><br>
+<input id="custInput" placeholder="Or type new customer">
 
-<input id="visit_amount" type="number" placeholder="Amount"><br><br>
-<input id="visit_date" type="date"><br><br>
+<h3>Services</h3>
+${services.map((s,i)=>`
+<label>
+<input type="checkbox" value="${i}">
+${s.name} ₹${s.price}
+</label><br>
+`).join("")}
 
-<button id="saveBtn" class="green">Save Visit</button>
-<button onclick="back()">Back</button>
-`;
+<input type="date" id="date" value="${today}">
+<input id="reminder" placeholder="Reminder Days">
 
-setTimeout(() => {
-let btn = document.getElementById("saveBtn");
-if(btn){
-btn.addEventListener("click", saveVisit);
-}
-}, 100);
-
-}
-
-
-// ✅ SAVE VISIT
-async function saveVisit(){
-
-alert("clicked");   // confirm button working
-
-let name = document.getElementById("visit_customer").value;
-let service = document.getElementById("visit_service").value;
-let amount = document.getElementById("visit_amount").value;
-let date = document.getElementById("visit_date").value;
-
-// ⚠️ TEMP: comment API if not configured
-/*
-let {error} = await client.from('salon_visits').insert([{
-customer_name:name,
-service:service,
-amount:amount,
-visit_date:date
-}]);
-
-if(error){
-alert(error.message);
-return;
-}
-*/
-
-alert("Visit Saved");
-
-back();
+<button class="green" onclick="saveVisit()">Save Visit</button>
+<button class="gray" onclick="showHome()">Back</button>
+</div>`;
 }
 
+// ===== SAVE VISIT =====
+function saveVisit(){
 
-// ✅ BACK FUNCTION
-function back(){
-document.getElementById("app").innerHTML = `
-<h2>Home</h2>
-<button onclick="showVisitForm()" class="green">Add Visit</button>
-`;
+let name = document.getElementById("custInput").value || document.getElementById("custSelect").value;
+
+name = formatName(name);
+
+if(!name){ alert("Enter customer"); return; }
+
+let exists = customers.find(c => normalize(c) === normalize(name));
+
+if(!exists){
+customers.push(name);
 }
 
+alert("Visit Saved for " + name);
+showHome();
+}
 
-// ✅ START APP
-back();
+// ===== REPORT =====
+function showReports(){
+app.innerHTML = `
+<div class="card">
+<h2>Reports</h2>
+<p>Today Total: ₹0</p>
+<button class="gray" onclick="showHome()">Back</button>
+</div>`;
+}
+
+// ===== REMINDER =====
+function showReminder(){
+
+let shop = localStorage.getItem("shop");
+
+let name = customers[0] || "Customer";
+let mobile = "9876543210";
+
+let msg = `Hello ${name},
+
+It’s time to pamper and groom yourself 😊
+
+We would love to welcome you again at ${shop}.
+
+Please visit us at your convenience.
+
+Thank you!`;
+
+let url = "https://wa.me/91"+mobile+"?text="+encodeURIComponent(msg);
+
+app.innerHTML = `
+<div class="card">
+<h2>Reminder</h2>
+
+<p>${name}</p>
+<p>${mobile}</p>
+
+<button class="green" onclick="window.open('${url}')">WhatsApp</button>
+
+<button class="gray" onclick="showHome()">Back</button>
+</div>`;
+}
+
+// ===== LOGOUT =====
+function logout(){
+localStorage.clear();
+showLogin();
+}
+
+// START
+if(localStorage.getItem("user")) showHome();
+else showLogin();
 
 </script>
 
