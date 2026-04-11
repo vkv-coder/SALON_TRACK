@@ -20,7 +20,7 @@
     <h3 id="welcome"></h3>
 
     <button onclick="showCustomerForm()">Add Customer</button>
-    <button onclick="alert('New Visit coming next')">New Visit</button>
+    <button onclick="showVisitForm()">New Visit</button>
 
     <!-- CUSTOMER FORM -->
     <div id="customerForm" style="display:none; margin-top:20px;">
@@ -28,6 +28,19 @@
         <input type="text" id="cust_mobile" placeholder="Mobile"><br><br>
         <button onclick="saveCustomer()">Save Customer</button>
     </div>
+
+    <!-- VISIT FORM -->
+    <div id="visitForm" style="display:none; margin-top:20px;">
+        
+        <select id="visit_customer"></select><br><br>
+
+        <input type="text" id="visit_service" placeholder="Service"><br><br>
+        <input type="number" id="visit_amount" placeholder="Amount"><br><br>
+        <input type="date" id="visit_date"><br><br>
+
+        <button onclick="saveVisit()">Save Visit</button>
+    </div>
+
 </div>
 
 <!-- SUPABASE -->
@@ -35,55 +48,47 @@
 
 <script>
 const client = supabase.createClient(
-    "https://jqqnnkzozjskziaizajg.supabase.co",  // YOUR PROJECT URL
-    "sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P"           // YOUR KEY
+    "https://jqqnnkzozjskziaizajg.supabase.co",
+    "sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P"
 );
 
 
-// ================= LOGIN =================
+// LOGIN
 async function login() {
     let mobile = document.getElementById("mobile").value.trim();
 
     if (!mobile) {
-        alert("Enter mobile number");
+        alert("Enter mobile");
         return;
     }
 
-    let { data, error } = await client
+    let { data } = await client
         .from('users')
         .select('*')
         .eq('mobile', mobile)
         .limit(1);
 
-    if (error) {
-        alert(error.message);
-        return;
-    }
-
-    // FIRST TIME USER
     if (!data || data.length === 0) {
         let name = prompt("Enter your name");
 
         if (!name) return;
 
-        let { error: insertError } = await client
+        let { error } = await client
             .from('users')
             .insert([{ mobile: mobile, name: name }]);
 
-        if (insertError) {
-            alert(insertError.message);
+        if (error) {
+            alert(error.message);
             return;
         }
     }
 
-    // SAVE SESSION
     localStorage.setItem("mobile", mobile);
-
     showDashboard(mobile);
 }
 
 
-// ================= DASHBOARD =================
+// DASHBOARD
 function showDashboard(mobile) {
     document.getElementById("loginDiv").style.display = "none";
     document.getElementById("dashboard").style.display = "block";
@@ -92,28 +97,26 @@ function showDashboard(mobile) {
 }
 
 
-// ================= AUTO LOGIN =================
+// AUTO LOGIN
 window.onload = function () {
-    let savedMobile = localStorage.getItem("mobile");
-    if (savedMobile) {
-        showDashboard(savedMobile);
-    }
+    let m = localStorage.getItem("mobile");
+    if (m) showDashboard(m);
 };
 
 
-// ================= CUSTOMER FORM =================
+// CUSTOMER FORM
 function showCustomerForm() {
     document.getElementById("customerForm").style.display = "block";
 }
 
 
-// ================= SAVE CUSTOMER =================
+// SAVE CUSTOMER
 async function saveCustomer() {
     let name = document.getElementById("cust_name").value.trim();
     let mobile = document.getElementById("cust_mobile").value.trim();
 
     if (!name || !mobile) {
-        alert("Enter all details");
+        alert("Enter details");
         return;
     }
 
@@ -123,13 +126,58 @@ async function saveCustomer() {
 
     if (error) {
         alert(error.message);
-        return;
+    } else {
+        alert("Customer Saved");
     }
+}
 
-    alert("Customer Saved");
 
-    document.getElementById("cust_name").value = "";
-    document.getElementById("cust_mobile").value = "";
+// SHOW VISIT FORM
+async function showVisitForm() {
+
+    document.getElementById("visitForm").style.display = "block";
+
+    let today = new Date().toISOString().split('T')[0];
+    document.getElementById("visit_date").value = today;
+
+    let { data } = await client
+        .from('salon_customers')
+        .select('*');
+
+    let dropdown = document.getElementById("visit_customer");
+    dropdown.innerHTML = "";
+
+    data.forEach(c => {
+        let opt = document.createElement("option");
+        opt.value = c.name;
+        opt.text = c.name;
+        dropdown.appendChild(opt);
+    });
+}
+
+
+// SAVE VISIT
+async function saveVisit() {
+
+    let name = document.getElementById("visit_customer").value;
+    let service = document.getElementById("visit_service").value;
+    let amount = document.getElementById("visit_amount").value;
+    let date = document.getElementById("visit_date").value;
+
+    let { error } = await client
+        .from('salon_visits')
+        .insert([{
+            customer_name: name,
+            service: service,
+            amount: amount,
+            visit_date: date
+        }]);
+
+    if (error) {
+        alert(error.message);
+    } else {
+        alert("Visit Saved");
+    }
 }
 </script>
 
