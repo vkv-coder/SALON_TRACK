@@ -8,16 +8,27 @@
 
 <h2>Salon Track</h2>
 
+<!-- LOGIN -->
 <div id="loginBox">
   <input type="text" id="mobile" placeholder="Enter Mobile">
   <button onclick="login()">Login</button>
 </div>
 
+<!-- APP -->
 <div id="appBox" style="display:none;">
   <h3 id="welcome"></h3>
+
+  <h4>Add Customer</h4>
+  <input type="text" id="custName" placeholder="Customer Name">
+  <button onclick="addCustomer()">Add</button>
+
+  <h4>Customer List</h4>
+  <div id="customerList"></div>
 </div>
 
 <script>
+
+// LOGIN FUNCTION
 function login() {
 
   let mobile = document.getElementById("mobile").value;
@@ -52,11 +63,53 @@ function login() {
   }
 }
 
+
+// SHOW APP
 function showApp(mobile) {
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("appBox").style.display = "block";
   document.getElementById("welcome").innerText = "Welcome: " + mobile;
+
+  showCustomers();
 }
+
+
+// ADD CUSTOMER
+function addCustomer() {
+
+  let name = document.getElementById("custName").value;
+
+  if (!name) {
+    alert("Enter customer name");
+    return;
+  }
+
+  let customers = JSON.parse(localStorage.getItem("customers")) || [];
+
+  customers.push({ name: name });
+
+  localStorage.setItem("customers", JSON.stringify(customers));
+
+  document.getElementById("custName").value = "";
+
+  showCustomers();
+}
+
+
+// SHOW CUSTOMERS
+function showCustomers() {
+
+  let customers = JSON.parse(localStorage.getItem("customers")) || [];
+
+  let html = "";
+
+  customers.forEach((c, index) => {
+    html += "<div>" + (index + 1) + ". " + c.name + "</div>";
+  });
+
+  document.getElementById("customerList").innerHTML = html;
+}
+
 </script>
 
 </body>
