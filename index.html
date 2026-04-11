@@ -29,7 +29,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const client = supabase.createClient(
+const { createClient } = supabase;
+
+const client = createClient(
   "https://jqqnnkzozjskziaizajg.supabase.co",
   "sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P"
 );
