@@ -8,8 +8,17 @@
 
 <h2>Salon Track</h2>
 
-<input type="text" id="mobile" placeholder="Enter Mobile">
-<button onclick="login()">Login</button>
+<div id="loginBox">
+  <input type="text" id="mobile" placeholder="Enter Mobile">
+  <button onclick="login()">Login</button>
+</div>
+
+<div id="appBox" style="display:none;">
+  <h3 id="welcome"></h3>
+
+  <button onclick="alert('Add Customer')">Add Customer</button>
+  <button onclick="alert('New Visit')">New Visit</button>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
@@ -22,20 +31,26 @@ const client = supabase.createClient(
 async function login() {
   let mobile = document.getElementById("mobile").value;
 
-  let { data, error } = await client
+  let { data } = await client
     .from('users')
     .select('*')
     .eq('mobile', mobile)
     .single();
 
   if (data) {
-    alert("Welcome back");
+    localStorage.setItem("mobile", mobile);
+
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("appBox").style.display = "block";
+
+    document.getElementById("welcome").innerText = "Welcome " + mobile;
+
   } else {
     let name = prompt("Enter your name");
 
     if (name) {
       await client.from('users').insert([
-{ mobile: mobile, name: name, plan: 'trial', start_date: new Date() }
+        { mobile: mobile, name: name, plan: 'trial', start_date: new Date() }
       ]);
 
       alert("User created");
