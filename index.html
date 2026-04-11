@@ -137,7 +137,7 @@ localStorage.setItem("customers",JSON.stringify(customers));
 showCustomerMaster();
 }
 
-// SERVICE MASTER
+// SERVICE MASTER (FIXED BACK BUTTON)
 function showServiceMaster(){
 app.innerHTML = `
 <div class="card">
@@ -279,7 +279,7 @@ let msg=encodeURIComponent("Time to visit salon 😊");
 
 return `
 <p>${v.name}</p>
-<button class="blue" onclick="window.open('tel:${c.mobile}')">Call</button>
+<button class="blue" onclick="window.location.href='tel:${c.mobile}'">Call</button>
 <button class="blue" onclick="window.open('https://wa.me/91${c.mobile}?text=${msg}')">WhatsApp</button>
 `;
 }).join("")}
