@@ -8,108 +8,40 @@
 
 <h2>Salon Track</h2>
 
-<!-- LOGIN -->
-<div id="loginBox">
-  <input type="text" id="mobile" placeholder="Enter Mobile">
-  <button onclick="login()">Login</button>
-</div>
+<input type="text" id="mobile" placeholder="Enter Mobile">
+<button onclick="login()">Login</button>
 
-<!-- APP -->
-<div id="appBox" style="display:none;">
-  <h3 id="welcome"></h3>
-
-  <h4>Add Customer</h4>
-  <input type="text" id="custName" placeholder="Customer Name">
-  <button onclick="addCustomer()">Add</button>
-
-  <h4>Customer List</h4>
-  <div id="customerList"></div>
-</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <script>
+const supabase = supabase.createClient(
+  "https://txfifgqslatvaiwpbhek.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcW5ua3pvempza3ppYWl6YWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Mjk1ODAsImV4cCI6MjA4ODUwNTU4MH0.sEYeWnm0dvuw8bLSVnQhqmgV8LB-pELjpuVIa3Us1Gg"
+);
 
-// LOGIN
-function login() {
+async function login() {
+  let mobile = document.getElementById("mobile").value;
 
-  let mobile = document.getElementById("mobile").value.trim();
+  let { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('mobile', mobile)
+    .single();
 
-  if (!mobile) {
-    alert("Enter mobile");
-    return;
-  }
-
-  let users = JSON.parse(localStorage.getItem("users")) || [];
-
-  let existing = users.find(u => u.mobile === mobile);
-
-  if (existing) {
-    alert("Login success");
-    showApp(mobile);
+  if (data) {
+    alert("Welcome back");
   } else {
+    let name = prompt("Enter your name");
 
-    let today = new Date();
-    let expiry = new Date();
-    expiry.setDate(today.getDate() + 7);
+    if (name) {
+      await supabase.from('users').insert([
+        { mobile: mobile, plan: 'trial', start_date: new Date() }
+      ]);
 
-    users.push({
-      mobile: mobile,
-      expiry_date: expiry.toISOString().split('T')[0]
-    });
-
-    localStorage.setItem("users", JSON.stringify(users));
-
-    alert("Trial started for 7 days");
-    showApp(mobile);
+      alert("User created");
+    }
   }
 }
-
-// SHOW APP
-function showApp(mobile) {
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("appBox").style.display = "block";
-  document.getElementById("welcome").innerText = "Welcome: " + mobile;
-
-  showCustomers();
-}
-
-// ADD CUSTOMER
-function addCustomer() {
-
-  let input = document.getElementById("custName");
-  let name = input.value.trim();
-
-  console.log("Entered Name:", name); // DEBUG
-
-  if (!name) {
-    alert("Enter customer name");
-    return;
-  }
-
-  let customers = JSON.parse(localStorage.getItem("customers")) || [];
-
-  customers.push({ name: name });
-
-  localStorage.setItem("customers", JSON.stringify(customers));
-
-  input.value = ""; // clear box
-
-  showCustomers();
-}
-
-// SHOW CUSTOMERS
-function showCustomers() {
-
-  let customers = JSON.parse(localStorage.getItem("customers")) || [];
-
-  let html = "";
-
-  customers.forEach((c, index) => {
-    html += "<div>" + (index + 1) + ". " + c.name + "</div>";
-  });
-
-  document.getElementById("customerList").innerHTML = html;
-}
-
 </script>
 
 </body>
