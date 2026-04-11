@@ -3,13 +3,24 @@
 <head>
   <title>Salon Track</title>
 </head>
+
+<body>
+
+<h2>Salon Track</h2>
+
+<input type="text" id="mobile" placeholder="Enter Mobile">
+<button id="loginBtn">Login</button>
+
+<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <script>
 const client = supabase.createClient(
   "https://txfifgqslatvaiwpbhek.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVlZm5rZWhweWd2cGJheGtjcHltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4Nzk0NTEsImV4cCI6MjA5MTQ1NTQ1MX0._ejpMgoBdDlE9D6olfYtnNV3_Bg3LOF7SwsSLdnQRJw"
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcW5ua3pvempza3ppYWl6YWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Mjk1ODAsImV4cCI6MjA4ODUwNTU4MH0.sEYeWnm0dvuw8bLSVnQhqmgV8LB-pELjpuVIa3Us1Gg"
 );
+
+document.getElementById("loginBtn").addEventListener("click", login);
 
 async function login() {
   let mobile = document.getElementById("mobile").value;
@@ -25,19 +36,6 @@ async function login() {
   } else {
     alert("User not found");
   }
-}
-</script>
-<body>
-
-<h2>Salon Track</h2>
-
-<input type="text" id="mobile" placeholder="Enter Mobile">
-<button onclick="login()">Login</button>
-
-<script>
-function login() {
-  let mobile = document.getElementById("mobile").value;
-
 }
 </script>
 
