@@ -25,7 +25,7 @@ border-radius:6px; border:1px solid #ccc;
 table { width:100%; border-collapse:collapse; }
 td, th { padding:8px; border-bottom:1px solid #ddd; }
 </style>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 
 <body>
@@ -33,7 +33,10 @@ td, th { padding:8px; border-bottom:1px solid #ddd; }
 <div id="app"></div>
 
 <script>
+const SUPABASE_URL = "https://jqqnnkzozjskziaizajg.supabase.co";
+const SUPABASE_KEY = "sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P";
 
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let app = document.getElementById("app");
 
 let users = JSON.parse(localStorage.getItem("users")) || {};
