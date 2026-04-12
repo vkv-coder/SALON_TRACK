@@ -1,71 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Salon Track</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
-  <style>
-    body { font-family: Arial; margin:0; }
-    .header { background:#2d6cdf; color:white; padding:15px; text-align:center; font-size:22px; }
-    .menu { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:10px; }
-    .btn { background:#2d6cdf; color:white; padding:12px; border:none; border-radius:8px; }
-    .content { padding:10px; }
-    input { padding:8px; width:200px; }
-  </style>
-</head>
-
-<body>
-
-<div class="header">SALON TRACK</div>
-
-<!-- MENU (HIDDEN INITIALLY) -->
-<div class="menu" id="menu" style="display:none;">
-  <button class="btn" onclick="showMaster()">Master</button>
-  <button class="btn" onclick="showVisit()">Add Visit</button>
-  <button class="btn" onclick="showReminder()">Reminder</button>
-  <button class="btn" onclick="showReports()">Reports</button>
-  <button class="btn" onclick="showPrivacy()">Privacy</button>
-  <button class="btn" onclick="logout()">Logout</button>
-</div>
-
-<!-- SUPPORT -->
-<div id="support" style="padding-left:10px; display:none;">
-  vkvcoder.support@gmail.com
-</div>
-
-<div id="content" class="content"></div>
-
-<script>
-
-// 🔴 PUT YOUR KEY HERE
-const client = supabase.createClient(
-  "https://jqqnnkzozjskziaizajg.supabase.co",
-  "sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P"
-);
-
+// ================= GLOBAL =================
 let user_id = null;
 
 // ================= LOGIN =================
-
 function showLogin(){
-  document.getElementById("content").innerHTML = `
-    <h3>Login / Register</h3>
-    <input id="mobile" placeholder="Enter Mobile"><br><br>
+  content.innerHTML = `
+    <h3>Login</h3>
+    <input id="mobile" placeholder="Mobile">
     <button onclick="login()">Continue</button>
   `;
 }
 
 async function login(){
+  let mob = mobile.value;
 
-  let mob = document.getElementById("mobile").value;
-
-  if(!mob){
-    alert("Enter mobile");
-    return;
-  }
-
-  // CHECK EXISTING
   let {data} = await client
     .from("users")
     .select("*")
@@ -73,7 +20,6 @@ async function login(){
     .maybeSingle();
 
   if(!data){
-    // 👉 AUTO REGISTER
     let res = await client
       .from("users")
       .insert([{mobile: mob}])
@@ -81,137 +27,111 @@ async function login(){
       .single();
 
     user_id = res.data.id;
-
   } else {
     user_id = data.id;
   }
 
-  // SHOW APP
-  document.getElementById("menu").style.display = "grid";
-  document.getElementById("support").style.display = "block";
+  menu.style.display = "grid";
+  support.style.display = "block";
 
   showMaster();
 }
 
 // ================= MASTER =================
-
 function showMaster(){
-
-  document.getElementById("content").innerHTML = `
+  content.innerHTML = `
   
   <div style="display:flex; gap:10px;">
-    <button onclick="showCustomerTab()" id="tabC" style="background:#2d6cdf;color:white;">Customer</button>
-    <button onclick="showServiceTab()" id="tabS">Service</button>
+    <button onclick="loadCustomer()">Customer</button>
+    <button onclick="loadService()">Service</button>
   </div>
 
-  <div id="custDiv">
-    <h3>Add Customer</h3>
+  <div id="subcontent"></div>
+  `;
+}
+
+// ================= CUSTOMER =================
+function loadCustomer(){
+  subcontent.innerHTML = `
+    <button onclick="custAdd()">Add</button>
+    <button onclick="custView()">View</button>
+    <div id="custArea"></div>
+  `;
+}
+
+function custAdd(){
+  custArea.innerHTML = `
     <input id="cname" placeholder="Name"><br><br>
     <input id="cmob" placeholder="Mobile"><br><br>
     <input id="cbday" type="date"> Birthday<br><br>
     <input id="canni" type="date"> Anniversary<br><br>
     <button onclick="saveCustomer()">Save</button>
-  </div>
+  `;
+}
 
-  <div id="servDiv" style="display:none;">
-    <h3>Add Service</h3>
+async function custView(){
+  let {data} = await client.from("customers")
+    .select("*")
+    .eq("user_id", user_id);
+
+  let html = "";
+
+  data.forEach(c=>{
+    html += `<div>${c.name} - ${c.mobile}</div>`;
+  });
+
+  custArea.innerHTML = html;
+}
+
+async function saveCustomer(){
+  let {error} = await client.from("customers").insert([{
+    user_id,
+    name: cname.value,
+    mobile: cmob.value,
+    birthday: cbday.value,
+    anniversary: canni.value
+  }]);
+
+  alert(error ? error.message : "Saved");
+}
+
+// ================= SERVICE =================
+function loadService(){
+  subcontent.innerHTML = `
     <input id="sname" placeholder="Service"><br><br>
     <input id="srate" placeholder="Rate"><br><br>
     <input id="sdays" placeholder="Reminder Days"><br><br>
     <button onclick="saveService()">Save</button>
-  </div>
   `;
 }
-
-function showCustomerTab(){
-  custDiv.style.display="block";
-  servDiv.style.display="none";
-
-  tabC.style.background="#2d6cdf";
-  tabC.style.color="white";
-
-  tabS.style.background="#ccc";
-}
-
-function showServiceTab(){
-  custDiv.style.display="none";
-  servDiv.style.display="block";
-
-  tabS.style.background="#2d6cdf";
-  tabS.style.color="white";
-
-  tabC.style.background="#ccc";
-}
-
-// ================= SAVE CUSTOMER =================
-
-async function saveCustomer(){
-
-  let name = cname.value;
-  let mobile = cmob.value;
-  let birthday = cbday.value;
-  let anniversary = canni.value;
-
-  let {error} = await client.from("customers").insert([{
-    user_id,
-    name,
-    mobile,
-    birthday,
-    anniversary
-  }]);
-
-  if(error){
-    alert(error.message);
-  } else {
-    alert("Saved");
-  }
-}
-
-// ================= SAVE SERVICE =================
 
 async function saveService(){
-
-  let name = sname.value;
-  let rate = srate.value;
-  let reminder_days = sdays.value;
-
   let {error} = await client.from("salon_services").insert([{
     user_id,
-    name,
-    rate,
-    reminder_days
+    name: sname.value,
+    rate: srate.value,
+    reminder_days: sdays.value
   }]);
 
-  if(error){
-    alert(error.message);
-  } else {
-    alert("Saved");
-  }
+  alert(error ? error.message : "Saved");
 }
 
-// ================= ADD VISIT =================
-
+// ================= VISIT =================
 async function showVisit(){
 
-  let {data:customers} = await client
-    .from("customers")
-    .select("*")
-    .eq("user_id",user_id);
+  let {data:customers} = await client.from("customers")
+    .select("*").eq("user_id", user_id);
 
-  let {data:services} = await client
-    .from("salon_services")
-    .select("*")
-    .eq("user_id",user_id);
+  let {data:services} = await client.from("salon_services")
+    .select("*").eq("user_id", user_id);
 
-  let html = `
-    <h3>Add Visit</h3>
+  let html = `<select id="cust">`;
 
-    <select id="cust">
-      ${customers.map(c=>`<option value="${c.id}">${c.name}</option>`)}
-    </select>
+  customers.forEach(c=>{
+    html += `<option value="${c.id}">${c.name}</option>`;
+  });
 
-    <br><br>
-  `;
+  html += `</select><br><br>`;
 
   services.forEach(s=>{
     html += `
@@ -227,55 +147,41 @@ async function showVisit(){
     <button onclick="saveVisit()">Save</button>
   `;
 
-  document.getElementById("content").innerHTML = html;
+  content.innerHTML = html;
 }
 
 function calcTotal(){
   let total = 0;
 
-  document.querySelectorAll("input[type=checkbox]:checked").forEach(cb=>{
-    total += Number(cb.dataset.rate);
-  });
-
-  total = isNaN(total) ? 0 : total;
+  document.querySelectorAll("input[type=checkbox]:checked")
+    .forEach(cb => total += Number(cb.dataset.rate));
 
   document.getElementById("total").innerText = total;
 }
 
 async function saveVisit(){
-
-  let customer_id = cust.value;
-  let amount = total.innerText;
-
   let {error} = await client.from("salon_visits").insert([{
     user_id,
-    customer_id,
-    amount
+    customer_id: cust.value,
+    amount: total.innerText
   }]);
 
-  if(error){
-    alert(error.message);
-  } else {
-    alert("Saved");
-  }
+  alert(error ? error.message : "Saved");
 }
 
 // ================= REMINDER =================
-
 function showReminder(){
   content.innerHTML = "Reminder coming next";
 }
 
 // ================= REPORT =================
-
 function showReports(){
   content.innerHTML = "Reports coming next";
 }
 
-// ================= PRIVACY =================
-
+// ================= OTHER =================
 function showPrivacy(){
-  content.innerHTML = "Privacy policy here";
+  content.innerHTML = "Privacy";
 }
 
 function logout(){
@@ -284,8 +190,3 @@ function logout(){
 
 // START
 showLogin();
-
-</script>
-
-</body>
-</html>
