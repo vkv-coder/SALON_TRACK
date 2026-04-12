@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Salon App</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <style>
 body { font-family: Arial; background:#f2f2f2; margin:0; }
@@ -17,15 +18,8 @@ input, select {
 width:100%; padding:10px; margin:5px 0;
 border-radius:6px; border:1px solid #ccc;
 }
-
-.row { display:flex; gap:10px; }
-.row select { flex:2; }
-.row input { flex:1; }
-
-table { width:100%; border-collapse:collapse; }
-td, th { padding:8px; border-bottom:1px solid #ddd; }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
 </head>
 
 <body>
@@ -33,27 +27,16 @@ td, th { padding:8px; border-bottom:1px solid #ddd; }
 <div id="app"></div>
 
 <script>
+
+// ===== SUPABASE =====
 const SUPABASE_URL = "https://jqqnnkzozjskziaizajg.supabase.co";
 const SUPABASE_KEY = "sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P";
 
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 let app = document.getElementById("app");
 
-let users = JSON.parse(localStorage.getItem("users")) || {};
-let customers = JSON.parse(localStorage.getItem("customers")) || [];
-let services = JSON.parse(localStorage.getItem("services")) || [
-{ name:"Haircut", price:150 },
-{ name:"Shaving", price:80 }
-];
-let visits = JSON.parse(localStorage.getItem("visits")) || [];
-
-function val(id){ return document.getElementById(id).value; }
-function formatName(n){
-return n.toLowerCase().split(" ").filter(w=>w).map(w=>w[0].toUpperCase()+w.slice(1)).join(" ");
-}
-function normalize(n){ return n.toLowerCase().trim(); }
-
-// LOGIN
+// ===== LOGIN =====
 function showLogin(){
 app.innerHTML = `
 <div class="card">
@@ -63,11 +46,19 @@ app.innerHTML = `
 </div>`;
 }
 
-function checkLogin(){
-let mobile = val("mobile");
+async function checkLogin(){
+
+let mobile = document.getElementById("mobile").value;
+
 if(!mobile){ alert("Enter mobile"); return; }
 
-if(users[mobile]){
+let { data } = await client
+.from("users")
+.select("*")
+.eq("mobile", mobile)
+.single();
+
+if(data){
 localStorage.setItem("currentUser", mobile);
 showHome();
 }else{
@@ -75,6 +66,7 @@ showRegister(mobile);
 }
 }
 
+// ===== REGISTER =====
 function showRegister(mobile){
 app.innerHTML = `
 <div class="card">
@@ -87,64 +79,93 @@ app.innerHTML = `
 </div>`;
 }
 
-function register(mobile){
-users[mobile] = {
-name: val("name"),
-shop: val("shop"),
-city: val("city"),
-state: val("state")
-};
-localStorage.setItem("users", JSON.stringify(users));
+async function register(mobile){
+
+let name = document.getElementById("name").value;
+let shop = document.getElementById("shop").value;
+let city = document.getElementById("city").value;
+let state = document.getElementById("state").value;
+
+if(!name || !shop || !city || !state){
+alert("Fill all fields");
+return;
+}
+
+let today = new Date().toISOString().split("T")[0];
+let endDate = new Date();
+endDate.setDate(endDate.getDate() + 15);
+let end = endDate.toISOString().split("T")[0];
+
+let { error } = await client.from("users").insert([{
+mobile: mobile,
+name: name,
+shop: shop,
+city: city,
+state: state,
+start_date: today,
+expiry_date: end
+}]);
+
+if(error){
+alert(error.message);
+return;
+}
+
 localStorage.setItem("currentUser", mobile);
+
+alert("Registered");
+
 showHome();
 }
 
-// HOME
+// ===== HOME =====
 function showHome(){
-let user = users[localStorage.getItem("currentUser")];
-
 app.innerHTML = `
 <div class="card">
-<h3>${user.shop}</h3>
+<h3>Salon App</h3>
 
 <div class="grid">
-<button class="blue" onclick="showVisit()">Add Visit</button>
-<button class="blue" onclick="showMaster()">Master</button>
-<button class="blue" onclick="showReports()">Reports</button>
-<button class="blue" onclick="showReminder()">Reminder</button>
+<button class="blue" onclick="showCustomerMaster()">Customer</button>
+<button class="blue">Service</button>
+<button class="blue">Add Visit</button>
+<button class="blue">Reports</button>
+<button class="blue">Reminder</button>
 </div>
 
 <button class="gray" onclick="logout()">Logout</button>
 </div>`;
 }
 
-// MASTER
-function showMaster(){
-app.innerHTML = `
-<div class="card">
-<h2>Master</h2>
-<button class="blue" onclick="showCustomerMaster()">Customer Master</button>
-<button class="blue" onclick="showServiceMaster()">Service Master</button>
-<button class="gray" onclick="showHome()">Back</button>
-</div>`;
+// ===== CUSTOMER MASTER =====
+async function showCustomerMaster(){
+
+let user = localStorage.getItem("currentUser");
+
+let { data, error } = await client
+.from("salon_customer")
+.select("*")
+.eq("user_id", user);
+
+if(error){
+alert(error.message);
+return;
 }
 
-// CUSTOMER MASTER (UPDATED)
-function showCustomerMaster(){
 app.innerHTML = `
 <div class="card">
 <h2>Customer Master</h2>
 
 <button class="blue" onclick="showAddCustomer()">+ Add Customer</button>
 
-${customers.map(c=>`
-<p>${c.salutation || ""} ${c.name} - ${c.mobile}</p>
+${data.map(c=>`
+<p>${c.salutation || ""} ${c.name} - ${c.mobile || ""}</p>
 `).join("")}
 
-<button class="gray" onclick="showMaster()">Back</button>
+<button class="gray" onclick="showHome()">Back</button>
 </div>`;
 }
 
+// ===== ADD CUSTOMER =====
 function showAddCustomer(){
 app.innerHTML = `
 <div class="card">
@@ -166,128 +187,43 @@ app.innerHTML = `
 </div>`;
 }
 
-function saveCustomer(){
-customers.push({
-salutation: val("salutation"),
-name: formatName(val("custName")),
-mobile: val("custMobile")
-});
-localStorage.setItem("customers",JSON.stringify(customers));
+// ===== SAVE CUSTOMER =====
+async function saveCustomer(){
+
+let name = document.getElementById("custName").value;
+let mobile = document.getElementById("custMobile").value;
+let salutation = document.getElementById("salutation").value;
+let user = localStorage.getItem("currentUser");
+
+if(!name){
+alert("Enter name");
+return;
+}
+
+let { error } = await client.from("salon_customer").insert([{
+user_id: user,
+name: name,
+mobile: mobile,
+salutation: salutation
+}]);
+
+if(error){
+alert(error.message);
+return;
+}
+
+alert("Customer Saved");
+
 showCustomerMaster();
 }
 
-// SERVICE MASTER
-function showServiceMaster(){
-app.innerHTML = `
-<div class="card">
-<h2>Service Master</h2>
-${services.map(s=>`<p>${s.name} ₹${s.price}</p>`).join("")}
-<input id="sname">
-<input id="sprice">
-<button class="blue" onclick="addService()">Add</button>
-<button class="gray" onclick="showMaster()">Back</button>
-</div>`;
-}
-
-function addService(){
-services.push({name:val("sname"),price:val("sprice")});
-localStorage.setItem("services",JSON.stringify(services));
-showServiceMaster();
-}
-
-// VISIT
-function showVisit(){
-let today=new Date().toISOString().split("T")[0];
-
-app.innerHTML = `
-<div class="card">
-<h2>Add Visit</h2>
-
-<select id="custSelect">
-<option value="">Select</option>
-${customers.map(c=>`<option>${c.name}</option>`).join("")}
-</select>
-
-<input id="custInput" placeholder="Or new">
-
-<div class="row">
-<select id="serviceSelect" onchange="setPrice()">
-<option value="">Service</option>
-${services.map((s,i)=>`<option value="${i}">${s.name}</option>`).join("")}
-</select>
-<input id="price">
-</div>
-
-<input type="date" id="date" value="${today}">
-<input id="reminder">
-
-<button class="blue" onclick="saveVisit()">Save</button>
-<button class="gray" onclick="showHome()">Back</button>
-</div>`;
-}
-
-function setPrice(){
-let i=val("serviceSelect");
-if(i!=="") document.getElementById("price").value=services[i].price;
-}
-
-function saveVisit(){
-let name=formatName(val("custInput")||val("custSelect"));
-let price=Number(val("price"));
-let date=val("date");
-let reminderDays=Number(val("reminder")||0);
-
-visits.push({name,date,total:price,reminderDays});
-localStorage.setItem("visits",JSON.stringify(visits));
-
-alert("Saved");
-showHome();
-}
-
-// REPORT (same as before)
-function showReports(){ showHome(); }
-
-// REMINDER (UPDATED MESSAGE)
-function showReminder(){
-
-let today=new Date();
-
-let list=visits.filter(v=>{
-let d=new Date(v.date);
-let next=new Date(d);
-next.setDate(next.getDate()+v.reminderDays);
-let r=new Date(next);
-r.setDate(r.getDate()-3);
-return r.toDateString()===today.toDateString();
-});
-
-app.innerHTML = `
-<div class="card">
-<h2>Reminder</h2>
-
-${list.map(v=>{
-let c=customers.find(x=>x.name===v.name)||{};
-let msg=encodeURIComponent(`Hello ${c.salutation || ""} ${v.name},
-
-It’s time to pamper and groom yourself 😊`);
-
-return `
-<p>${c.salutation || ""} ${v.name}</p>
-<button class="blue" onclick="window.open('https://api.whatsapp.com/send?phone=91${c.mobile}&text=${msg}')">WhatsApp</button>
-`;
-}).join("")}
-
-<button class="gray" onclick="showHome()">Back</button>
-</div>`;
-}
-
-// LOGOUT
+// ===== LOGOUT =====
 function logout(){
 localStorage.removeItem("currentUser");
 showLogin();
 }
 
-// START
+// ===== START =====
 if(localStorage.getItem("currentUser")){
 showHome();
 }else{
