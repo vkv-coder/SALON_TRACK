@@ -8,8 +8,6 @@
 body { font-family: Arial; background:#f2f2f2; margin:0; }
 .card { background:white; padding:15px; margin:10px; border-radius:10px; }
 
-.grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-
 button { padding:10px; border:none; border-radius:6px; }
 .blue { background:#2563eb; color:white; }
 .gray { background:#ddd; width:100%; margin-top:10px; }
@@ -19,10 +17,7 @@ width:100%; padding:8px; margin:5px 0;
 border-radius:6px; border:1px solid #ccc;
 }
 
-table { width:100%; border-collapse:collapse; }
-th, td { padding:8px; border-bottom:1px solid #ddd; text-align:left; }
-th { background:#eee; }
-tr { cursor:pointer; }
+.row { display:flex; justify-content:space-between; align-items:center; margin:5px 0; }
 </style>
 
 </head>
@@ -39,63 +34,6 @@ const client = supabase.createClient(
 
 let app = document.getElementById("app");
 
-// ================= LOGIN =================
-
-function showLogin(){
-app.innerHTML = `
-<div class="card">
-<h2>Login</h2>
-<input id="mobile" placeholder="Mobile">
-<button class="blue" onclick="checkLogin()">Continue</button>
-</div>`;
-}
-
-async function checkLogin(){
-let mobile = document.getElementById("mobile").value;
-
-let { data } = await client
-.from("users")
-.select("*")
-.eq("mobile", mobile)
-.single();
-
-if(data){
-localStorage.setItem("userId", data.id);
-showHome();
-}else{
-showRegister(mobile);
-}
-}
-
-// ================= REGISTER =================
-
-function showRegister(mobile){
-app.innerHTML = `
-<div class="card">
-<h2>Register</h2>
-<input id="name" placeholder="Owner Name">
-<input id="shop" placeholder="Shop Name">
-<input id="city" placeholder="City">
-<input id="state" placeholder="State">
-<button class="blue" onclick="register('${mobile}')">Register</button>
-</div>`;
-}
-
-async function register(mobile){
-
-let { data } = await client.from("users").insert([{
-mobile,
-name: name.value,
-shop: shop.value,
-city: city.value,
-state: state.value
-}]).select();
-
-localStorage.setItem("userId", data[0].id);
-
-showHome();
-}
-
 // ================= HOME =================
 
 function showHome(){
@@ -103,283 +41,183 @@ app.innerHTML = `
 <div class="card">
 <h3>Salon App</h3>
 
-<div class="grid">
-<button class="blue" onclick="showMaster()">Master</button>
 <button class="blue" onclick="showAddVisit()">Add Visit</button>
-<button class="blue" onclick="showReports()">Reports</button>
-<button class="blue" onclick="showReminder()">Reminder</button>
-</div>
-
 <button class="gray" onclick="logout()">Logout</button>
 </div>`;
 }
 
-// ================= MASTER =================
+// ================= ADD VISIT =================
 
-function showMaster(){
-app.innerHTML = `
-<div class="card">
-<h2>Master</h2>
-
-<button class="blue" onclick="showCustomerMenu()">Customer</button>
-<button class="blue" onclick="showServiceMenu()">Service</button>
-
-<button class="gray" onclick="showHome()">Back</button>
-</div>`;
-}
-
-// ================= CUSTOMER MENU =================
-
-function showCustomerMenu(){
-app.innerHTML = `
-<div class="card">
-<h2>Customer Master</h2>
-
-<button class="blue" onclick="showAddCustomer()">Add Customer</button>
-<button class="blue" onclick="showCustomerList()">View Customers</button>
-
-<button class="gray" onclick="showMaster()">Back</button>
-</div>`;
-}
-
-// ================= CUSTOMER TABLE VIEW =================
-
-async function showCustomerList(){
+async function showAddVisit(){
 
 let userId = localStorage.getItem("userId");
 
-let { data } = await client
+// fetch customers
+let { data: customers } = await client
 .from("salon_customers")
 .select("*")
 .eq("user_id", userId);
 
-window.customerData = data;
-
-app.innerHTML = `
-<div class="card">
-<h2>Customers</h2>
-
-<input id="search" placeholder="Search..." onkeyup="filterCustomer()">
-
-<table id="custTable">
-<thead>
-<tr>
-<th>Name</th>
-<th>Mobile</th>
-<th>Address</th>
-<th>Birthday</th>
-</tr>
-</thead>
-
-<tbody>
-${data.map(c=>`
-<tr onclick="editCustomer('${c.id}')">
-<td>${c.name||""}</td>
-<td>${c.mobile||""}</td>
-<td>${c.address||""}</td>
-<td>${c.birthday||""}</td>
-</tr>
-`).join("")}
-</tbody>
-</table>
-
-<button class="gray" onclick="showCustomerMenu()">Back</button>
-</div>`;
-}
-
-function filterCustomer(){
-let txt = search.value.toLowerCase();
-document.querySelectorAll("#custTable tbody tr").forEach(r=>{
-r.style.display = r.innerText.toLowerCase().includes(txt) ? "" : "none";
-});
-}
-
-// ================= ADD CUSTOMER =================
-
-function showAddCustomer(){
-app.innerHTML = `
-<div class="card">
-<h2>Add Customer</h2>
-
-<input id="cname" placeholder="Name">
-<input id="cmobile" placeholder="Mobile">
-<input id="caddress" placeholder="Address">
-
-<button class="blue" onclick="saveCustomer()">Save</button>
-<button class="gray" onclick="showCustomerMenu()">Back</button>
-</div>`;
-}
-
-async function saveCustomer(){
-
-await client.from("salon_customers").insert([{
-user_id:localStorage.getItem("userId"),
-name:cname.value,
-mobile:cmobile.value,
-address:caddress.value
-}]);
-
-showCustomerMenu();
-}
-
-// ================= EDIT CUSTOMER =================
-
-function editCustomer(id){
-
-let c = customerData.find(x=>x.id==id);
-
-app.innerHTML = `
-<div class="card">
-<h2>Edit Customer</h2>
-
-<table>
-<tr><th>Name</th><th>Mobile</th><th>Address</th><th>Birthday</th></tr>
-<tr>
-<td><input id="cname" value="${c.name}"></td>
-<td><input id="cmobile" value="${c.mobile||""}"></td>
-<td><input id="caddress" value="${c.address||""}"></td>
-<td><input id="cbirthday" value="${c.birthday||""}"></td>
-</tr>
-</table>
-
-<button class="blue" onclick="updateCustomer('${id}')">Update</button>
-<button class="gray" onclick="showCustomerList()">Back</button>
-</div>`;
-}
-
-async function updateCustomer(id){
-
-await client.from("salon_customers").update({
-name:cname.value,
-mobile:cmobile.value,
-address:caddress.value,
-birthday:cbirthday.value
-}).eq("id", id);
-
-showCustomerList();
-}
-
-// ================= SERVICE MENU =================
-
-function showServiceMenu(){
-app.innerHTML = `
-<div class="card">
-<h2>Service Master</h2>
-
-<button class="blue" onclick="showAddService()">Add Service</button>
-<button class="blue" onclick="showServiceList()">View Services</button>
-
-<button class="gray" onclick="showMaster()">Back</button>
-</div>`;
-}
-
-// ================= SERVICE TABLE =================
-
-async function showServiceList(){
-
-let userId = localStorage.getItem("userId");
-
-let { data } = await client
+// fetch services
+let { data: services } = await client
 .from("salon_services")
 .select("*")
 .eq("user_id", userId);
 
-window.serviceData = data;
+window.visitCustomers = customers;
+window.visitServices = services;
 
 app.innerHTML = `
 <div class="card">
-<h2>Services</h2>
+<h2>Add Visit</h2>
 
-<input id="search" placeholder="Search..." onkeyup="filterService()">
+<input id="custSearch" placeholder="Search Customer" onkeyup="filterCustomer()">
+<div id="custList"></div>
 
-<table id="srvTable">
-<thead>
-<tr>
-<th>Name</th>
-<th>Rate</th>
-</tr>
-</thead>
+<hr>
 
-<tbody>
-${data.map(s=>`
-<tr onclick="editService('${s.id}')">
-<td>${s.name}</td>
-<td>₹${s.rate}</td>
-</tr>
-`).join("")}
-</tbody>
-</table>
+<h3>Select Services</h3>
 
-<button class="gray" onclick="showServiceMenu()">Back</button>
+<div id="serviceList"></div>
+
+<hr>
+
+<h3>Total: ₹ <span id="total">0</span></h3>
+
+<input type="date" id="vdate">
+
+<button class="blue" onclick="saveVisit()">Save Visit</button>
+<button class="gray" onclick="showHome()">Back</button>
 </div>`;
+
+renderCustomerList(customers);
+renderServiceList(services);
+
+// default date
+document.getElementById("vdate").value =
+new Date().toISOString().split("T")[0];
 }
 
-function filterService(){
-let txt = search.value.toLowerCase();
-document.querySelectorAll("#srvTable tbody tr").forEach(r=>{
-r.style.display = r.innerText.toLowerCase().includes(txt) ? "" : "none";
+// ================= CUSTOMER SELECT =================
+
+function renderCustomerList(data){
+document.getElementById("custList").innerHTML = data.map(c=>`
+<div onclick="selectCustomer('${c.id}','${c.name}')">
+${c.name}
+</div>
+`).join("");
+}
+
+function filterCustomer(){
+let txt = custSearch.value.toLowerCase();
+let filtered = visitCustomers.filter(c =>
+c.name.toLowerCase().includes(txt)
+);
+renderCustomerList(filtered);
+}
+
+function selectCustomer(id,name){
+window.selectedCustomer = {id,name};
+custSearch.value = name;
+document.getElementById("custList").innerHTML = "";
+}
+
+// ================= SERVICE CHECKBOX =================
+
+function renderServiceList(data){
+
+document.getElementById("serviceList").innerHTML = data.map(s=>`
+<div class="row">
+<input type="checkbox" onchange="calcTotal()"
+value="${s.id}" id="chk_${s.id}">
+
+<span>${s.name}</span>
+
+<input type="number" value="${s.rate}"
+id="rate_${s.id}" onchange="calcTotal()">
+</div>
+`).join("");
+}
+
+// ================= TOTAL =================
+
+function calcTotal(){
+
+let total = 0;
+
+visitServices.forEach(s=>{
+let chk = document.getElementById("chk_"+s.id);
+if(chk && chk.checked){
+let rate = parseFloat(document.getElementById("rate_"+s.id).value || 0);
+total += rate;
+}
 });
+
+document.getElementById("total").innerText = total;
 }
 
-// ================= ADD SERVICE =================
+// ================= SAVE VISIT =================
 
-function showAddService(){
-app.innerHTML = `
-<div class="card">
-<h2>Add Service</h2>
+async function saveVisit(){
 
-<input id="sname" placeholder="Name">
-<input id="srate" placeholder="Rate">
-
-<button class="blue" onclick="saveService()">Save</button>
-<button class="gray" onclick="showServiceMenu()">Back</button>
-</div>`;
+if(!window.selectedCustomer){
+alert("Select customer");
+return;
 }
 
-async function saveService(){
+let selectedServices = [];
+let total = 0;
 
-await client.from("salon_services").insert([{
-user_id:localStorage.getItem("userId"),
-name:sname.value,
-rate:srate.value
+visitServices.forEach(s=>{
+let chk = document.getElementById("chk_"+s.id);
+if(chk && chk.checked){
+let rate = parseFloat(document.getElementById("rate_"+s.id).value || 0);
+
+selectedServices.push({
+name: s.name,
+rate: rate
+});
+
+total += rate;
+}
+});
+
+await client.from("salon_visits").insert([{
+user_id: localStorage.getItem("userId"),
+customer_id: selectedCustomer.id,
+customer_name: selectedCustomer.name,
+services: JSON.stringify(selectedServices),
+amount: total,
+visit_date: vdate.value
 }]);
 
-showServiceMenu();
+alert("Visit Saved");
+
+showHome();
 }
 
-// ================= EDIT SERVICE =================
+// ================= LOGIN SIMPLE =================
 
-function editService(id){
-
-let s = serviceData.find(x=>x.id==id);
-
+function showLogin(){
 app.innerHTML = `
 <div class="card">
-<h2>Edit Service</h2>
-
-<input id="sname" value="${s.name}">
-<input id="srate" value="${s.rate}">
-
-<button class="blue" onclick="updateService('${id}')">Update</button>
-<button class="gray" onclick="showServiceList()">Back</button>
+<h2>Login</h2>
+<input id="mobile">
+<button onclick="login()">Login</button>
 </div>`;
 }
 
-async function updateService(id){
+async function login(){
+let { data } = await client
+.from("users")
+.select("*")
+.eq("mobile", mobile.value)
+.single();
 
-await client.from("salon_services").update({
-name:sname.value,
-rate:srate.value
-}).eq("id", id);
+localStorage.setItem("userId", data.id);
 
-showServiceList();
+showHome();
 }
-
-// ================= PLACEHOLDER =================
-
-function showAddVisit(){ alert("Next Step"); }
-function showReports(){ alert("Next Step"); }
-function showReminder(){ alert("Next Step"); }
 
 // ================= LOGOUT =================
 
@@ -388,8 +226,7 @@ localStorage.clear();
 showLogin();
 }
 
-// ================= START =================
-
+// START
 if(localStorage.getItem("userId")){
 showHome();
 }else{
