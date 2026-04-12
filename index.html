@@ -102,11 +102,17 @@ ${(c||[]).map(x=>`<option data-phone="${x.phone}">${x.name}</option>`)}
 <h4 style="text-align:right;margin-right:20px;">Reminder Days</h4>
 <div id="list">
 ${(s||[]).map(serv=>`
-<div class="row">
-<input type="checkbox" onchange="calcTotal()">
-<span>${serv.name}</span>
-<input class="small" type="number" value="${serv.rate}" onchange="calcTotal()">
-<input class="small" type="number" placeholder="Days">
+<div class="row" style="display:flex;align-items:center;gap:12px;justify-content:space-between">
+
+  <div style="display:flex;align-items:center;gap:10px;width:50%">
+    <input type="checkbox" onchange="calcTotal()">
+    <span>${serv.name}</span>
+  </div>
+
+  <input class="small" type="number" value="${serv.rate}" onchange="calcTotal()" style="width:70px">
+
+  <input class="small" type="number" placeholder="Days" style="width:70px">
+
 </div>
 `).join("")}
 </div>
