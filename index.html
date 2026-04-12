@@ -55,22 +55,20 @@ app.innerHTML=`
 }
 
 async function login(){
-let mob=mobile.value.trim();
-if(!mob){alert("Enter mobile");return;}
 
-let {data}=await client.from("users").select("*").eq("mobile",mob).limit(1);
+let mob = document.getElementById("mobile").value.trim();
 
-let user;
-if(!data || data.length==0){
-let {data:newUser}=await client.from("users").insert([{mobile:mob,name:"User"}]).select();
-user=newUser[0];
-}else user=data[0];
-
-localStorage.setItem("userId",user.id);
-
-showMenu(); showHome();
+if(!mob){
+alert("Enter mobile");
+return;
 }
 
+// 🔥 TEMP BYPASS LOGIN (NO DATABASE)
+localStorage.setItem("userId", mob);
+
+showMenu();
+showHome();
+}
 // MENU
 function showMenu(){
 menu.innerHTML=`
