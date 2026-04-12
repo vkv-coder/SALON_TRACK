@@ -1,273 +1,251 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <title>Salon Track</title>
 
-<style>
-body {font-family: Arial; margin:0; background:#f2f2f2;}
-.header {background:#2d6cdf; color:white; padding:15px; text-align:center; font-size:22px;}
-.container {padding:15px;}
-.btn {background:#2d6cdf; color:white; padding:12px; margin:5px; border:none; width:45%; border-radius:8px;}
-.row {display:flex; align-items:center; gap:10px; margin:6px 0;}
-.small {width:70px;}
-.hidden {display:none;}
-table {width:100%; border-collapse:collapse;}
-td, th {border:1px solid #ccc; padding:6px; font-size:13px;}
-</style>
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+  <style>
+    body { font-family: Arial; margin:0; }
+    .header { background:#2d6cdf; color:white; padding:15px; text-align:center; font-size:22px; }
+    .menu { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:10px; }
+    .btn { background:#2d6cdf; color:white; padding:12px; border:none; border-radius:8px; }
+    .content { padding:10px; }
+    input { padding:8px; width:200px; }
+  </style>
 </head>
 
 <body>
 
 <div class="header">SALON TRACK</div>
 
-<div class="container">
-
-<div id="login">
-<input id="mobile" placeholder="Mobile">
-<button onclick="login()">Login</button>
+<div class="menu">
+  <button class="btn" onclick="showMaster()">Master</button>
+  <button class="btn" onclick="showVisit()">Add Visit</button>
+  <button class="btn" onclick="showReminder()">Reminder</button>
+  <button class="btn" onclick="showReports()">Reports</button>
+  <button class="btn" onclick="showPrivacy()">Privacy</button>
+  <button class="btn" onclick="logout()">Logout</button>
 </div>
 
-<div id="menu" class="hidden">
-<button class="btn" onclick="showMaster()">Master</button>
-<button class="btn" onclick="showVisit()">Add Visit</button>
-<button class="btn" onclick="showReminder()">Reminder</button>
-<button class="btn" onclick="showReports()">Reports</button>
-<button class="btn" onclick="showPrivacy()">Privacy</button>
-<button class="btn" onclick="logout()">Logout</button>
-<div>📧 vkvcoder.support@gmail.com</div>
-</div>
+<div style="padding-left:10px;">vkvcoder.support@gmail.com</div>
 
-<div id="content"></div>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<div id="content" class="content"></div>
 
 <script>
+
 const client = supabase.createClient(
   "https://jqqnnkzozjskziaizajg.supabase.co",
   "sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P"
 );
-let user_id=null;
 
-// LOGIN
+let user_id = null;
+
+// ================= LOGIN =================
+
+function showLogin(){
+  document.getElementById("content").innerHTML = `
+    <input id="mobile" placeholder="Mobile">
+    <button onclick="login()">Login</button>
+  `;
+}
+
 async function login(){
-let mob=document.getElementById("mobile").value;
+  let mob = document.getElementById("mobile").value;
 
-let {data}=await client.from("users").select("*").eq("mobile",mob).maybeSingle();
+  let {data} = await client.from("users").select("*").eq("mobile",mob).maybeSingle();
 
-if(!data){
-let {data:newUser}=await client.from("users").insert([{mobile:mob}]).select().single();
-user_id=newUser.id;
-}else user_id=data.id;
+  if(!data){
+    let res = await client.from("users").insert([{mobile:mob}]).select().single();
+    user_id = res.data.id;
+  } else {
+    user_id = data.id;
+  }
 
-document.getElementById("login").classList.add("hidden");
-document.getElementById("menu").classList.remove("hidden");
+  showMaster();
 }
 
-// MASTER
+// ================= MASTER =================
+
 function showMaster(){
-content.innerHTML=`
-<button onclick="showCustomer()">Customer</button>
-<button onclick="showService()">Service</button>
-<div id="master"></div>`;
-showCustomer();
+  document.getElementById("content").innerHTML = `
+  
+  <div style="display:flex; gap:10px;">
+    <button onclick="showCustomerTab()" id="tabC" style="background:#2d6cdf;color:white;">Customer</button>
+    <button onclick="showServiceTab()" id="tabS">Service</button>
+  </div>
+
+  <div id="custDiv">
+    <h3>Add Customer</h3>
+    <input id="cname" placeholder="Name"><br><br>
+    <input id="cmob" placeholder="Mobile"><br><br>
+    <input id="cbday" type="date"> Birthday<br><br>
+    <input id="canni" type="date"> Anniversary<br><br>
+    <button onclick="saveCustomer()">Save</button>
+  </div>
+
+  <div id="servDiv" style="display:none;">
+    <h3>Add Service</h3>
+    <input id="sname" placeholder="Service"><br><br>
+    <input id="srate" placeholder="Rate"><br><br>
+    <input id="sdays" placeholder="Reminder Days"><br><br>
+    <button onclick="saveService()">Save</button>
+  </div>
+  `;
 }
 
-// CUSTOMER
-async function showCustomer(){
-master.innerHTML=`
-<button onclick="addCustomer()">Add</button>
-<button onclick="viewCustomer()">View</button>
-<div id="sub"></div>`;
+function showCustomerTab(){
+  document.getElementById("custDiv").style.display="block";
+  document.getElementById("servDiv").style.display="none";
+
+  tabC.style.background="#2d6cdf";
+  tabC.style.color="white";
+
+  tabS.style.background="#ccc";
 }
 
-function addCustomer(){
-sub.innerHTML=`
-<input id="cname" placeholder="Name">
-<input id="cmobile" placeholder="Mobile">
-<input id="cbday" type="date">
-<input id="canni" type="date">
-<input id="caddr" placeholder="Address">
-<button onclick="saveCustomer()">Save</button>`;
+function showServiceTab(){
+  document.getElementById("custDiv").style.display="none";
+  document.getElementById("servDiv").style.display="block";
+
+  tabS.style.background="#2d6cdf";
+  tabS.style.color="white";
+
+  tabC.style.background="#ccc";
 }
+
+// ================= SAVE CUSTOMER =================
 
 async function saveCustomer(){
-await client.from("salon_customers").insert([{
-user_id,
-name:cname.value,
-mobile:cmobile.value,
-birthday:cbday.value,
-anniversary:canni.value,
-address:caddr.value
-}]);
-alert("Saved");
+
+  let name = document.getElementById("cname").value;
+  let mobile = document.getElementById("cmob").value;
+  let birthday = document.getElementById("cbday").value;
+  let anniversary = document.getElementById("canni").value;
+
+  let {error} = await client.from("customers").insert([{
+    user_id,
+    name,
+    mobile,
+    birthday,
+    anniversary
+  }]);
+
+  if(error){
+    alert(error.message);
+  } else {
+    alert("Saved");
+  }
 }
 
-async function viewCustomer(){
-let {data}=await client.from("salon_customers").select("*").eq("user_id",user_id);
-
-sub.innerHTML=`
-<table>
-<tr>
-<th>Name</th><th>Mobile</th><th>Address</th><th>Birthday</th><th>Anniversary</th>
-</tr>
-${data.map(c=>`
-<tr>
-<td contenteditable>${c.name}</td>
-<td contenteditable>${c.mobile}</td>
-<td contenteditable>${c.address||""}</td>
-<td>${c.birthday||""}</td>
-<td>${c.anniversary||""}</td>
-</tr>`).join("")}
-</table>`;
-}
-
-// SERVICE
-async function showService(){
-master.innerHTML=`
-<button onclick="addService()">Add</button>
-<button onclick="viewService()">View</button>
-<div id="sub"></div>`;
-}
-
-function addService(){
-sub.innerHTML=`
-<input id="sname" placeholder="Service">
-<input id="srate" placeholder="Rate">
-<input id="sdays" placeholder="Reminder Days">
-<button onclick="saveService()">Save</button>`;
-}
+// ================= SAVE SERVICE =================
 
 async function saveService(){
-await client.from("salon_services").insert([{
-user_id,
-name:sname.value,
-rate:srate.value,
-reminder_days:sdays.value
-}]);
-alert("Saved");
+
+  let name = document.getElementById("sname").value;
+  let rate = document.getElementById("srate").value;
+  let reminder_days = document.getElementById("sdays").value;
+
+  let {error} = await client.from("salon_services").insert([{
+    user_id,
+    name,
+    rate,
+    reminder_days
+  }]);
+
+  if(error){
+    alert(error.message);
+  } else {
+    alert("Saved");
+  }
 }
 
-async function viewService(){
-let {data}=await client.from("salon_services").select("*").eq("user_id",user_id);
+// ================= ADD VISIT =================
 
-sub.innerHTML=`
-<table>
-<tr><th>Name</th><th>Rate</th><th>Days</th></tr>
-${data.map(s=>`
-<tr>
-<td contenteditable>${s.name}</td>
-<td contenteditable>${s.rate}</td>
-<td contenteditable>${s.reminder_days}</td>
-</tr>`).join("")}
-</table>`;
-}
-
-// ADD VISIT
 async function showVisit(){
 
-let {data:cust}=await client.from("salon_customers").select("*").eq("user_id",user_id);
-let {data:serv}=await client.from("salon_services").select("*").eq("user_id",user_id);
+  let {data:customers} = await client.from("customers").select("*").eq("user_id",user_id);
+  let {data:services} = await client.from("salon_services").select("*").eq("user_id",user_id);
 
-content.innerHTML=`
-<select id="cust">
-${cust.map(c=>`<option value="${c.id}">${c.name}</option>`)}
-</select>
+  let serviceHTML = "";
 
-<h4 style="text-align:right;">Reminder Days</h4>
+  services.forEach(s=>{
+    serviceHTML += `
+      <div>
+        <input type="checkbox" value="${s.id}" data-rate="${s.rate}" onchange="calcTotal()">
+        ${s.name} - ₹${s.rate}
+      </div>
+    `;
+  });
 
-${serv.map(s=>`
-<div class="row">
-<input type="checkbox">
-<span style="width:120px">${s.name}</span>
-<input class="small" value="${s.rate}">
-<input class="small" placeholder="${s.reminder_days}">
-</div>`).join("")}
+  document.getElementById("content").innerHTML = `
+    <select id="cust">
+      ${customers.map(c=>`<option value="${c.id}">${c.name}</option>`)}
+    </select>
 
-<div>Total ₹ <span id="tot">0</span></div>
-<button onclick="saveVisit()">Save</button>
-`;
+    <br><br>
 
+    ${serviceHTML}
+
+    <h3>Total ₹ <span id="total">0</span></h3>
+
+    <button onclick="saveVisit()">Save</button>
+  `;
 }
 
-// SAVE VISIT
+function calcTotal(){
+  let total = 0;
+
+  document.querySelectorAll("input[type=checkbox]:checked").forEach(cb=>{
+    total += Number(cb.dataset.rate);
+  });
+
+  document.getElementById("total").innerText = total;
+}
+
 async function saveVisit(){
 
-let cust=document.getElementById("cust");
-let cid=cust.value;
-let cname=cust.options[cust.selectedIndex].text;
+  let customer_id = document.getElementById("cust").value;
+  let amount = document.getElementById("total").innerText;
 
-let rows=document.querySelectorAll(".row");
+  let {error} = await client.from("salon_visits").insert([{
+    user_id,
+    customer_id,
+    amount
+  }]);
 
-for(let r of rows){
-
-let cb=r.children[0];
-if(!cb.checked) continue;
-
-let service=r.children[1].innerText;
-let price=r.children[2].value;
-let days=r.children[3].value;
-
-let today=new Date();
-let due=new Date();
-due.setDate(today.getDate()+Number(days||0));
-
-await client.from("salon_visits").insert([{
-user_id,
-customer_id:cid,
-customer_name:cname,
-service,
-amount:price,
-reminder_days:days,
-visit_date:today,
-due_date:due
-}]);
-
+  if(error){
+    alert(error.message);
+  } else {
+    alert("Saved");
+  }
 }
 
-alert("Saved");
+// ================= REMINDER =================
+
+function showReminder(){
+  document.getElementById("content").innerHTML = "Reminder coming next step";
 }
 
-// REMINDER
-async function showReminder(){
+// ================= REPORT =================
 
-let {data}=await client.from("salon_visits").select("*").eq("user_id",user_id);
-
-let today=new Date();
-
-content.innerHTML=data.filter(v=>{
-let d=new Date(v.due_date);
-let diff=(d-today)/(1000*60*60*24);
-return diff<=3;
-}).map(v=>`
-<div>
-<b>${v.customer_name}</b><br>
-${v.service}<br>
-Due: ${new Date(v.due_date).toLocaleDateString()}
-<br>
-<a href="tel:${v.mobile||""}">Call</a>
-</div>`).join("");
+function showReports(){
+  document.getElementById("content").innerHTML = "Reports coming next step";
 }
 
-// REPORTS
-async function showReports(){
-let {data}=await client.from("salon_visits").select("*").eq("user_id",user_id);
+// ================= PRIVACY =================
 
-let total=data.reduce((a,b)=>a+Number(b.amount||0),0);
-
-content.innerHTML=`
-Total ₹ ${total}
-`;
-}
-
-// PRIVACY
 function showPrivacy(){
-content.innerHTML=`<h3>Privacy</h3> Your data is safe`;
+  document.getElementById("content").innerHTML = "Privacy policy here";
 }
 
-function logout(){location.reload();}
+function logout(){
+  location.reload();
+}
+
+// START
+showLogin();
 
 </script>
 
