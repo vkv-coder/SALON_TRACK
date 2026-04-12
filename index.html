@@ -1,6 +1,122 @@
-<!-- SAME HEAD + STYLE + LOGIN CODE AS BEFORE (UNCHANGED) -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<style>
+body { font-family: Arial; background:#f2f2f2; margin:0; }
+.card { background:white; padding:15px; margin:10px; border-radius:10px; }
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+button { padding:10px; border:none; border-radius:6px; }
+.blue { background:#2563eb; color:white; }
+.gray { background:#ddd; width:100%; margin-top:10px; }
+
+input {
+width:100%; padding:8px; margin:5px 0;
+border-radius:6px; border:1px solid #ccc;
+}
+
+.list-item {
+padding:10px;
+border-bottom:1px solid #eee;
+cursor:pointer;
+}
+</style>
+
+</head>
+
+<body>
+<div id="app"></div>
 
 <script>
+
+const client = supabase.createClient(
+"https://jqqnnkzozjskziaizajg.supabase.co",
+"sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P"
+);
+
+let app = document.getElementById("app");
+
+// ================= LOGIN =================
+
+function showLogin(){
+app.innerHTML = `
+<div class="card">
+<h2>Login</h2>
+<input id="mobile" placeholder="Mobile">
+<button class="blue" onclick="checkLogin()">Continue</button>
+</div>`;
+}
+
+async function checkLogin(){
+let mobile = mobileInput();
+
+let { data } = await client
+.from("users")
+.select("*")
+.eq("mobile", mobile)
+.single();
+
+if(data){
+localStorage.setItem("userId", data.id);
+showHome();
+}else{
+showRegister(mobile);
+}
+}
+
+function mobileInput(){
+return document.getElementById("mobile").value;
+}
+
+// ================= REGISTER =================
+
+function showRegister(mobile){
+app.innerHTML = `
+<div class="card">
+<h2>Register</h2>
+<input id="name" placeholder="Name">
+<input id="shop" placeholder="Shop">
+<input id="city" placeholder="City">
+<input id="state" placeholder="State">
+<button class="blue" onclick="register('${mobile}')">Register</button>
+</div>`;
+}
+
+async function register(mobile){
+
+let { data } = await client.from("users").insert([{
+mobile,
+name: name.value,
+shop: shop.value,
+city: city.value,
+state: state.value
+}]).select();
+
+localStorage.setItem("userId", data[0].id);
+
+showHome();
+}
+
+// ================= HOME =================
+
+function showHome(){
+app.innerHTML = `
+<div class="card">
+<h3>Salon App</h3>
+
+<div class="grid">
+<button class="blue" onclick="showMaster()">Master</button>
+<button class="blue" onclick="showAddVisit()">Add Visit</button>
+<button class="blue" onclick="showReports()">Reports</button>
+<button class="blue" onclick="showReminder()">Reminder</button>
+</div>
+
+<button class="gray" onclick="logout()">Logout</button>
+</div>`;
+}
 
 // ================= MASTER =================
 
@@ -30,7 +146,7 @@ app.innerHTML = `
 </div>`;
 }
 
-// ================= CUSTOMER LIST =================
+// ================= CUSTOMER =================
 
 async function showCustomerList(){
 
@@ -52,7 +168,6 @@ let { data } = await client
 .eq("user_id", userId);
 
 window.customerData = data;
-
 renderCustomerList(data);
 }
 
@@ -66,12 +181,66 @@ ${c.name}
 
 function searchCustomer(){
 let txt = search.value.toLowerCase();
-
 let filtered = customerData.filter(c =>
 c.name.toLowerCase().includes(txt)
 );
-
 renderCustomerList(filtered);
+}
+
+function showAddCustomer(){
+app.innerHTML = `
+<div class="card">
+<h2>Add Customer</h2>
+
+<input id="cname" placeholder="Name">
+<input id="cmobile" placeholder="Mobile">
+<input id="caddress" placeholder="Address">
+
+<button class="blue" onclick="saveCustomer()">Save</button>
+<button class="gray" onclick="showCustomerMenu()">Back</button>
+</div>`;
+}
+
+async function saveCustomer(){
+let userId = localStorage.getItem("userId");
+
+await client.from("salon_customers").insert([{
+user_id:userId,
+name:cname.value,
+mobile:cmobile.value,
+address:caddress.value
+}]);
+
+showCustomerMenu();
+}
+
+function editCustomer(id){
+let c = customerData.find(x=>x.id==id);
+
+app.innerHTML = `
+<div class="card">
+<h2>Edit Customer</h2>
+
+<input id="cname" value="${c.name}">
+<input id="cmobile" value="${c.mobile || ""}">
+<input id="caddress" value="${c.address || ""}">
+
+<button class="blue" onclick="updateCustomer('${id}')">Update</button>
+<button class="gray" onclick="showCustomerList()">Back</button>
+</div>`;
+}
+
+async function updateCustomer(id){
+await client
+.from("salon_customers")
+.update({
+name:cname.value,
+mobile:cmobile.value,
+address:caddress.value
+})
+.eq("id",id);
+
+showCustomerList();
 }
 
 // ================= SERVICE MENU =================
@@ -88,7 +257,7 @@ app.innerHTML = `
 </div>`;
 }
 
-// ================= SERVICE LIST =================
+// ================= SERVICE =================
 
 async function showServiceList(){
 
@@ -110,7 +279,6 @@ let { data } = await client
 .eq("user_id", userId);
 
 window.serviceData = data;
-
 renderServiceList(data);
 }
 
@@ -124,12 +292,93 @@ ${s.name} - ₹${s.rate}
 
 function searchService(){
 let txt = search.value.toLowerCase();
-
 let filtered = serviceData.filter(s =>
 s.name.toLowerCase().includes(txt)
 );
-
 renderServiceList(filtered);
 }
 
+function showAddService(){
+app.innerHTML = `
+<div class="card">
+<h2>Add Service</h2>
+
+<input id="sname" placeholder="Name">
+<input id="srate" placeholder="Rate">
+
+<button class="blue" onclick="saveService()">Save</button>
+<button class="gray" onclick="showServiceMenu()">Back</button>
+</div>`;
+}
+
+async function saveService(){
+let userId = localStorage.getItem("userId");
+
+await client.from("salon_services").insert([{
+user_id:userId,
+name:sname.value,
+rate:srate.value
+}]);
+
+showServiceMenu();
+}
+
+function editService(id){
+let s = serviceData.find(x=>x.id==id);
+
+app.innerHTML = `
+<div class="card">
+<h2>Edit Service</h2>
+
+<input id="sname" value="${s.name}">
+<input id="srate" value="${s.rate}">
+
+<button class="blue" onclick="updateService('${id}')">Update</button>
+<button class="gray" onclick="showServiceList()">Back</button>
+</div>`;
+}
+
+async function updateService(id){
+await client
+.from("salon_services")
+.update({
+name:sname.value,
+rate:srate.value
+})
+.eq("id",id);
+
+showServiceList();
+}
+
+// ================= PLACEHOLDER =================
+
+function showAddVisit(){
+alert("Next step");
+}
+
+function showReports(){
+alert("Next step");
+}
+
+function showReminder(){
+alert("Next step");
+}
+
+// ================= LOGOUT =================
+
+function logout(){
+localStorage.clear();
+showLogin();
+}
+
+// ================= START =================
+
+if(localStorage.getItem("userId")){
+showHome();
+}else{
+showLogin();
+}
+
 </script>
+</body>
+</html>
