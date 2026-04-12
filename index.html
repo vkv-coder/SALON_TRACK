@@ -1,9 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salon App</title>
+
+<style>
+body { font-family: Arial; background:#f2f2f2; margin:0; }
+.card { background:white; padding:15px; margin:10px; border-radius:10px; }
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+button { padding:12px; border:none; border-radius:6px; }
+.blue { background:#2563eb; color:white; }
+.gray { background:#ddd; width:100%; margin-top:10px; }
+
+input, select {
+width:100%; padding:10px; margin:5px 0;
+border-radius:6px; border:1px solid #ccc;
+}
+
+.row { display:flex; gap:10px; }
+.row select { flex:2; }
+.row input { flex:1; }
+
+table { width:100%; border-collapse:collapse; }
+td, th { padding:8px; border-bottom:1px solid #ddd; }
+</style>
+
+</head>
+
+<body>
+
+<div id="app"></div>
+
 <script>
 
 let app = document.getElementById("app");
 
-// ===== DATA =====
-let users = JSON.parse(localStorage.getItem("users")) || {}; // mobile आधारित
+let users = JSON.parse(localStorage.getItem("users")) || {};
 let customers = JSON.parse(localStorage.getItem("customers")) || [];
 let services = JSON.parse(localStorage.getItem("services")) || [
 { name:"Haircut", price:150 },
@@ -12,8 +45,12 @@ let services = JSON.parse(localStorage.getItem("services")) || [
 let visits = JSON.parse(localStorage.getItem("visits")) || [];
 
 function val(id){ return document.getElementById(id).value; }
+function formatName(n){
+return n.toLowerCase().split(" ").filter(w=>w).map(w=>w[0].toUpperCase()+w.slice(1)).join(" ");
+}
+function normalize(n){ return n.toLowerCase().trim(); }
 
-// ===== LOGIN =====
+// LOGIN
 function showLogin(){
 app.innerHTML = `
 <div class="card">
@@ -24,15 +61,9 @@ app.innerHTML = `
 }
 
 function checkLogin(){
-
 let mobile = val("mobile");
+if(!mobile){ alert("Enter mobile"); return; }
 
-if(!mobile){
-alert("Enter mobile number");
-return;
-}
-
-// check user by mobile
 if(users[mobile]){
 localStorage.setItem("currentUser", mobile);
 showHome();
@@ -41,47 +72,33 @@ showRegister(mobile);
 }
 }
 
-// ===== REGISTER =====
 function showRegister(mobile){
 app.innerHTML = `
 <div class="card">
 <h2>Register</h2>
-
 <input id="name" placeholder="Name">
 <input id="shop" placeholder="Shop Name">
 <input id="city" placeholder="City">
 <input id="state" placeholder="State">
-
 <button class="blue" onclick="register('${mobile}')">Register</button>
 </div>`;
 }
 
 function register(mobile){
-
-let name = val("name");
-let shop = val("shop");
-let city = val("city");
-let state = val("state");
-
-if(!name || !shop || !city || !state){
-alert("Fill all fields");
-return;
-}
-
-// store user by mobile
-users[mobile] = { name, shop, city, state };
-
+users[mobile] = {
+name: val("name"),
+shop: val("shop"),
+city: val("city"),
+state: val("state")
+};
 localStorage.setItem("users", JSON.stringify(users));
 localStorage.setItem("currentUser", mobile);
-
 showHome();
 }
 
-// ===== HOME =====
+// HOME
 function showHome(){
-
-let mobile = localStorage.getItem("currentUser");
-let user = users[mobile];
+let user = users[localStorage.getItem("currentUser")];
 
 app.innerHTML = `
 <div class="card">
@@ -98,13 +115,183 @@ app.innerHTML = `
 </div>`;
 }
 
-// ===== LOGOUT =====
+// MASTER
+function showMaster(){
+app.innerHTML = `
+<div class="card">
+<h2>Master</h2>
+<button class="blue" onclick="showCustomerMaster()">Customer Master</button>
+<button class="blue" onclick="showServiceMaster()">Service Master</button>
+<button class="gray" onclick="showHome()">Back</button>
+</div>`;
+}
+
+// CUSTOMER
+function showCustomerMaster(){
+app.innerHTML = `
+<div class="card">
+<h2>Customer Master</h2>
+<button class="blue" onclick="showAddCustomer()">+ Add Customer</button>
+${customers.map(c=>`<p>${c.name} - ${c.mobile}</p>`).join("")}
+<button class="gray" onclick="showMaster()">Back</button>
+</div>`;
+}
+
+function showAddCustomer(){
+app.innerHTML = `
+<div class="card">
+<h2>Add Customer</h2>
+<input id="custName">
+<input id="custMobile">
+<button class="blue" onclick="saveCustomer()">Save</button>
+</div>`;
+}
+
+function saveCustomer(){
+customers.push({name:formatName(val("custName")),mobile:val("custMobile")});
+localStorage.setItem("customers",JSON.stringify(customers));
+showCustomerMaster();
+}
+
+// SERVICE
+function showServiceMaster(){
+app.innerHTML = `
+<div class="card">
+<h2>Service Master</h2>
+${services.map(s=>`<p>${s.name} ₹${s.price}</p>`).join("")}
+<input id="sname">
+<input id="sprice">
+<button class="blue" onclick="addService()">Add</button>
+<button class="gray" onclick="showMaster()">Back</button>
+</div>`;
+}
+
+function addService(){
+services.push({name:val("sname"),price:val("sprice")});
+localStorage.setItem("services",JSON.stringify(services));
+showServiceMaster();
+}
+
+// VISIT
+function showVisit(){
+let today=new Date().toISOString().split("T")[0];
+
+app.innerHTML = `
+<div class="card">
+<h2>Add Visit</h2>
+
+<select id="custSelect">
+<option value="">Select</option>
+${customers.map(c=>`<option>${c.name}</option>`).join("")}
+</select>
+
+<input id="custInput" placeholder="Or new">
+
+<div class="row">
+<select id="serviceSelect" onchange="setPrice()">
+<option value="">Service</option>
+${services.map((s,i)=>`<option value="${i}">${s.name}</option>`).join("")}
+</select>
+<input id="price">
+</div>
+
+<input type="date" id="date" value="${today}">
+<input id="reminder">
+
+<button class="blue" onclick="saveVisit()">Save</button>
+<button class="gray" onclick="showHome()">Back</button>
+</div>`;
+}
+
+function setPrice(){
+let i=val("serviceSelect");
+if(i!=="") document.getElementById("price").value=services[i].price;
+}
+
+function saveVisit(){
+let name=formatName(val("custInput")||val("custSelect"));
+let price=Number(val("price"));
+let date=val("date");
+let reminderDays=Number(val("reminder")||0);
+
+visits.push({name,date,total:price,reminderDays});
+localStorage.setItem("visits",JSON.stringify(visits));
+
+alert("Saved");
+showHome();
+}
+
+// ===== REPORT (ALIGNMENT FIXED) =====
+function showReports(){
+
+app.innerHTML = `
+<div class="card">
+<h2>Reports</h2>
+
+<button class="blue" onclick="todayReport()">Today</button>
+
+<input type="date" id="from">
+<input type="date" id="to">
+<button class="blue" onclick="rangeReport()">Show</button>
+
+<div id="report"></div>
+
+<button class="gray" onclick="showHome()">Back</button>
+</div>`;
+}
+
+function todayReport(){
+let t=new Date().toISOString().split("T")[0];
+displayReport(visits.filter(v=>v.date===t));
+}
+
+function rangeReport(){
+let from=val("from"), to=val("to");
+displayReport(visits.filter(v=>v.date>=from && v.date<=to));
+}
+
+function displayReport(list){
+
+let total=list.reduce((s,v)=>s+v.total,0);
+
+document.getElementById("report").innerHTML=`
+<p><b>Total ₹${total}</b></p>
+
+<table style="width:100%; table-layout:fixed; border-collapse:collapse;">
+<tr style="background:#2563eb; color:white;">
+<th style="width:40%; text-align:left;">Name</th>
+<th style="width:30%; text-align:center;">Date</th>
+<th style="width:30%; text-align:right;">Amount</th>
+</tr>
+
+${list.map(v=>`
+<tr>
+<td style="text-align:left;">${v.name}</td>
+<td style="text-align:center;">${v.date}</td>
+<td style="text-align:right;">₹${v.total}</td>
+</tr>`).join("")}
+
+</table>
+`;
+}
+
+// REMINDER (unchanged)
+function showReminder(){ showHome(); }
+
+// LOGOUT
 function logout(){
 localStorage.removeItem("currentUser");
 showLogin();
 }
 
 // START
+if(localStorage.getItem("currentUser")){
+showHome();
+}else{
 showLogin();
+}
 
 </script>
+
+</body>
+</html>
