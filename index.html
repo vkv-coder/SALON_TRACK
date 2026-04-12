@@ -1,127 +1,158 @@
-<!-- ONLY SHOWING MODIFIED PARTS CLEANLY INSIDE FULL STRUCTURE -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<style>
+body { font-family: Arial; margin:0; background:#f2f2f2; }
+.header { background:#2563eb;color:white;padding:18px;text-align:center;font-size:22px;font-weight:bold;}
+.menu { display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px;background:white;}
+.menu button { padding:16px;border:none;border-radius:10px;background:#2563eb;color:white;font-size:16px;}
+.card { background:white;padding:18px;margin:12px;border-radius:12px;}
+input,select { width:100%;padding:10px;margin:6px 0;border-radius:8px;border:1px solid #ccc;}
+.row { display:flex;gap:10px;}
+.tab-btn { padding:10px;margin:5px;background:#2563eb;color:white;border:none;border-radius:8px;}
+.footer { text-align:center;font-size:13px;color:#666;padding:10px;}
+</style>
+</head>
+
+<body>
+
+<div class="header">SALON TRACK</div>
+<div id="menu"></div>
+<div id="app"></div>
 
 <script>
+
+// ✅ FIXED CLIENT (IMPORTANT)
+const client = window.supabase.createClient(
+"https://jqqnnkzozjskziaizajg.supabase.co",
+"PASTE_ANON_KEY_HERE"
+);
+
+let app=document.getElementById("app");
+let menu=document.getElementById("menu");
+
+// ================= LOGIN =================
+function showLogin(){
+menu.innerHTML="";
+app.innerHTML=`
+<div class="card">
+<h2>Login</h2>
+<input id="mobile" placeholder="Mobile">
+<button onclick="login()">Login</button>
+</div>`;
+}
+
+async function login(){
+
+let mob=document.getElementById("mobile").value.trim();
+
+if(!mob){
+alert("Enter mobile");
+return;
+}
+
+// auto create user
+let {data}=await client.from("users").select("*").eq("mobile",mob).limit(1);
+
+let user;
+
+if(!data || data.length==0){
+
+let {data:newUser}=await client.from("users").insert([{
+mobile:mob,
+name:"User",
+plan_status:"not_started"
+}]).select();
+
+user=newUser[0];
+
+}else{
+user=data[0];
+}
+
+localStorage.setItem("userId",user.id);
+localStorage.setItem("userName",user.name);
+
+showMenu();
+showHome();
+}
+
+// ================= MENU =================
+function showMenu(){
+menu.innerHTML=`
+<div class="menu">
+<button onclick="showMaster()">Master</button>
+<button onclick="showPrivacy()">Privacy</button>
+<button onclick="logout()">Logout</button>
+</div>
+<div class="footer">📧 vkvcoder.support@gmail.com</div>`;
+}
+
+function showHome(){
+app.innerHTML=`<div class="card">Welcome</div>`;
+}
 
 // ================= MASTER =================
 function showMaster(){
 app.innerHTML=`
 <div class="card">
 
-<div>
-<button id="btnCust" class="tab-btn" onclick="showCustomer()">Customer</button>
-<button id="btnServ" class="tab-btn" onclick="showService()">Service</button>
-</div>
+<button onclick="showCustomer()">Customer</button>
+<button onclick="showService()">Service</button>
 
 <div id="content"></div>
 
 </div>`;
 }
 
-// ================= CUSTOMER =================
+// CUSTOMER
 function showCustomer(){
+document.getElementById("content").innerHTML=`
+<h3>Add Customer</h3>
 
-document.getElementById("btnCust").style.background="#1d4ed8";
-document.getElementById("btnServ").style.background="#2563eb";
+<label>Salutation</label>
+<select id="salutation"><option>Mr</option><option>Mrs</option></select>
 
-content.innerHTML=`
-<button class="tab-btn" onclick="addCustomerUI()">Add</button>
-<button class="tab-btn" onclick="viewCustomerUI()">View</button>
-<div id="sub"></div>`;
-}
-
-function addCustomerUI(){
-sub.innerHTML=`
-
-<h3>Salutation</h3>
-<select id="salutation">
-<option>Mr</option><option>Mrs</option><option>Miss</option><option>Dr</option>
-</select>
-
-<h3>Name</h3>
+<label>Name</label>
 <input id="name">
 
-<h3>Phone</h3>
+<label>Phone</label>
 <input id="phone">
 
-<h3>Address</h3>
+<label>Address</label>
 <input id="address">
 
-<h3>Birthday</h3>
-<input id="bday" type="date">
+<label>Birthday</label>
+<input type="date" id="bday">
 
-<h3>Anniversary</h3>
-<input id="anni" type="date">
+<label>Anniversary</label>
+<input type="date" id="anni">
 
 <button onclick="saveCustomer()">Save</button>
 `;
 }
 
-async function viewCustomerUI(){
+async function saveCustomer(){
 
-let {data}=await client.from("salon_customers").select("*");
+await client.from("salon_customers").insert([{
+name:name.value,
+phone:phone.value,
+address:address.value
+}]);
 
-sub.innerHTML=`
-<h3>Select Customer</h3>
-<select id="custDrop" onchange="loadCust()">
-<option>Select</option>
-${data.map(c=>`<option value="${c.id}">${c.name}</option>`)}
-</select>
-
-<div id="custDetail"></div>`;
+alert("Saved");
 }
 
-async function loadCust(){
-
-let {data}=await client.from("salon_customers").select("*").eq("id",custDrop.value).single();
-
-custDetail.innerHTML=`
-
-<h3>Salutation</h3>
-<select id="e0">
-<option ${data.salutation=="Mr"?"selected":""}>Mr</option>
-<option ${data.salutation=="Mrs"?"selected":""}>Mrs</option>
-<option ${data.salutation=="Miss"?"selected":""}>Miss</option>
-<option ${data.salutation=="Dr"?"selected":""}>Dr</option>
-</select>
-
-<h3>Name</h3>
-<input id="e1" value="${data.name}">
-
-<h3>Phone</h3>
-<input id="e2" value="${data.phone}">
-
-<h3>Address</h3>
-<input id="e3" value="${data.address||""}">
-
-<h3>Birthday</h3>
-<input id="e4" type="date" value="${data.birthday||""}">
-
-<h3>Anniversary</h3>
-<input id="e5" type="date" value="${data.anniversary||""}">
-
-<button onclick="updateCust('${data.id}')">Update</button>
-`;
-}
-
-// ================= SERVICE =================
+// SERVICE
 function showService(){
-
-document.getElementById("btnServ").style.background="#1d4ed8";
-document.getElementById("btnCust").style.background="#2563eb";
-
-content.innerHTML=`
-<button class="tab-btn" onclick="addServiceUI()">Add</button>
-<button class="tab-btn" onclick="viewServiceUI()">View</button>
-<div id="sub"></div>`;
-}
-
-function addServiceUI(){
-sub.innerHTML=`
-
+document.getElementById("content").innerHTML=`
 <h3>Add Service</h3>
 
 <div class="row">
-<input id="sname" placeholder="Service Name">
+<input id="sname" placeholder="Service">
 <input id="srate" placeholder="Price">
 </div>
 
@@ -129,34 +160,44 @@ sub.innerHTML=`
 `;
 }
 
-async function viewServiceUI(){
+async function saveService(){
 
-let {data}=await client.from("salon_services").select("*");
+await client.from("salon_services").insert([{
+name:sname.value,
+rate:srate.value
+}]);
 
-sub.innerHTML=`
-<h3>Select Service</h3>
-
-<select id="servDrop" onchange="loadServ()">
-<option>Select</option>
-${data.map(s=>`<option value="${s.id}">${s.name}</option>`)}
-</select>
-
-<div id="servDetail"></div>`;
+alert("Saved");
 }
 
-async function loadServ(){
+// ================= PRIVACY =================
+function showPrivacy(){
+app.innerHTML=`
+<div class="card">
 
-let {data}=await client.from("salon_services").select("*").eq("id",servDrop.value).single();
+<h2>🔒 Privacy Policy</h2>
 
-servDetail.innerHTML=`
-
-<div class="row">
-<input id="sn" value="${data.name}">
-<input id="sr" value="${data.rate}">
+<div style="background:#2563eb;color:white;padding:15px;border-radius:10px;text-align:center;">
+<b>Think of us as a bank locker —<br>
+We hold your data safely, but only YOU have the key!</b>
 </div>
 
-<button onclick="updateServ('${data.id}')">Update</button>
-`;
+<p>We never sell or share your data.</p>
+<p>All salon data is securely stored.</p>
+
+</div>`;
 }
 
+// ================= LOGOUT =================
+function logout(){
+localStorage.clear();
+showLogin();
+}
+
+// START
+showLogin();
+
 </script>
+
+</body>
+</html>
