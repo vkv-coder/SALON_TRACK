@@ -1,7 +1,92 @@
-<!-- ONLY ADD VISIT PART SHOWN CHANGED -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<style>
+body { font-family: Arial; margin:0; background:#f2f2f2; }
+.header { background:#2563eb;color:white;padding:18px;text-align:center;font-size:22px;font-weight:bold;}
+.menu { display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px;background:white;}
+.menu button { padding:16px;border:none;border-radius:10px;background:#2563eb;color:white;font-size:16px;}
+.card { background:white;padding:18px;margin:12px;border-radius:12px;}
+input,select { width:100%;padding:8px;margin:4px;border-radius:6px;border:1px solid #ccc;}
+.footer { text-align:center;font-size:13px;color:#666;padding:10px;}
+
+.row{
+display:flex;
+align-items:center;
+gap:8px;
+padding:6px 0;
+border-bottom:1px solid #eee;
+}
+
+.small{
+width:70px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">SALON TRACK</div>
+<div id="menu"></div>
+<div id="app"></div>
 
 <script>
 
+const client = window.supabase.createClient(
+"https://jqqnnkzozjskziaizajg.supabase.co",
+"PASTE_YOUR_PUBLISHABLE_KEY"
+);
+
+let app=document.getElementById("app");
+let menu=document.getElementById("menu");
+
+// LOGIN
+function showLogin(){
+menu.innerHTML="";
+app.innerHTML=`
+<div class="card">
+<h2>Login</h2>
+<input id="mobile" placeholder="Mobile">
+<button onclick="login()">Login</button>
+</div>`;
+}
+
+async function login(){
+let mob=mobile.value.trim();
+if(!mob){alert("Enter mobile");return;}
+
+let {data}=await client.from("users").select("*").eq("mobile",mob).limit(1);
+
+let user;
+if(!data || data.length==0){
+let {data:newUser}=await client.from("users").insert([{mobile:mob,name:"User"}]).select();
+user=newUser[0];
+}else user=data[0];
+
+localStorage.setItem("userId",user.id);
+
+showMenu(); showHome();
+}
+
+// MENU
+function showMenu(){
+menu.innerHTML=`
+<div class="menu">
+<button onclick="showAddVisit()">Add Visit</button>
+<button onclick="showPrivacy()">Privacy</button>
+<button onclick="logout()">Logout</button>
+</div>
+<div class="footer">📧 vkvcoder.support@gmail.com</div>`;
+}
+
+function showHome(){
+app.innerHTML=`<div class="card">Welcome</div>`;
+}
+
+// ADD VISIT (SAFE VERSION)
 async function showAddVisit(){
 
 let {data:c}=await client.from("salon_customers").select("*");
@@ -10,26 +95,20 @@ let {data:s}=await client.from("salon_services").select("*");
 app.innerHTML=`
 <div class="card">
 
-<h3>Select Customer</h3>
+<h3>Customer</h3>
 <select id="cust">
-${c.map(x=>`<option data-phone="${x.phone}">${x.name}</option>`)}
+${(c||[]).map(x=>`<option data-phone="${x.phone}">${x.name}</option>`)}
 </select>
 
-<h3>Select Service</h3>
+<h3>Services</h3>
 
-<div id="serviceList">
-${s.map(serv=>`
-<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;">
-
-<div style="display:flex;align-items:center;gap:10px;">
+<div id="list">
+${(s||[]).map(serv=>`
+<div class="row">
 <input type="checkbox" onchange="calcTotal()">
 <span>${serv.name}</span>
-</div>
-
-<input type="number" value="${serv.rate}" style="width:70px;" onchange="calcTotal()">
-
-<input type="number" placeholder="Days" style="width:70px;">
-
+<input class="small" type="number" value="${serv.rate}" onchange="calcTotal()">
+<input class="small" type="number" placeholder="Days">
 </div>
 `).join("")}
 </div>
@@ -44,63 +123,63 @@ ${s.map(serv=>`
 function calcTotal(){
 let total=0;
 
-document.querySelectorAll("#serviceList > div").forEach(row=>{
-let cb=row.children[0].children[0];
-let price=row.children[1];
+document.querySelectorAll("#list .row").forEach(r=>{
+let cb=r.children[0];
+let price=r.children[2];
 
 if(cb.checked){
 total+=Number(price.value||0);
 }
 });
 
-document.getElementById("total").innerText=total;
+total && (document.getElementById("total").innerText=total);
 }
 
-// ✅ SAVE WITH REMINDER PER SERVICE
+// SAVE (SAFE)
 async function saveVisit(){
 
-let customerSelect = document.getElementById("cust");
-let customer = customerSelect.value;
-let phone = customerSelect.options[customerSelect.selectedIndex].getAttribute("data-phone");
+let cust=document.getElementById("cust");
+let name=cust.value;
+let phone=cust.options[cust.selectedIndex].getAttribute("data-phone");
 
-let today = new Date();
+let today=new Date();
 
-let rows = document.querySelectorAll("#serviceList > div");
+let rows=document.querySelectorAll("#list .row");
 
-let inserts=[];
+let data=[];
 
-rows.forEach(row=>{
-let cb=row.children[0].children[0];
-let service=row.children[0].children[1].innerText;
-let price=row.children[1].value;
-let days=row.children[2].value;
+rows.forEach(r=>{
+let cb=r.children[0];
+let service=r.children[1].innerText;
+let price=r.children[2].value;
+let days=r.children[3].value;
 
 if(cb.checked){
 
-let due = new Date();
-due.setDate(today.getDate() + Number(days||0));
+let due=new Date();
+due.setDate(today.getDate()+Number(days||0));
 
-inserts.push({
-customer_name: customer,
-mobile: phone,
-service: service,
-amount: Number(price||0),
-visit_date: today.toISOString().split("T")[0],
-reminder_days: Number(days||0),
-due_date: due.toISOString().split("T")[0]
+data.push({
+customer_name:name,
+mobile:phone,
+service:service,
+amount:Number(price||0),
+visit_date:today.toISOString().split("T")[0],
+reminder_days:Number(days||0),
+due_date:due.toISOString().split("T")[0]
 });
 }
 });
 
-if(inserts.length===0){
+if(data.length==0){
 alert("Select service");
 return;
 }
 
-let {error}=await client.from("salon_visits").insert(inserts);
+let {error}=await client.from("salon_visits").insert(data);
 
 if(error){
-alert("Error saving");
+alert("Error");
 console.log(error);
 }else{
 alert("Saved ✅");
@@ -108,4 +187,24 @@ showAddVisit();
 }
 }
 
+// PRIVACY
+function showPrivacy(){
+app.innerHTML=`
+<div class="card">
+<h3>Privacy</h3>
+<b>Think of us as a bank locker — only YOU have the key!</b>
+</div>`;
+}
+
+// LOGOUT
+function logout(){
+localStorage.clear();
+showLogin();
+}
+
+showLogin();
+
 </script>
+
+</body>
+</html>
