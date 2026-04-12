@@ -27,13 +27,11 @@ input,select { width:100%;padding:10px;margin:6px 0;border-radius:8px;border:1px
 
 const client = window.supabase.createClient(
 "https://jqqnnkzozjskziaizajg.supabase.co",
-"sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P"
+"PASTE_YOUR_PUBLISHABLE_KEY"
 );
 
 let app=document.getElementById("app");
 let menu=document.getElementById("menu");
-
-let visitCustomers=[], visitServices=[], selectedCustomer=null;
 
 // ================= LOGIN =================
 function showLogin(){
@@ -62,7 +60,9 @@ user=data[0];
 }
 
 localStorage.setItem("userId",user.id);
-showMenu(); showHome();
+
+showMenu();
+showHome();
 }
 
 // ================= MENU =================
@@ -113,14 +113,25 @@ sub.innerHTML=`
 
 async function saveCustomer(){
 await client.from("salon_customers").insert([{
-name:name.value,phone:phone.value,address:address.value
+name:name.value,
+phone:phone.value,
+address:address.value,
+birthday:bday.value,
+anniversary:anni.value
 }]);
 alert("Saved");
 }
 
 async function viewCustomer(){
 let {data}=await client.from("salon_customers").select("*");
-sub.innerHTML=data.map(c=>`<div>${c.name} - ${c.phone}</div>`).join("");
+sub.innerHTML=data.map(c=>`
+<div class="card">
+<b>${c.name}</b><br>
+${c.phone}<br>
+${c.address || ""}<br>
+Bday: ${c.birthday || "-"}<br>
+Anniv: ${c.anniversary || "-"}
+</div>`).join("");
 }
 
 // SERVICE
@@ -142,43 +153,61 @@ sub.innerHTML=`
 
 async function saveService(){
 await client.from("salon_services").insert([{
-name:sname.value,rate:srate.value
+name:sname.value,
+rate:srate.value
 }]);
 alert("Saved");
 }
 
 async function viewService(){
 let {data}=await client.from("salon_services").select("*");
-sub.innerHTML=data.map(s=>`<div>${s.name} ₹${s.rate}</div>`).join("");
+sub.innerHTML=data.map(s=>`
+<div class="card">${s.name} ₹${s.rate}</div>
+`).join("");
 }
 
 // ================= ADD VISIT =================
 async function showAddVisit(){
+
 let {data:c}=await client.from("salon_customers").select("*");
 let {data:s}=await client.from("salon_services").select("*");
 
-visitCustomers=c||[];
-visitServices=s||[];
-
 app.innerHTML=`
 <div class="card">
+
 <h3>Select Customer</h3>
 <select id="cust">
-${visitCustomers.map(x=>`<option>${x.name}</option>`)}
+${c.map(x=>`<option>${x.name}</option>`)}
 </select>
 
 <h3>Select Service</h3>
-${visitServices.map(s=>`
-<div>
-<input type="checkbox" id="c${s.id}">${s.name} ₹${s.rate}
-</div>`).join("")}
+
+<div id="serviceList">
+${s.map(serv=>`
+<div style="display:flex;align-items:center;padding:8px 0;border-bottom:1px solid #eee;">
+<input type="checkbox" value="${serv.rate}" onchange="calcTotal()">
+<span style="margin-left:10px;">${serv.name} ₹${serv.rate}</span>
+</div>
+`).join("")}
+</div>
+
+<h3>Total ₹ <span id="total">0</span></h3>
 
 <button onclick="saveVisit()">Save</button>
+
 </div>`;
 }
 
-async function saveVisit(){
-alert("Visit Saved");
+function calcTotal(){
+let total=0;
+document.querySelectorAll("#serviceList input:checked").forEach(cb=>{
+total+=Number(cb.value);
+});
+document.getElementById("total").innerText=total;
+}
+
+function saveVisit(){
+alert("Visit Saved (next step DB save)");
 }
 
 // ================= REPORT =================
@@ -188,13 +217,13 @@ let {data}=await client.from("salon_visits").select("*");
 app.innerHTML=`
 <div class="card">
 <h2>Reports</h2>
-${(data||[]).map(v=>`<div>${v.customer_name} ₹${v.amount}</div>`).join("")}
+${(data||[]).map(v=>`<div>${v.customer_name || "-"} ₹${v.amount || 0}</div>`).join("")}
 </div>`;
 }
 
 // ================= REMINDER =================
 function showReminder(){
-app.innerHTML=`<div class="card">Reminder coming soon</div>`;
+app.innerHTML=`<div class="card">Reminder coming next</div>`;
 }
 
 // ================= PRIVACY =================
@@ -203,8 +232,12 @@ app.innerHTML=`
 <div class="card">
 <h2>🔒 Privacy Policy</h2>
 <div style="background:#2563eb;color:white;padding:10px;border-radius:10px;text-align:center;">
-Think of us as a bank locker — only YOU have the key!
+<b>Think of us as a bank locker — We hold your data safely, but only YOU have the key!</b>
 </div>
+<br>
+We NEVER sell your data.<br>
+We NEVER share your data.<br>
+Your salon data is securely stored.
 </div>`;
 }
 
