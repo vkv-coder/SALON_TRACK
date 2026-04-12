@@ -5,11 +5,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <style>
-body { 
-font-family: Arial; 
-margin:0; 
-background:#f2f2f2; 
-}
+body { font-family: Arial; margin:0; background:#f2f2f2; }
 
 /* HEADER */
 .header {
@@ -40,7 +36,6 @@ font-size:16px;
 font-weight:bold;
 }
 
-/* MOBILE FULL WIDTH */
 @media(max-width:500px){
 .menu { grid-template-columns:1fr; }
 }
@@ -61,10 +56,9 @@ padding:12px;
 margin:8px 0;
 border-radius:8px;
 border:1px solid #ccc;
-font-size:15px;
 }
 
-/* SERVICE ROW */
+/* SERVICE */
 .service-row {
 display:flex;
 align-items:center;
@@ -76,20 +70,22 @@ margin:10px 0;
 transform:scale(1.3);
 }
 
-.service-name {
-flex:1;
-font-size:15px;
-}
+.service-name { flex:1; }
+.service-rate { width:90px; }
 
-.service-rate {
-width:90px;
+/* FOOT INFO */
+.footer {
+text-align:center;
+font-size:13px;
+color:#666;
+padding:10px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">Salon Manager</div>
+<div class="header">SALON TRACK</div>
 <div id="menu"></div>
 <div id="app"></div>
 
@@ -113,7 +109,7 @@ function showLogin(){
 menu.innerHTML = "";
 app.innerHTML = `
 <div class="card">
-<h2 style="text-align:center;">Salon Manager</h2>
+<h2 style="text-align:center;">SALON TRACK</h2>
 <input id="mobile" placeholder="Enter Mobile">
 <button onclick="login()" style="width:100%;background:#2563eb;color:white;padding:12px;border:none;border-radius:8px;">Login</button>
 </div>`;
@@ -121,6 +117,7 @@ app.innerHTML = `
 
 async function login(){
 
+try{
 let { data } = await client
 .from("users")
 .select("*")
@@ -137,6 +134,10 @@ localStorage.setItem("userName", data.name || "User");
 
 showMenu();
 showHome();
+
+}catch(e){
+alert("Login error");
+}
 }
 
 // ================= MENU =================
@@ -148,9 +149,14 @@ menu.innerHTML = `
 <button onclick="showAddVisit()">Add Visit</button>
 <button onclick="showReports()">Reports</button>
 <button onclick="showReminder()">Reminder</button>
-<button onclick="showSupport()">Support</button>
+<button onclick="showPrivacy()">Privacy</button>
 <button onclick="logout()">Logout</button>
-</div>`;
+</div>
+
+<div class="footer">
+📧 vkvcoder.support@gmail.com
+</div>
+`;
 }
 
 // ================= HOME =================
@@ -165,6 +171,8 @@ app.innerHTML = `
 // ================= ADD VISIT =================
 
 async function showAddVisit(){
+
+try{
 
 let userId = localStorage.getItem("userId");
 
@@ -200,12 +208,16 @@ renderCustomerList(visitCustomers);
 renderServiceList(visitServices);
 
 vdate.value = new Date().toISOString().split("T")[0];
+
+}catch(e){
+alert("Add Visit error");
+}
 }
 
-// CUSTOMER
+// ================= CUSTOMER =================
 
 function renderCustomerList(data){
-custList.innerHTML = data.map(c=>`
+custList.innerHTML = (data || []).map(c=>`
 <div onclick="selectCustomer('${c.id}','${c.name}')">${c.name}</div>
 `).join("");
 }
@@ -221,10 +233,10 @@ custSearch.value = name;
 custList.innerHTML = "";
 }
 
-// SERVICES
+// ================= SERVICES =================
 
 function renderServiceList(data){
-serviceList.innerHTML = data.map(s=>`
+serviceList.innerHTML = (data || []).map(s=>`
 <div class="service-row">
 <input type="checkbox" id="chk_${s.id}" onchange="calcTotal()">
 <div class="service-name">${s.name}</div>
@@ -233,7 +245,7 @@ serviceList.innerHTML = data.map(s=>`
 `).join("");
 }
 
-// TOTAL
+// ================= TOTAL =================
 
 function calcTotal(){
 let total = 0;
@@ -248,9 +260,11 @@ total += parseFloat(document.getElementById("rate_"+s.id).value || 0);
 document.getElementById("total").innerText = total;
 }
 
-// SAVE VISIT
+// ================= SAVE =================
 
 async function saveVisit(){
+
+try{
 
 if(!selectedCustomer){
 alert("Select customer");
@@ -288,11 +302,46 @@ reminder_date: reminderDate
 
 alert("Saved");
 showAddVisit();
+
+}catch(e){
+alert("Save error");
+}
+}
+
+// ================= REPORT =================
+
+async function showReports(){
+
+try{
+
+let { data } = await client
+.from("salon_visits")
+.select("*")
+.eq("user_id", localStorage.getItem("userId"));
+
+let list = data || [];
+
+app.innerHTML = `
+<div class="card">
+<h2>Reports</h2>
+${list.length === 0 ? "No data" : list.map(v=>`
+<div class="card">
+<b>${v.customer_name}</b><br>
+₹${v.amount} | ${v.visit_date}
+</div>
+`).join("")}
+</div>`;
+
+}catch(e){
+alert("Report error");
+}
 }
 
 // ================= REMINDER =================
 
 async function showReminder(){
+
+try{
 
 let today = new Date().toISOString().split("T")[0];
 
@@ -307,50 +356,31 @@ let list = data || [];
 app.innerHTML = `
 <div class="card">
 <h2>Reminders</h2>
-
 ${list.length === 0 ? "No reminders" : list.map(v=>`
 <div class="card">
 <b>${v.customer_name}</b><br>
 Due: ${v.reminder_date}
 </div>
 `).join("")}
-
 </div>`;
+
+}catch(e){
+alert("Reminder error");
 }
-
-// ================= REPORT =================
-
-async function showReports(){
-
-let { data } = await client
-.from("salon_visits")
-.select("*")
-.eq("user_id", localStorage.getItem("userId"));
-
-let list = data || [];
-
-app.innerHTML = `
-<div class="card">
-<h2>Reports</h2>
-
-${list.map(v=>`
-<div class="card">
-<b>${v.customer_name}</b><br>
-₹${v.amount} | ${v.visit_date}
-</div>
-`).join("")}
-
-</div>`;
 }
 
 // ================= OTHER =================
 
-function showSupport(){
-app.innerHTML = `<div class="card">vkvcoder.support@gmail.com</div>`;
+function showMaster(){
+app.innerHTML = `<div class="card">Master coming next</div>`;
 }
 
-function showMaster(){
-app.innerHTML = `<div class="card">Master (next step)</div>`;
+function showPrivacy(){
+app.innerHTML = `
+<div class="card">
+<h3>Privacy Policy</h3>
+Your data is सुरक्षित and used only for salon tracking.
+</div>`;
 }
 
 function logout(){
