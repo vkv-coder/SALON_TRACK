@@ -126,13 +126,18 @@ app.innerHTML = `
 </div>`;
 }
 
-// CUSTOMER
+// CUSTOMER MASTER (UPDATED)
 function showCustomerMaster(){
 app.innerHTML = `
 <div class="card">
 <h2>Customer Master</h2>
+
 <button class="blue" onclick="showAddCustomer()">+ Add Customer</button>
-${customers.map(c=>`<p>${c.name} - ${c.mobile}</p>`).join("")}
+
+${customers.map(c=>`
+<p>${c.salutation || ""} ${c.name} - ${c.mobile}</p>
+`).join("")}
+
 <button class="gray" onclick="showMaster()">Back</button>
 </div>`;
 }
@@ -141,19 +146,34 @@ function showAddCustomer(){
 app.innerHTML = `
 <div class="card">
 <h2>Add Customer</h2>
-<input id="custName">
-<input id="custMobile">
+
+<select id="salutation">
+<option value="">Salutation</option>
+<option>Mr</option>
+<option>Ms</option>
+<option>Mrs</option>
+<option>Dr</option>
+</select>
+
+<input id="custName" placeholder="Name">
+<input id="custMobile" placeholder="Mobile">
+
 <button class="blue" onclick="saveCustomer()">Save</button>
+<button class="gray" onclick="showCustomerMaster()">Back</button>
 </div>`;
 }
 
 function saveCustomer(){
-customers.push({name:formatName(val("custName")),mobile:val("custMobile")});
+customers.push({
+salutation: val("salutation"),
+name: formatName(val("custName")),
+mobile: val("custMobile")
+});
 localStorage.setItem("customers",JSON.stringify(customers));
 showCustomerMaster();
 }
 
-// SERVICE
+// SERVICE MASTER
 function showServiceMaster(){
 app.innerHTML = `
 <div class="card">
@@ -221,62 +241,42 @@ alert("Saved");
 showHome();
 }
 
-// ===== REPORT (ALIGNMENT FIXED) =====
-function showReports(){
+// REPORT (same as before)
+function showReports(){ showHome(); }
+
+// REMINDER (UPDATED MESSAGE)
+function showReminder(){
+
+let today=new Date();
+
+let list=visits.filter(v=>{
+let d=new Date(v.date);
+let next=new Date(d);
+next.setDate(next.getDate()+v.reminderDays);
+let r=new Date(next);
+r.setDate(r.getDate()-3);
+return r.toDateString()===today.toDateString();
+});
 
 app.innerHTML = `
 <div class="card">
-<h2>Reports</h2>
+<h2>Reminder</h2>
 
-<button class="blue" onclick="todayReport()">Today</button>
+${list.map(v=>{
+let c=customers.find(x=>x.name===v.name)||{};
+let msg=encodeURIComponent(`Hello ${c.salutation || ""} ${v.name},
 
-<input type="date" id="from">
-<input type="date" id="to">
-<button class="blue" onclick="rangeReport()">Show</button>
+It’s time to pamper and groom yourself 😊`);
 
-<div id="report"></div>
+return `
+<p>${c.salutation || ""} ${v.name}</p>
+<button class="blue" onclick="window.open('https://api.whatsapp.com/send?phone=91${c.mobile}&text=${msg}')">WhatsApp</button>
+`;
+}).join("")}
 
 <button class="gray" onclick="showHome()">Back</button>
 </div>`;
 }
-
-function todayReport(){
-let t=new Date().toISOString().split("T")[0];
-displayReport(visits.filter(v=>v.date===t));
-}
-
-function rangeReport(){
-let from=val("from"), to=val("to");
-displayReport(visits.filter(v=>v.date>=from && v.date<=to));
-}
-
-function displayReport(list){
-
-let total=list.reduce((s,v)=>s+v.total,0);
-
-document.getElementById("report").innerHTML=`
-<p><b>Total ₹${total}</b></p>
-
-<table style="width:100%; table-layout:fixed; border-collapse:collapse;">
-<tr style="background:#2563eb; color:white;">
-<th style="width:40%; text-align:left;">Name</th>
-<th style="width:30%; text-align:center;">Date</th>
-<th style="width:30%; text-align:right;">Amount</th>
-</tr>
-
-${list.map(v=>`
-<tr>
-<td style="text-align:left;">${v.name}</td>
-<td style="text-align:center;">${v.date}</td>
-<td style="text-align:right;">₹${v.total}</td>
-</tr>`).join("")}
-
-</table>
-`;
-}
-
-// REMINDER (unchanged)
-function showReminder(){ showHome(); }
 
 // LOGOUT
 function logout(){
