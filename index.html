@@ -28,13 +28,25 @@ border-radius:6px; border:1px solid #ccc;
 
 <script>
 
-// ===== SUPABASE =====
 const SUPABASE_URL = "https://jqqnnkzozjskziaizajg.supabase.co";
 const SUPABASE_KEY = "sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P";
 
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let app = document.getElementById("app");
+
+// ===== GET USER ID SAFELY =====
+async function getUserId(){
+let mobile = localStorage.getItem("currentUser");
+
+let { data } = await client
+.from("users")
+.select("id")
+.eq("mobile", mobile)
+.single();
+
+return data ? data.id : null;
+}
 
 // ===== LOGIN =====
 function showLogin(){
@@ -52,20 +64,14 @@ let mobile = document.getElementById("mobile").value;
 
 if(!mobile){ alert("Enter mobile"); return; }
 
-let { data, error } = await client
+let { data } = await client
 .from("users")
 .select("*")
 .eq("mobile", mobile)
 .single();
 
-if(error && error.code !== "PGRST116"){
-alert(error.message);
-return;
-}
-
 if(data){
 localStorage.setItem("currentUser", mobile);
-localStorage.setItem("userId", data.id);
 showHome();
 }else{
 showRegister(mobile);
@@ -102,7 +108,7 @@ let endDate = new Date();
 endDate.setDate(endDate.getDate() + 15);
 let end = endDate.toISOString().split("T")[0];
 
-let { data, error } = await client.from("users").insert([{
+let { error } = await client.from("users").insert([{
 mobile: mobile,
 name: name,
 shop: shop,
@@ -110,7 +116,7 @@ city: city,
 state: state,
 start_date: today,
 expiry_date: end
-}]).select();
+}]);
 
 if(error){
 alert(error.message);
@@ -118,7 +124,6 @@ return;
 }
 
 localStorage.setItem("currentUser", mobile);
-localStorage.setItem("userId", data[0].id);
 
 alert("Registered");
 
@@ -133,23 +138,23 @@ app.innerHTML = `
 
 <div class="grid">
 <button class="blue" onclick="showMaster()">Master</button>
-<button class="blue">Add Visit</button>
-<button class="blue">Reports</button>
-<button class="blue">Reminder</button>
+<button class="blue" onclick="alert('Coming next')">Add Visit</button>
+<button class="blue" onclick="alert('Coming next')">Reports</button>
+<button class="blue" onclick="alert('Coming next')">Reminder</button>
 </div>
 
 <button class="gray" onclick="logout()">Logout</button>
 </div>`;
 }
 
-// ===== MASTER MENU =====
+// ===== MASTER =====
 function showMaster(){
 app.innerHTML = `
 <div class="card">
 <h2>Master</h2>
 
 <button class="blue" onclick="showCustomerMaster()">Customer</button>
-<button class="blue">Service</button>
+<button class="blue" onclick="alert('Service next')">Service</button>
 
 <button class="gray" onclick="showHome()">Back</button>
 </div>`;
@@ -158,7 +163,13 @@ app.innerHTML = `
 // ===== CUSTOMER MASTER =====
 async function showCustomerMaster(){
 
-let userId = localStorage.getItem("userId");
+let userId = await getUserId();
+
+if(!userId){
+alert("User not found. Login again.");
+logout();
+return;
+}
 
 let { data, error } = await client
 .from("salon_customers")
@@ -212,7 +223,8 @@ async function saveCustomer(){
 let name = document.getElementById("custName").value;
 let mobile = document.getElementById("custMobile").value;
 let salutation = document.getElementById("salutation").value;
-let userId = localStorage.getItem("userId");
+
+let userId = await getUserId();
 
 if(!name){
 alert("Enter name");
