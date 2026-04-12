@@ -13,13 +13,16 @@ button { padding:10px; border:none; border-radius:6px; }
 .blue { background:#2563eb; color:white; }
 .gray { background:#ddd; width:100%; margin-top:10px; }
 
-input, select {
-width:100%; padding:8px; margin:4px 0;
+input {
+width:100%; padding:8px; margin:5px 0;
 border-radius:6px; border:1px solid #ccc;
 }
 
-.row { display:flex; gap:5px; margin:5px 0; }
-.row input { flex:1; }
+.list-item {
+padding:10px;
+border-bottom:1px solid #eee;
+cursor:pointer;
+}
 </style>
 
 </head>
@@ -29,19 +32,19 @@ border-radius:6px; border:1px solid #ccc;
 
 <script>
 
-const SUPABASE_URL = "https://jqqnnkzozjskziaizajg.supabase.co";
-const SUPABASE_KEY = "sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P";
-const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const client = supabase.createClient(
+"https://jqqnnkzozjskziaizajg.supabase.co",
+"sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P"
+);
 
 let app = document.getElementById("app");
 
-// ================= LOGIN =================
-
+// LOGIN
 function showLogin(){
 app.innerHTML = `
 <div class="card">
 <h2>Login</h2>
-<input id="mobile" placeholder="Mobile Number">
+<input id="mobile" placeholder="Mobile">
 <button class="blue" onclick="checkLogin()">Continue</button>
 </div>`;
 }
@@ -67,14 +70,13 @@ function mobileInput(){
 return document.getElementById("mobile").value;
 }
 
-// ================= REGISTER =================
-
+// REGISTER
 function showRegister(mobile){
 app.innerHTML = `
 <div class="card">
 <h2>Register</h2>
-<input id="name" placeholder="Owner Name">
-<input id="shop" placeholder="Shop Name">
+<input id="name" placeholder="Name">
+<input id="shop" placeholder="Shop">
 <input id="city" placeholder="City">
 <input id="state" placeholder="State">
 <button class="blue" onclick="register('${mobile}')">Register</button>
@@ -96,8 +98,7 @@ localStorage.setItem("userId", data[0].id);
 showHome();
 }
 
-// ================= HOME =================
-
+// HOME
 function showHome(){
 app.innerHTML = `
 <div class="card">
@@ -114,8 +115,7 @@ app.innerHTML = `
 </div>`;
 }
 
-// ================= MASTER =================
-
+// MASTER
 function showMaster(){
 app.innerHTML = `
 <div class="card">
@@ -128,7 +128,7 @@ app.innerHTML = `
 </div>`;
 }
 
-// ================= CUSTOMER MASTER (IMPROVED) =================
+// ================= CUSTOMER (CLEAN UI) =================
 
 async function showCustomerMaster(){
 
@@ -141,24 +141,13 @@ let { data } = await client
 
 app.innerHTML = `
 <div class="card">
-<h2>Customer Master</h2>
+<h2>Customers</h2>
 
-<h4>Add New Customer</h4>
-<input id="cname" placeholder="Name">
-<input id="cmobile" placeholder="Mobile">
-<input id="caddress" placeholder="Address">
-<button class="blue" onclick="saveCustomer()">Add Customer</button>
-
-<hr>
-
-<h4>Existing Customers</h4>
+<button class="blue" onclick="showAddCustomer()">+ Add Customer</button>
 
 ${data.map(c=>`
-<div class="row">
-<input value="${c.name}" disabled>
-<input id="mob_${c.id}" value="${c.mobile || ""}">
-<input id="add_${c.id}" value="${c.address || ""}">
-<button onclick="updateCustomer('${c.id}')">Update</button>
+<div class="list-item" onclick="editCustomer('${c.id}','${c.name}','${c.mobile || ""}','${c.address || ""}')">
+${c.name}
 </div>
 `).join("")}
 
@@ -166,61 +155,91 @@ ${data.map(c=>`
 </div>`;
 }
 
+// ADD CUSTOMER
+function showAddCustomer(){
+app.innerHTML = `
+<div class="card">
+<h2>Add Customer</h2>
+
+<input id="cname" placeholder="Name">
+<input id="cmobile" placeholder="Mobile">
+<input id="caddress" placeholder="Address">
+
+<button class="blue" onclick="saveCustomer()">Save</button>
+<button class="gray" onclick="showCustomerMaster()">Back</button>
+</div>`;
+}
+
+// EDIT CUSTOMER
+function editCustomer(id,name,mobile,address){
+app.innerHTML = `
+<div class="card">
+<h2>Edit Customer</h2>
+
+<input id="cname" value="${name}">
+<input id="cmobile" value="${mobile}">
+<input id="caddress" value="${address}">
+
+<button class="blue" onclick="updateCustomer('${id}')">Update</button>
+<button class="gray" onclick="showCustomerMaster()">Back</button>
+</div>`;
+}
+
+// SAVE
 async function saveCustomer(){
 
 let userId = localStorage.getItem("userId");
 
 await client.from("salon_customers").insert([{
-user_id: userId,
-name: cname.value,
-mobile: cmobile.value,
-address: caddress.value
+user_id:userId,
+name:cname.value,
+mobile:cmobile.value,
+address:caddress.value
 }]);
 
-alert("Customer Added");
 showCustomerMaster();
 }
 
+// UPDATE
 async function updateCustomer(id){
-
-let mobile = document.getElementById("mob_"+id).value;
-let address = document.getElementById("add_"+id).value;
 
 await client
 .from("salon_customers")
-.update({ mobile, address })
-.eq("id", id);
+.update({
+name:cname.value,
+mobile:cmobile.value,
+address:caddress.value
+})
+.eq("id",id);
 
-alert("Updated");
 showCustomerMaster();
 }
 
-// ================= SERVICE MASTER =================
+// ================= SERVICE (FIXED) =================
 
 async function showService(){
 
 let userId = localStorage.getItem("userId");
 
-let { data } = await client
+let { data, error } = await client
 .from("salon_services")
 .select("*")
 .eq("user_id", userId);
 
+if(error){
+alert(error.message);
+return;
+}
+
 app.innerHTML = `
 <div class="card">
-<h2>Service Master</h2>
+<h2>Services</h2>
 
-<input id="sname" placeholder="Service Name">
-<input id="srate" placeholder="Rate">
-<button class="blue" onclick="saveService()">Add Service</button>
-
-<hr>
+<button class="blue" onclick="showAddService()">+ Add Service</button>
 
 ${data.map(s=>`
-<div class="row">
-<input value="${s.name}" disabled>
-<input id="rate_${s.id}" value="${s.rate}">
-<button onclick="updateService('${s.id}')">Update</button>
+<div class="list-item" onclick="editService('${s.id}','${s.name}','${s.rate}')">
+${s.name} - ₹${s.rate}
 </div>
 `).join("")}
 
@@ -228,42 +247,69 @@ ${data.map(s=>`
 </div>`;
 }
 
+// ADD SERVICE
+function showAddService(){
+app.innerHTML = `
+<div class="card">
+<h2>Add Service</h2>
+
+<input id="sname" placeholder="Name">
+<input id="srate" placeholder="Rate">
+
+<button class="blue" onclick="saveService()">Save</button>
+<button class="gray" onclick="showService()">Back</button>
+</div>`;
+}
+
+// EDIT SERVICE
+function editService(id,name,rate){
+app.innerHTML = `
+<div class="card">
+<h2>Edit Service</h2>
+
+<input id="sname" value="${name}">
+<input id="srate" value="${rate}">
+
+<button class="blue" onclick="updateService('${id}')">Update</button>
+<button class="gray" onclick="showService()">Back</button>
+</div>`;
+}
+
+// SAVE
 async function saveService(){
 
 let userId = localStorage.getItem("userId");
 
 await client.from("salon_services").insert([{
-user_id: userId,
-name: sname.value,
-rate: srate.value
+user_id:userId,
+name:sname.value,
+rate:srate.value
 }]);
 
-alert("Service Added");
 showService();
 }
 
+// UPDATE
 async function updateService(id){
-
-let rate = document.getElementById("rate_"+id).value;
 
 await client
 .from("salon_services")
-.update({ rate })
-.eq("id", id);
+.update({
+name:sname.value,
+rate:srate.value
+})
+.eq("id",id);
 
-alert("Updated");
 showService();
 }
 
-// ================= LOGOUT =================
-
+// LOGOUT
 function logout(){
 localStorage.clear();
 showLogin();
 }
 
-// ================= START =================
-
+// START
 if(localStorage.getItem("userId")){
 showHome();
 }else{
@@ -271,6 +317,5 @@ showLogin();
 }
 
 </script>
-
 </body>
 </html>
