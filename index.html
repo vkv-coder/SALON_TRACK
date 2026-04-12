@@ -231,12 +231,15 @@ alert("Enter name");
 return;
 }
 
-let { error } = await client.from("salon_customers").insert([{
+let { data, error } = await client
+.from("salon_customers")
+.insert([{
 user_id: userId,
 name: name,
 mobile: mobile,
 salutation: salutation
-}]);
+}])
+.select();   // ✅ IMPORTANT FIX
 
 if(error){
 alert(error.message);
@@ -247,7 +250,6 @@ alert("Customer Saved");
 
 showCustomerMaster();
 }
-
 // ===== LOGOUT =====
 function logout(){
 localStorage.clear();
