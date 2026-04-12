@@ -28,14 +28,15 @@ border-radius:6px; border:1px solid #ccc;
 
 <script>
 
+// 🔗 SUPABASE
 const SUPABASE_URL = "https://jqqnnkzozjskziaizajg.supabase.co";
 const SUPABASE_KEY = "sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P";
-
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let app = document.getElementById("app");
 
-// LOGIN
+// ================= LOGIN =================
+
 function showLogin(){
 app.innerHTML = `
 <div class="card">
@@ -63,7 +64,8 @@ showRegister(mobile);
 }
 }
 
-// REGISTER
+// ================= REGISTER =================
+
 function showRegister(mobile){
 app.innerHTML = `
 <div class="card">
@@ -93,7 +95,8 @@ localStorage.setItem("userId", data[0].id);
 showHome();
 }
 
-// HOME
+// ================= HOME =================
+
 function showHome(){
 app.innerHTML = `
 <div class="card">
@@ -110,7 +113,8 @@ app.innerHTML = `
 </div>`;
 }
 
-// MASTER
+// ================= MASTER =================
+
 function showMaster(){
 app.innerHTML = `
 <div class="card">
@@ -123,7 +127,8 @@ app.innerHTML = `
 </div>`;
 }
 
-// CUSTOMER
+// ================= CUSTOMER =================
+
 async function showCustomerMaster(){
 let userId = localStorage.getItem("userId");
 
@@ -176,53 +181,95 @@ alert("Saved");
 showCustomerMaster();
 }
 
-// SERVICE (TEMP)
-function showService(){
+// ================= SERVICE MASTER =================
+
+async function showService(){
+
+let userId = localStorage.getItem("userId");
+
+let { data } = await client
+.from("salon_services")
+.select("*")
+.eq("user_id", userId);
+
 app.innerHTML = `
 <div class="card">
 <h2>Service Master</h2>
-<p>Coming next...</p>
+
+<input id="sname" placeholder="Service Name">
+<input id="srate" placeholder="Rate">
+
+<button class="blue" onclick="saveService()">Add Service</button>
+
+<hr>
+
+${data.map(s=>`
+<div style="display:flex; justify-content:space-between;">
+<span>${s.name}</span>
+<span>₹${s.rate}</span>
+</div>
+`).join("")}
+
 <button class="gray" onclick="showMaster()">Back</button>
 </div>`;
 }
 
-// ADD VISIT (TEMP)
+async function saveService(){
+
+let userId = localStorage.getItem("userId");
+
+await client.from("salon_services").insert([{
+user_id: userId,
+name: sname.value,
+rate: srate.value
+}]);
+
+alert("Service Added");
+showService();
+}
+
+// ================= ADD VISIT (NEXT STEP) =================
+
 function showAddVisit(){
 app.innerHTML = `
 <div class="card">
 <h2>Add Visit</h2>
-<p>Coming next...</p>
+<p>Next step</p>
 <button class="gray" onclick="showHome()">Back</button>
 </div>`;
 }
 
-// REPORTS (TEMP)
+// ================= REPORT =================
+
 function showReports(){
 app.innerHTML = `
 <div class="card">
 <h2>Reports</h2>
-<p>Coming next...</p>
+<p>Next step</p>
 <button class="gray" onclick="showHome()">Back</button>
 </div>`;
 }
 
-// REMINDER (TEMP)
+// ================= REMINDER =================
+
 function showReminder(){
 app.innerHTML = `
 <div class="card">
 <h2>Reminder</h2>
-<p>Coming next...</p>
+<p>Next step</p>
 <button class="gray" onclick="showHome()">Back</button>
 </div>`;
 }
 
-// LOGOUT
+// ================= LOGOUT =================
+
 function logout(){
 localStorage.clear();
 showLogin();
 }
 
-// START
+// ================= START =================
+
 if(localStorage.getItem("currentUser")){
 showHome();
 }else{
