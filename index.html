@@ -1,212 +1,270 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <style>
-body { font-family: Arial; margin:0; background:#f2f2f2; }
-.header { background:#2563eb;color:white;padding:18px;text-align:center;font-size:22px;font-weight:bold;}
-.menu { display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px;background:white;}
-.menu button { padding:16px;border:none;border-radius:10px;background:#2563eb;color:white;font-size:16px;}
-.card { background:white;padding:18px;margin:12px;border-radius:12px;}
-input,select { width:100%;padding:8px;margin:4px;border-radius:6px;border:1px solid #ccc;}
-.footer { text-align:center;font-size:13px;color:#666;padding:10px;}
-
-.row{
-display:flex;
-align-items:center;
-gap:8px;
-padding:6px 0;
-border-bottom:1px solid #eee;
-}
-
-.small{
-width:70px;
-}
+body {font-family: Arial; margin:0; background:#f2f2f2;}
+.header {background:#2d6cdf; color:white; padding:15px; text-align:center; font-size:22px;}
+.container {padding:15px;}
+.btn {background:#2d6cdf; color:white; padding:12px; margin:5px; border:none; width:45%; border-radius:8px;}
+.row {display:flex; align-items:center; gap:10px; margin:6px 0;}
+.small {width:70px;}
+.hidden {display:none;}
+table {width:100%; border-collapse:collapse;}
+td, th {border:1px solid #ccc; padding:6px; font-size:13px;}
 </style>
 </head>
 
 <body>
 
 <div class="header">SALON TRACK</div>
-<div id="menu"></div>
-<div id="app"></div>
+
+<div class="container">
+
+<div id="login">
+<input id="mobile" placeholder="Mobile">
+<button onclick="login()">Login</button>
+</div>
+
+<div id="menu" class="hidden">
+<button class="btn" onclick="showMaster()">Master</button>
+<button class="btn" onclick="showVisit()">Add Visit</button>
+<button class="btn" onclick="showReminder()">Reminder</button>
+<button class="btn" onclick="showReports()">Reports</button>
+<button class="btn" onclick="showPrivacy()">Privacy</button>
+<button class="btn" onclick="logout()">Logout</button>
+<div>📧 vkvcoder.support@gmail.com</div>
+</div>
+
+<div id="content"></div>
+
+</div>
 
 <script>
 
-const client = window.supabase.createClient(
-"https://jqqnnkzozjskziaizajg.supabase.co",
-"sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P"
-);
+const client = supabase.createClient("YOUR_URL","YOUR_PUBLISHABLE_KEY");
 
-let app=document.getElementById("app");
-let menu=document.getElementById("menu");
+let user_id=null;
 
 // LOGIN
-function showLogin(){
-menu.innerHTML="";
-app.innerHTML=`
-<div class="card">
-<h2>Login</h2>
-<input id="mobile" placeholder="Mobile">
-<button onclick="login()">Login</button>
-</div>`;
-}
-
 async function login(){
+let mob=document.getElementById("mobile").value;
 
-let mob = document.getElementById("mobile").value.trim();
+let {data}=await client.from("users").select("*").eq("mobile",mob).maybeSingle();
 
-if(!mob){
-alert("Enter mobile");
-return;
+if(!data){
+let {data:newUser}=await client.from("users").insert([{mobile:mob}]).select().single();
+user_id=newUser.id;
+}else user_id=data.id;
+
+document.getElementById("login").classList.add("hidden");
+document.getElementById("menu").classList.remove("hidden");
 }
 
-// 🔥 TEMP BYPASS LOGIN (NO DATABASE)
-localStorage.setItem("userId", mob);
-
-showMenu();
-showHome();
-}
-// MENU
-function showMenu(){
-menu.innerHTML=`
-<div class="menu">
-<button onclick="showAddVisit()">Add Visit</button>
-<button onclick="showPrivacy()">Privacy</button>
-<button onclick="logout()">Logout</button>
-</div>
-<div class="footer">📧 vkvcoder.support@gmail.com</div>`;
+// MASTER
+function showMaster(){
+content.innerHTML=`
+<button onclick="showCustomer()">Customer</button>
+<button onclick="showService()">Service</button>
+<div id="master"></div>`;
+showCustomer();
 }
 
-function showHome(){
-app.innerHTML=`<div class="card">Welcome</div>`;
+// CUSTOMER
+async function showCustomer(){
+master.innerHTML=`
+<button onclick="addCustomer()">Add</button>
+<button onclick="viewCustomer()">View</button>
+<div id="sub"></div>`;
 }
 
-// ADD VISIT (SAFE VERSION)
-async function showAddVisit(){
+function addCustomer(){
+sub.innerHTML=`
+<input id="cname" placeholder="Name">
+<input id="cmobile" placeholder="Mobile">
+<input id="cbday" type="date">
+<input id="canni" type="date">
+<input id="caddr" placeholder="Address">
+<button onclick="saveCustomer()">Save</button>`;
+}
 
-let {data:c}=await client.from("salon_customers").select("*");
-let {data:s}=await client.from("salon_services").select("*");
+async function saveCustomer(){
+await client.from("salon_customers").insert([{
+user_id,
+name:cname.value,
+mobile:cmobile.value,
+birthday:cbday.value,
+anniversary:canni.value,
+address:caddr.value
+}]);
+alert("Saved");
+}
 
-app.innerHTML=`
-<div class="card">
+async function viewCustomer(){
+let {data}=await client.from("salon_customers").select("*").eq("user_id",user_id);
 
-<h3>Customer</h3>
+sub.innerHTML=`
+<table>
+<tr>
+<th>Name</th><th>Mobile</th><th>Address</th><th>Birthday</th><th>Anniversary</th>
+</tr>
+${data.map(c=>`
+<tr>
+<td contenteditable>${c.name}</td>
+<td contenteditable>${c.mobile}</td>
+<td contenteditable>${c.address||""}</td>
+<td>${c.birthday||""}</td>
+<td>${c.anniversary||""}</td>
+</tr>`).join("")}
+</table>`;
+}
+
+// SERVICE
+async function showService(){
+master.innerHTML=`
+<button onclick="addService()">Add</button>
+<button onclick="viewService()">View</button>
+<div id="sub"></div>`;
+}
+
+function addService(){
+sub.innerHTML=`
+<input id="sname" placeholder="Service">
+<input id="srate" placeholder="Rate">
+<input id="sdays" placeholder="Reminder Days">
+<button onclick="saveService()">Save</button>`;
+}
+
+async function saveService(){
+await client.from("salon_services").insert([{
+user_id,
+name:sname.value,
+rate:srate.value,
+reminder_days:sdays.value
+}]);
+alert("Saved");
+}
+
+async function viewService(){
+let {data}=await client.from("salon_services").select("*").eq("user_id",user_id);
+
+sub.innerHTML=`
+<table>
+<tr><th>Name</th><th>Rate</th><th>Days</th></tr>
+${data.map(s=>`
+<tr>
+<td contenteditable>${s.name}</td>
+<td contenteditable>${s.rate}</td>
+<td contenteditable>${s.reminder_days}</td>
+</tr>`).join("")}
+</table>`;
+}
+
+// ADD VISIT
+async function showVisit(){
+
+let {data:cust}=await client.from("salon_customers").select("*").eq("user_id",user_id);
+let {data:serv}=await client.from("salon_services").select("*").eq("user_id",user_id);
+
+content.innerHTML=`
 <select id="cust">
-${(c||[]).map(x=>`<option data-phone="${x.phone}">${x.name}</option>`)}
+${cust.map(c=>`<option value="${c.id}">${c.name}</option>`)}
 </select>
 
-<h3>Services</h3>
-<h4 style="text-align:right;margin-right:20px;">Reminder Days</h4>
-<div id="list">
-${(s||[]).map(serv=>`
-<div class="row" style="display:flex;align-items:center;justify-content:flex-start;gap:20px">
+<h4 style="text-align:right;">Reminder Days</h4>
 
-  <input type="checkbox" onchange="calcTotal()">
+${serv.map(s=>`
+<div class="row">
+<input type="checkbox">
+<span style="width:120px">${s.name}</span>
+<input class="small" value="${s.rate}">
+<input class="small" placeholder="${s.reminder_days}">
+</div>`).join("")}
 
-  <span style="width:120px">${serv.name}</span>
-
-  <input class="small" type="number" value="${serv.rate}" onchange="calcTotal()" style="width:80px">
-
-  <input class="small" type="number" placeholder="Days" style="width:80px">
-
-</div>
- 
-`).join("")}
-</div>
-
-<h3>Total ₹ <span id="total">0</span></h3>
-
+<div>Total ₹ <span id="tot">0</span></div>
 <button onclick="saveVisit()">Save</button>
+`;
 
-</div>`;
 }
 
-function calcTotal(){
-let total=0;
-
-document.querySelectorAll("#list .row").forEach(r=>{
-let cb=r.children[0];
-let price=r.children[2];
-
-if(cb.checked){
-total+=Number(price.value||0);
-}
-});
-
-total && (document.getElementById("total").innerText=total);
-}
-
-// SAVE (SAFE)
+// SAVE VISIT
 async function saveVisit(){
 
 let cust=document.getElementById("cust");
-let name=cust.value;
-let phone=cust.options[cust.selectedIndex].getAttribute("data-phone");
+let cid=cust.value;
+let cname=cust.options[cust.selectedIndex].text;
 
-let today=new Date();
+let rows=document.querySelectorAll(".row");
 
-let rows=document.querySelectorAll("#list .row");
+for(let r of rows){
 
-let data=[];
-
-rows.forEach(r=>{
 let cb=r.children[0];
+if(!cb.checked) continue;
+
 let service=r.children[1].innerText;
 let price=r.children[2].value;
 let days=r.children[3].value;
 
-if(cb.checked){
-
+let today=new Date();
 let due=new Date();
 due.setDate(today.getDate()+Number(days||0));
 
-data.push({
-customer_name:name,
-mobile:phone,
-service:service,
-amount:Number(price||0),
-visit_date:today.toISOString().split("T")[0],
-reminder_days:Number(days||0),
-due_date:due.toISOString().split("T")[0]
-});
-}
-});
+await client.from("salon_visits").insert([{
+user_id,
+customer_id:cid,
+customer_name:cname,
+service,
+amount:price,
+reminder_days:days,
+visit_date:today,
+due_date:due
+}]);
 
-if(data.length==0){
-alert("Select service");
-return;
 }
 
-let {error}=await client.from("salon_visits").insert(data);
-
-if(error){
-alert("Error");
-console.log(error);
-}else{
-alert("Saved ✅");
-showAddVisit();
+alert("Saved");
 }
+
+// REMINDER
+async function showReminder(){
+
+let {data}=await client.from("salon_visits").select("*").eq("user_id",user_id);
+
+let today=new Date();
+
+content.innerHTML=data.filter(v=>{
+let d=new Date(v.due_date);
+let diff=(d-today)/(1000*60*60*24);
+return diff<=3;
+}).map(v=>`
+<div>
+<b>${v.customer_name}</b><br>
+${v.service}<br>
+Due: ${new Date(v.due_date).toLocaleDateString()}
+<br>
+<a href="tel:${v.mobile||""}">Call</a>
+</div>`).join("");
+}
+
+// REPORTS
+async function showReports(){
+let {data}=await client.from("salon_visits").select("*").eq("user_id",user_id);
+
+let total=data.reduce((a,b)=>a+Number(b.amount||0),0);
+
+content.innerHTML=`
+Total ₹ ${total}
+`;
 }
 
 // PRIVACY
 function showPrivacy(){
-app.innerHTML=`
-<div class="card">
-<h3>Privacy</h3>
-<b>Think of us as a bank locker — only YOU have the key!</b>
-</div>`;
+content.innerHTML=`<h3>Privacy</h3> Your data is safe`;
 }
 
-// LOGOUT
-function logout(){
-localStorage.clear();
-showLogin();
-}
-
-showLogin();
+function logout(){location.reload();}
 
 </script>
 
