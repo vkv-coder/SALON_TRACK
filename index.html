@@ -7,7 +7,6 @@
 <style>
 body { font-family: Arial; margin:0; background:#f2f2f2; }
 
-/* HEADER */
 .header {
 background:#2563eb;
 color:white;
@@ -17,7 +16,6 @@ font-size:22px;
 font-weight:bold;
 }
 
-/* MENU */
 .menu {
 display:grid;
 grid-template-columns:1fr 1fr;
@@ -36,11 +34,6 @@ font-size:16px;
 font-weight:bold;
 }
 
-@media(max-width:500px){
-.menu { grid-template-columns:1fr; }
-}
-
-/* CARD */
 .card {
 background:white;
 padding:18px;
@@ -49,7 +42,6 @@ border-radius:12px;
 box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
 
-/* INPUT */
 input {
 width:100%;
 padding:12px;
@@ -58,7 +50,6 @@ border-radius:8px;
 border:1px solid #ccc;
 }
 
-/* SERVICE */
 .service-row {
 display:flex;
 align-items:center;
@@ -66,14 +57,9 @@ gap:12px;
 margin:10px 0;
 }
 
-.service-row input[type="checkbox"] {
-transform:scale(1.3);
-}
-
 .service-name { flex:1; }
 .service-rate { width:90px; }
 
-/* FOOT INFO */
 .footer {
 text-align:center;
 font-size:13px;
@@ -103,8 +89,7 @@ let visitCustomers = [];
 let visitServices = [];
 let selectedCustomer = null;
 
-// ================= LOGIN =================
-
+// LOGIN
 function showLogin(){
 menu.innerHTML = "";
 app.innerHTML = `
@@ -116,32 +101,22 @@ app.innerHTML = `
 }
 
 async function login(){
-
-try{
 let { data } = await client
 .from("users")
 .select("*")
 .eq("mobile", mobile.value)
 .single();
 
-if(!data){
-alert("User not found");
-return;
-}
+if(!data){ alert("User not found"); return; }
 
 localStorage.setItem("userId", data.id);
 localStorage.setItem("userName", data.name || "User");
 
 showMenu();
 showHome();
-
-}catch(e){
-alert("Login error");
-}
 }
 
-// ================= MENU =================
-
+// MENU
 function showMenu(){
 menu.innerHTML = `
 <div class="menu">
@@ -155,24 +130,16 @@ menu.innerHTML = `
 
 <div class="footer">
 📧 vkvcoder.support@gmail.com
-</div>
-`;
-}
-
-// ================= HOME =================
-
-function showHome(){
-app.innerHTML = `
-<div class="card">
-<h3>Welcome, ${localStorage.getItem("userName")}</h3>
 </div>`;
 }
 
-// ================= ADD VISIT =================
+// HOME
+function showHome(){
+app.innerHTML = `<div class="card"><h3>Welcome, ${localStorage.getItem("userName")}</h3></div>`;
+}
 
+// ADD VISIT
 async function showAddVisit(){
-
-try{
 
 let userId = localStorage.getItem("userId");
 
@@ -199,7 +166,6 @@ app.innerHTML = `
 <h3>Total ₹ <span id="total">0</span></h3>
 
 <input type="date" id="vdate">
-<input id="remDays" type="number" placeholder="Reminder Days (e.g. 30)">
 
 <button onclick="saveVisit()" style="width:100%;background:#2563eb;color:white;padding:12px;border:none;border-radius:8px;">Save Visit</button>
 </div>`;
@@ -208,16 +174,11 @@ renderCustomerList(visitCustomers);
 renderServiceList(visitServices);
 
 vdate.value = new Date().toISOString().split("T")[0];
-
-}catch(e){
-alert("Add Visit error");
-}
 }
 
-// ================= CUSTOMER =================
-
+// CUSTOMER
 function renderCustomerList(data){
-custList.innerHTML = (data || []).map(c=>`
+custList.innerHTML = data.map(c=>`
 <div onclick="selectCustomer('${c.id}','${c.name}')">${c.name}</div>
 `).join("");
 }
@@ -233,10 +194,9 @@ custSearch.value = name;
 custList.innerHTML = "";
 }
 
-// ================= SERVICES =================
-
+// SERVICES
 function renderServiceList(data){
-serviceList.innerHTML = (data || []).map(s=>`
+serviceList.innerHTML = data.map(s=>`
 <div class="service-row">
 <input type="checkbox" id="chk_${s.id}" onchange="calcTotal()">
 <div class="service-name">${s.name}</div>
@@ -245,8 +205,7 @@ serviceList.innerHTML = (data || []).map(s=>`
 `).join("");
 }
 
-// ================= TOTAL =================
-
+// TOTAL
 function calcTotal(){
 let total = 0;
 
@@ -260,11 +219,8 @@ total += parseFloat(document.getElementById("rate_"+s.id).value || 0);
 document.getElementById("total").innerText = total;
 }
 
-// ================= SAVE =================
-
+// SAVE VISIT (FIXED)
 async function saveVisit(){
-
-try{
 
 if(!selectedCustomer){
 alert("Select customer");
@@ -283,36 +239,20 @@ total += rate;
 }
 });
 
-let reminderDate = null;
-
-if(remDays.value){
-let d = new Date(vdate.value);
-d.setDate(d.getDate() + parseInt(remDays.value));
-reminderDate = d.toISOString().split("T")[0];
-}
-
 await client.from("salon_visits").insert([{
 user_id: localStorage.getItem("userId"),
 customer_name: selectedCustomer.name,
-services: services.join(", "),
+service: services.join(", "),
 amount: total,
-visit_date: vdate.value,
-reminder_date: reminderDate
+visit_date: vdate.value
 }]);
 
 alert("Saved");
 showAddVisit();
-
-}catch(e){
-alert("Save error");
-}
 }
 
-// ================= REPORT =================
-
+// REPORTS (FIXED)
 async function showReports(){
-
-try{
 
 let { data } = await client
 .from("salon_visits")
@@ -327,62 +267,50 @@ app.innerHTML = `
 ${list.length === 0 ? "No data" : list.map(v=>`
 <div class="card">
 <b>${v.customer_name}</b><br>
+${v.service}<br>
 ₹${v.amount} | ${v.visit_date}
 </div>
 `).join("")}
 </div>`;
-
-}catch(e){
-alert("Report error");
-}
 }
 
-// ================= REMINDER =================
-
+// REMINDER (TEMP SIMPLE)
 async function showReminder(){
-
-try{
-
-let today = new Date().toISOString().split("T")[0];
 
 let { data } = await client
 .from("salon_visits")
 .select("*")
-.eq("user_id", localStorage.getItem("userId"))
-.lte("reminder_date", today);
+.eq("user_id", localStorage.getItem("userId"));
 
 let list = data || [];
 
 app.innerHTML = `
 <div class="card">
-<h2>Reminders</h2>
-${list.length === 0 ? "No reminders" : list.map(v=>`
+<h2>Reminder</h2>
+${list.length === 0 ? "No data" : list.map(v=>`
 <div class="card">
 <b>${v.customer_name}</b><br>
-Due: ${v.reminder_date}
+Last Visit: ${v.visit_date}
 </div>
 `).join("")}
 </div>`;
-
-}catch(e){
-alert("Reminder error");
-}
 }
 
-// ================= OTHER =================
-
+// MASTER (placeholder)
 function showMaster(){
 app.innerHTML = `<div class="card">Master coming next</div>`;
 }
 
+// PRIVACY
 function showPrivacy(){
 app.innerHTML = `
 <div class="card">
 <h3>Privacy Policy</h3>
-Your data is सुरक्षित and used only for salon tracking.
+Your data is safe and used only for salon tracking.
 </div>`;
 }
 
+// LOGOUT
 function logout(){
 localStorage.clear();
 showLogin();
