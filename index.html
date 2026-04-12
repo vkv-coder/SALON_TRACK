@@ -6,83 +6,16 @@
 
 <style>
 body { font-family: Arial; margin:0; background:#f2f2f2; }
-
-.header {
-background:#2563eb;
-color:white;
-padding:18px;
-text-align:center;
-font-size:22px;
-font-weight:bold;
-}
-
-.menu {
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:12px;
-padding:12px;
-background:white;
-}
-
-.menu button {
-padding:16px;
-border:none;
-border-radius:10px;
-background:#2563eb;
-color:white;
-font-size:16px;
-font-weight:bold;
-}
-
-.card {
-background:white;
-padding:18px;
-margin:12px;
-border-radius:12px;
-}
-
-input, select {
-width:100%;
-padding:10px;
-margin:6px 0;
-border-radius:8px;
-border:1px solid #ccc;
-}
-
-.row { display:flex; gap:10px; }
-.row input { flex:1; }
-
-.tab-btn {
-padding:10px;
-margin:5px;
-background:#2563eb;
-color:white;
-border:none;
-border-radius:8px;
-}
-
-.service-row {
-display:flex;
-align-items:center;
-justify-content:space-between;
-margin:10px 0;
-}
-
-.footer {
-text-align:center;
-font-size:13px;
-color:#666;
-padding:10px;
-}
-
-.small-btn {
-padding:6px 10px;
-margin:5px;
-background:#2563eb;
-color:white;
-border:none;
-border-radius:6px;
-}
+.header { background:#2563eb;color:white;padding:18px;text-align:center;font-size:22px;font-weight:bold;}
+.menu { display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px;background:white;}
+.menu button { padding:16px;border:none;border-radius:10px;background:#2563eb;color:white;font-size:16px;}
+.card { background:white;padding:18px;margin:12px;border-radius:12px;}
+input,select { width:100%;padding:10px;margin:6px 0;border-radius:8px;border:1px solid #ccc;}
+.row { display:flex;gap:10px;}
+.tab-btn { padding:10px;margin:5px;background:#2563eb;color:white;border:none;border-radius:8px;}
+.service-row { display:flex;justify-content:space-between;margin:10px 0;}
+.footer { text-align:center;font-size:13px;color:#666;padding:10px;}
+.small-btn { padding:6px 10px;margin:5px;background:#2563eb;color:white;border:none;border-radius:6px;}
 </style>
 </head>
 
@@ -99,12 +32,10 @@ const client = supabase.createClient(
 "YOUR_KEY"
 );
 
-let app = document.getElementById("app");
-let menu = document.getElementById("menu");
+let app=document.getElementById("app");
+let menu=document.getElementById("menu");
 
-let visitCustomers = [];
-let visitServices = [];
-let selectedCustomer = null;
+let visitCustomers=[], visitServices=[], selectedCustomer=null;
 
 // ================= LOGIN =================
 function showLogin(){
@@ -118,11 +49,37 @@ app.innerHTML=`
 }
 
 async function login(){
-let { data } = await client.from("users").select("*").eq("mobile", mobile.value).single();
-if(!data){alert("User not found");return;}
-localStorage.setItem("userId", data.id);
-localStorage.setItem("userName", data.name || "User");
+let mob=mobile.value.trim();
+if(!mob){alert("Enter mobile");return;}
+
+let {data}=await client.from("users").select("*").eq("mobile",mob).limit(1);
+if(!data || data.length==0){alert("User not found");return;}
+
+let user=data[0];
+localStorage.setItem("userId",user.id);
+localStorage.setItem("userName",user.name||"User");
+
 showMenu(); showHome();
+}
+
+// ================= TRIAL =================
+async function startTrialIfNeeded(){
+let userId=localStorage.getItem("userId");
+let {data}=await client.from("users").select("*").eq("id",userId).single();
+
+if(!data) return;
+
+if(!data.trial_start){
+let today=new Date();
+let end=new Date();
+end.setDate(today.getDate()+15);
+
+await client.from("users").update({
+trial_start:today.toISOString().split("T")[0],
+trial_end:end.toISOString().split("T")[0],
+plan_status:"trial"
+}).eq("id",userId);
+}
 }
 
 // ================= MENU =================
@@ -133,6 +90,7 @@ menu.innerHTML=`
 <button onclick="showAddVisit()">Add Visit</button>
 <button onclick="showReports()">Reports</button>
 <button onclick="showReminder()">Reminder</button>
+<button onclick="showPrivacy()">Privacy</button>
 <button onclick="logout()">Logout</button>
 </div>
 <div class="footer">📧 vkvcoder.support@gmail.com</div>`;
@@ -174,14 +132,18 @@ sub.innerHTML=`
 }
 
 async function saveCustomer(){
+await startTrialIfNeeded();
+
 await client.from("salon_customers").insert([{
 salutation:salutation.value,
 name:name.value,
 phone:phone.value,
 address:address.value,
 birthday:bday.value,
-anniversary:anni.value
+anniversary:anni.value,
+user_id:localStorage.getItem("userId")
 }]);
+
 alert("Saved");
 }
 
@@ -231,6 +193,7 @@ address:e3.value,
 birthday:e4.value,
 anniversary:e5.value
 }).eq("id",id);
+
 alert("Updated");
 }
 
@@ -250,7 +213,14 @@ sub.innerHTML=`
 }
 
 async function saveService(){
-await client.from("salon_services").insert([{name:sname.value,rate:srate.value}]);
+await startTrialIfNeeded();
+
+await client.from("salon_services").insert([{
+name:sname.value,
+rate:srate.value,
+user_id:localStorage.getItem("userId")
+}]);
+
 alert("Saved");
 }
 
@@ -279,6 +249,7 @@ await client.from("salon_services").update({
 name:sn.value,
 rate:sr.value
 }).eq("id",id);
+
 alert("Updated");
 }
 
@@ -349,6 +320,8 @@ total.innerText=t;
 
 async function saveVisit(){
 
+await startTrialIfNeeded();
+
 let totalAmt=0, svc=[];
 visitServices.forEach(s=>{
 if(document.getElementById("c"+s.id)?.checked){
@@ -370,7 +343,8 @@ customer_name:selectedCustomer,
 service:svc.join(", "),
 amount:totalAmt,
 visit_date:vdate.value,
-reminder_date:due
+reminder_date:due,
+user_id:localStorage.getItem("userId")
 }]);
 
 alert("Saved");
@@ -403,7 +377,7 @@ q=q.gte("visit_date",from.value).lte("visit_date",to.value);
 
 let {data}=await q;
 
-rlist.innerHTML=data.map(v=>`
+rlist.innerHTML=(data||[]).map(v=>`
 <div class="card">
 <b>${v.customer_name}</b><br>
 ${v.service}<br>
@@ -414,29 +388,66 @@ ${v.service}<br>
 // ================= REMINDER =================
 async function showReminder(){
 
+let userId=localStorage.getItem("userId");
+let {data}=await client.from("users").select("*").eq("id",userId).single();
+
+if(!data || !data.trial_end){
+app.innerHTML=`<div class="card">No reminder</div>`;
+return;
+}
+
 let today=new Date();
-let future=new Date();
-future.setDate(today.getDate()+3);
+let end=new Date(data.trial_end);
+let diff=(end - today)/(1000*60*60*24);
 
-let {data}=await client.from("salon_visits").select("*");
+if(diff<=3 && diff>=0){
+app.innerHTML=`
+<div class="card">
+Trial ending on ${data.trial_end}<br>
+Please subscribe
+</div>`;
+}else{
+app.innerHTML=`<div class="card">No reminder</div>`;
+}
+}
 
-let list=data.filter(v=>{
-if(!v.reminder_date) return false;
-let d=new Date(v.reminder_date);
-return d>=today && d<=future;
-});
+// ================= PRIVACY =================
+function showPrivacy(){
 
 app.innerHTML=`
 <div class="card">
-<h2>Reminder</h2>
-${list.map(v=>`
-<div class="card">
-<b>${v.customer_name}</b><br>
-Due: ${v.reminder_date}<br>
 
-<a href="https://wa.me/?text=Dear ${v.customer_name}, it is time to groom yourself. We would love to serve you again." target="_blank">💬 WhatsApp</a>
+<h2 style="text-align:center;">🔒 Privacy Policy</h2>
 
-</div>`).join("")}
+<div style="background:#2563eb;color:white;padding:15px;border-radius:10px;text-align:center;">
+<b>Think of us as a bank locker —<br>
+We hold your data safely, but only YOU have the key!</b>
+</div>
+
+<h3>Salon Track — Your Data. Your Control.</h3>
+
+<hr>
+
+<p>✅ We NEVER sell your data</p>
+<p>✅ We NEVER share your data</p>
+<p>✅ No ads using your data</p>
+
+<hr>
+
+<p>Your salon data is securely stored in India.</p>
+
+<hr>
+
+<p>We store only your salon-related data for your use.</p>
+
+<hr>
+
+<p>No contacts, no photos, no tracking.</p>
+
+<hr>
+
+<p>📧 vkvcoder.support@gmail.com</p>
+
 </div>`;
 }
 
