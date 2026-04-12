@@ -3,7 +3,6 @@
 <head>
   <title>Salon Track</title>
 
-  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
   <style>
@@ -20,7 +19,8 @@
 
 <div class="header">SALON TRACK</div>
 
-<div class="menu">
+<!-- MENU (HIDDEN INITIALLY) -->
+<div class="menu" id="menu" style="display:none;">
   <button class="btn" onclick="showMaster()">Master</button>
   <button class="btn" onclick="showVisit()">Add Visit</button>
   <button class="btn" onclick="showReminder()">Reminder</button>
@@ -29,15 +29,19 @@
   <button class="btn" onclick="logout()">Logout</button>
 </div>
 
-<div style="padding-left:10px;">vkvcoder.support@gmail.com</div>
+<!-- SUPPORT -->
+<div id="support" style="padding-left:10px; display:none;">
+  vkvcoder.support@gmail.com
+</div>
 
 <div id="content" class="content"></div>
 
 <script>
 
+// 🔴 PUT YOUR KEY HERE
 const client = supabase.createClient(
   "https://jqqnnkzozjskziaizajg.supabase.co",
-  "sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P"
+  "YOUR_KEY_HERE"
 );
 
 let user_id = null;
@@ -46,22 +50,45 @@ let user_id = null;
 
 function showLogin(){
   document.getElementById("content").innerHTML = `
-    <input id="mobile" placeholder="Mobile">
-    <button onclick="login()">Login</button>
+    <h3>Login / Register</h3>
+    <input id="mobile" placeholder="Enter Mobile"><br><br>
+    <button onclick="login()">Continue</button>
   `;
 }
 
 async function login(){
+
   let mob = document.getElementById("mobile").value;
 
-  let {data} = await client.from("users").select("*").eq("mobile",mob).maybeSingle();
+  if(!mob){
+    alert("Enter mobile");
+    return;
+  }
+
+  // CHECK EXISTING
+  let {data} = await client
+    .from("users")
+    .select("*")
+    .eq("mobile", mob)
+    .maybeSingle();
 
   if(!data){
-    let res = await client.from("users").insert([{mobile:mob}]).select().single();
+    // 👉 AUTO REGISTER
+    let res = await client
+      .from("users")
+      .insert([{mobile: mob}])
+      .select()
+      .single();
+
     user_id = res.data.id;
+
   } else {
     user_id = data.id;
   }
+
+  // SHOW APP
+  document.getElementById("menu").style.display = "grid";
+  document.getElementById("support").style.display = "block";
 
   showMaster();
 }
@@ -69,6 +96,7 @@ async function login(){
 // ================= MASTER =================
 
 function showMaster(){
+
   document.getElementById("content").innerHTML = `
   
   <div style="display:flex; gap:10px;">
@@ -96,8 +124,8 @@ function showMaster(){
 }
 
 function showCustomerTab(){
-  document.getElementById("custDiv").style.display="block";
-  document.getElementById("servDiv").style.display="none";
+  custDiv.style.display="block";
+  servDiv.style.display="none";
 
   tabC.style.background="#2d6cdf";
   tabC.style.color="white";
@@ -106,8 +134,8 @@ function showCustomerTab(){
 }
 
 function showServiceTab(){
-  document.getElementById("custDiv").style.display="none";
-  document.getElementById("servDiv").style.display="block";
+  custDiv.style.display="none";
+  servDiv.style.display="block";
 
   tabS.style.background="#2d6cdf";
   tabS.style.color="white";
@@ -119,10 +147,10 @@ function showServiceTab(){
 
 async function saveCustomer(){
 
-  let name = document.getElementById("cname").value;
-  let mobile = document.getElementById("cmob").value;
-  let birthday = document.getElementById("cbday").value;
-  let anniversary = document.getElementById("canni").value;
+  let name = cname.value;
+  let mobile = cmob.value;
+  let birthday = cbday.value;
+  let anniversary = canni.value;
 
   let {error} = await client.from("customers").insert([{
     user_id,
@@ -143,9 +171,9 @@ async function saveCustomer(){
 
 async function saveService(){
 
-  let name = document.getElementById("sname").value;
-  let rate = document.getElementById("srate").value;
-  let reminder_days = document.getElementById("sdays").value;
+  let name = sname.value;
+  let rate = srate.value;
+  let reminder_days = sdays.value;
 
   let {error} = await client.from("salon_services").insert([{
     user_id,
@@ -165,33 +193,41 @@ async function saveService(){
 
 async function showVisit(){
 
-  let {data:customers} = await client.from("customers").select("*").eq("user_id",user_id);
-  let {data:services} = await client.from("salon_services").select("*").eq("user_id",user_id);
+  let {data:customers} = await client
+    .from("customers")
+    .select("*")
+    .eq("user_id",user_id);
 
-  let serviceHTML = "";
+  let {data:services} = await client
+    .from("salon_services")
+    .select("*")
+    .eq("user_id",user_id);
 
-  services.forEach(s=>{
-    serviceHTML += `
-      <div>
-        <input type="checkbox" value="${s.id}" data-rate="${s.rate}" onchange="calcTotal()">
-        ${s.name} - ₹${s.rate}
-      </div>
-    `;
-  });
+  let html = `
+    <h3>Add Visit</h3>
 
-  document.getElementById("content").innerHTML = `
     <select id="cust">
       ${customers.map(c=>`<option value="${c.id}">${c.name}</option>`)}
     </select>
 
     <br><br>
+  `;
 
-    ${serviceHTML}
+  services.forEach(s=>{
+    html += `
+      <div>
+        <input type="checkbox" data-rate="${s.rate}" onchange="calcTotal()">
+        ${s.name} ₹${s.rate}
+      </div>
+    `;
+  });
 
+  html += `
     <h3>Total ₹ <span id="total">0</span></h3>
-
     <button onclick="saveVisit()">Save</button>
   `;
+
+  document.getElementById("content").innerHTML = html;
 }
 
 function calcTotal(){
@@ -201,13 +237,15 @@ function calcTotal(){
     total += Number(cb.dataset.rate);
   });
 
+  total = isNaN(total) ? 0 : total;
+
   document.getElementById("total").innerText = total;
 }
 
 async function saveVisit(){
 
-  let customer_id = document.getElementById("cust").value;
-  let amount = document.getElementById("total").innerText;
+  let customer_id = cust.value;
+  let amount = total.innerText;
 
   let {error} = await client.from("salon_visits").insert([{
     user_id,
@@ -225,19 +263,19 @@ async function saveVisit(){
 // ================= REMINDER =================
 
 function showReminder(){
-  document.getElementById("content").innerHTML = "Reminder coming next step";
+  content.innerHTML = "Reminder coming next";
 }
 
 // ================= REPORT =================
 
 function showReports(){
-  document.getElementById("content").innerHTML = "Reports coming next step";
+  content.innerHTML = "Reports coming next";
 }
 
 // ================= PRIVACY =================
 
 function showPrivacy(){
-  document.getElementById("content").innerHTML = "Privacy policy here";
+  content.innerHTML = "Privacy policy here";
 }
 
 function logout(){
