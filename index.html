@@ -72,12 +72,13 @@ let { data } = await client
 
 if(data){
 localStorage.setItem("currentUser", mobile);
+localStorage.setItem("userId", data.id); // ✅ IMPORTANT
+
 showHome();
 }else{
 showRegister(mobile);
 }
 }
-
 // ===== REGISTER =====
 function showRegister(mobile){
 app.innerHTML = `
