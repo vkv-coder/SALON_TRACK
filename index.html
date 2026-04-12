@@ -39,7 +39,6 @@ background:white;
 padding:18px;
 margin:12px;
 border-radius:12px;
-box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
 
 input, select {
@@ -50,20 +49,22 @@ border-radius:8px;
 border:1px solid #ccc;
 }
 
+.row {
+display:flex;
+gap:10px;
+}
+
+.row input {
+flex:1;
+}
+
 .tab-btn {
 padding:10px;
 margin:5px;
-border:none;
-border-radius:8px;
 background:#2563eb;
 color:white;
-}
-
-.footer {
-text-align:center;
-font-size:13px;
-color:#666;
-padding:10px;
+border:none;
+border-radius:8px;
 }
 </style>
 </head>
@@ -78,185 +79,158 @@ padding:10px;
 
 const client = supabase.createClient(
 "https://jqqnnkzozjskziaizajg.supabase.co",
-"sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P"
+"YOUR_KEY"
 );
 
 let app = document.getElementById("app");
-let menu = document.getElementById("menu");
-
-// LOGIN
-function showLogin(){
-menu.innerHTML="";
-app.innerHTML=`
-<div class="card">
-<h2>SALON TRACK</h2>
-<input id="mobile" placeholder="Mobile">
-<button onclick="login()">Login</button>
-</div>`;
-}
-
-async function login(){
-let { data } = await client.from("users").select("*").eq("mobile", mobile.value).single();
-if(!data){alert("User not found");return;}
-localStorage.setItem("userId", data.id);
-showMenu();
-showHome();
-}
-
-// MENU
-function showMenu(){
-menu.innerHTML=`
-<div class="menu">
-<button onclick="showMaster()">Master</button>
-<button onclick="showAddVisit()">Add Visit</button>
-<button onclick="showReports()">Reports</button>
-<button onclick="showReminder()">Reminder</button>
-<button onclick="logout()">Logout</button>
-</div>
-<div class="footer">📧 vkvcoder.support@gmail.com</div>`;
-}
-
-function showHome(){
-app.innerHTML=`<div class="card">Welcome</div>`;
-}
 
 // ================= MASTER =================
 
 function showMaster(){
 app.innerHTML=`
 <div class="card">
-<button class="tab-btn" onclick="showCustomerMaster()">Customer</button>
-<button class="tab-btn" onclick="showServiceMaster()">Service</button>
-
-<div id="masterContent"></div>
+<button class="tab-btn" onclick="showCustomer()">Customer</button>
+<button class="tab-btn" onclick="showService()">Service</button>
+<div id="content"></div>
 </div>`;
 }
 
-// -------- CUSTOMER --------
-async function showCustomerMaster(){
+// -------- CUSTOMER MAIN --------
+function showCustomer(){
+content.innerHTML=`
+<button class="tab-btn" onclick="addCustomerUI()">Add</button>
+<button class="tab-btn" onclick="viewCustomerUI()">View</button>
+<div id="sub"></div>`;
+}
 
-let uid=localStorage.getItem("userId");
-let {data}=await client.from("salon_customers").select("*").eq("user_id",uid);
+// -------- ADD CUSTOMER --------
+function addCustomerUI(){
+sub.innerHTML=`
+<input id="name" placeholder="Name">
+<input id="phone" placeholder="Phone">
+<input id="address" placeholder="Address">
+<input id="bday" type="date">
+<input id="anni" type="date">
+<button onclick="saveCustomer()">Save</button>`;
+}
 
-masterContent.innerHTML=`
-<h3>Add Customer</h3>
-<input id="cname" placeholder="Name">
-<input id="cphone" placeholder="Phone">
-<input id="cbday" placeholder="Birthday">
-<input id="canni" placeholder="Anniversary">
-<button onclick="addCustomer()">Add</button>
+async function saveCustomer(){
+await client.from("salon_customers").insert([{
+name:name.value,
+phone:phone.value,
+address:address.value,
+birthday:bday.value,
+anniversary:anni.value
+}]);
+alert("Saved");
+}
 
-<hr>
+// -------- VIEW CUSTOMER --------
+async function viewCustomerUI(){
 
-<h3>View Customer</h3>
-<select id="custSelect" onchange="loadCustomerDetail()">
-<option value="">Select</option>
-${(data||[]).map(c=>`<option value="${c.id}">${c.name}</option>`).join("")}
+let {data}=await client.from("salon_customers").select("*");
+
+sub.innerHTML=`
+<select id="custDrop" onchange="loadCust()">
+<option>Select</option>
+${data.map(c=>`<option value="${c.id}">${c.name}</option>`)}
 </select>
 
-<div id="custDetail"></div>
-`;
+<div id="custDetail"></div>`;
 }
 
-async function addCustomer(){
-await client.from("salon_customers").insert([{
-name:cname.value,
-phone:cphone.value,
-birthday:cbday.value,
-anniversary:canni.value,
-user_id:localStorage.getItem("userId")
-}]);
-alert("Added");
-showCustomerMaster();
-}
-
-async function loadCustomerDetail(){
-let id=custSelect.value;
+async function loadCust(){
+let id=custDrop.value;
 let {data}=await client.from("salon_customers").select("*").eq("id",id).single();
 
 custDetail.innerHTML=`
-<input id="ename" value="${data.name}">
-<input id="ephone" value="${data.phone}">
-<input id="ebday" value="${data.birthday||""}">
-<input id="eanni" value="${data.anniversary||""}">
-<button onclick="updateCustomer('${data.id}')">Update</button>
+<div class="row">
+<input id="e1" value="${data.name}">
+<input id="e2" value="${data.phone}">
+</div>
+
+<div class="row">
+<input id="e3" value="${data.address||""}">
+</div>
+
+<div class="row">
+<input id="e4" type="date" value="${data.birthday||""}">
+<input id="e5" type="date" value="${data.anniversary||""}">
+</div>
+
+<button onclick="updateCust('${data.id}')">Update</button>
 `;
 }
 
-async function updateCustomer(id){
+async function updateCust(id){
 await client.from("salon_customers").update({
-name:ename.value,
-phone:ephone.value,
-birthday:ebday.value,
-anniversary:eanni.value
+name:e1.value,
+phone:e2.value,
+address:e3.value,
+birthday:e4.value,
+anniversary:e5.value
 }).eq("id",id);
 
 alert("Updated");
 }
 
 // -------- SERVICE --------
-async function showServiceMaster(){
+function showService(){
+content.innerHTML=`
+<button class="tab-btn" onclick="addServiceUI()">Add</button>
+<button class="tab-btn" onclick="viewServiceUI()">View</button>
+<div id="sub"></div>`;
+}
 
-let uid=localStorage.getItem("userId");
-let {data}=await client.from("salon_services").select("*").eq("user_id",uid);
-
-masterContent.innerHTML=`
-<h3>Add Service</h3>
+function addServiceUI(){
+sub.innerHTML=`
 <input id="sname" placeholder="Service">
 <input id="srate" placeholder="Rate">
-<button onclick="addService()">Add</button>
-
-<hr>
-
-<h3>View Service</h3>
-<select id="servSelect" onchange="loadServiceDetail()">
-<option value="">Select</option>
-${(data||[]).map(s=>`<option value="${s.id}">${s.name}</option>`).join("")}
-</select>
-
-<div id="servDetail"></div>
-`;
+<button onclick="saveService()">Save</button>`;
 }
 
-async function addService(){
+async function saveService(){
 await client.from("salon_services").insert([{
 name:sname.value,
-rate:srate.value,
-user_id:localStorage.getItem("userId")
+rate:srate.value
 }]);
-alert("Added");
-showServiceMaster();
+alert("Saved");
 }
 
-async function loadServiceDetail(){
-let id=servSelect.value;
+async function viewServiceUI(){
+let {data}=await client.from("salon_services").select("*");
+
+sub.innerHTML=`
+<select id="servDrop" onchange="loadServ()">
+<option>Select</option>
+${data.map(s=>`<option value="${s.id}">${s.name}</option>`)}
+</select>
+
+<div id="servDetail"></div>`;
+}
+
+async function loadServ(){
+let id=servDrop.value;
 let {data}=await client.from("salon_services").select("*").eq("id",id).single();
 
 servDetail.innerHTML=`
-<input id="esname" value="${data.name}">
-<input id="esrate" value="${data.rate}">
-<button onclick="updateService('${data.id}')">Update</button>
+<input id="sn" value="${data.name}">
+<input id="sr" value="${data.rate}">
+<button onclick="updateServ('${data.id}')">Update</button>
 `;
 }
 
-async function updateService(id){
+async function updateServ(id){
 await client.from("salon_services").update({
-name:esname.value,
-rate:esrate.value
+name:sn.value,
+rate:sr.value
 }).eq("id",id);
 
 alert("Updated");
 }
 
-// ================= OTHER =================
-
-function showAddVisit(){ app.innerHTML="<div class='card'>Add Visit working</div>"; }
-function showReports(){ app.innerHTML="<div class='card'>Reports working</div>"; }
-function showReminder(){ app.innerHTML="<div class='card'>Reminder working</div>"; }
-
-function logout(){ localStorage.clear(); showLogin(); }
-
-showLogin();
+// START
+showMaster();
 
 </script>
 </body>
