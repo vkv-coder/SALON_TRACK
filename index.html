@@ -6,24 +6,60 @@
 
 <style>
 body { font-family: Arial; background:#f2f2f2; margin:0; }
-.card { background:white; padding:15px; margin:10px; border-radius:10px; }
 
-button { padding:10px; border:none; border-radius:6px; margin:5px 0; }
-.blue { background:#2563eb; color:white; }
-.gray { background:#ddd; width:100%; }
-
-input {
-width:100%; padding:8px; margin:5px 0;
-border-radius:6px; border:1px solid #ccc;
+.header {
+background:#2563eb;
+color:white;
+padding:15px;
+text-align:center;
+font-size:20px;
+font-weight:bold;
 }
 
-.row { border-bottom:1px solid #eee; padding:8px 0; }
-.small { font-size:12px; color:gray; }
+.menu {
+display:flex;
+gap:10px;
+padding:10px;
+background:white;
+}
+
+.menu button {
+flex:1;
+padding:10px;
+border:none;
+border-radius:6px;
+background:#2563eb;
+color:white;
+}
+
+.card {
+background:white;
+padding:15px;
+margin:10px;
+border-radius:10px;
+}
+
+input {
+width:100%;
+padding:8px;
+margin:5px 0;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+.row {
+display:flex;
+justify-content:space-between;
+margin:5px 0;
+}
 </style>
 
 </head>
 
 <body>
+
+<div class="header">Salon Manager</div>
+<div id="menu"></div>
 <div id="app"></div>
 
 <script>
@@ -35,23 +71,62 @@ const client = supabase.createClient(
 
 let app = document.getElementById("app");
 
-// ================= HOME =================
+// ================= MENU =================
 
-function showHome(){
-app.innerHTML = `
-<div class="card">
-<h3>Salon App</h3>
-
-<button class="blue" onclick="showAddVisit()">Add Visit</button>
-<button class="blue" onclick="showReports()">Reports</button>
-
-<button class="gray" onclick="logout()">Logout</button>
+function showMenu(){
+menu.innerHTML = `
+<div class="menu">
+<button onclick="showAddVisit()">Add Visit</button>
+<button onclick="showReports()">Reports</button>
+<button onclick="logout()">Logout</button>
 </div>`;
 }
 
-// ================= ADD VISIT (same as before) =================
+// ================= LOGIN =================
+
+function showLogin(){
+menu.innerHTML = "";
+app.innerHTML = `
+<div class="card">
+<h2 style="text-align:center;">Salon Manager</h2>
+<p style="text-align:center;">Manage your salon smartly</p>
+
+<input id="mobile" placeholder="Enter Mobile">
+
+<button onclick="login()" style="width:100%;background:#2563eb;color:white;">Login</button>
+</div>`;
+}
+
+async function login(){
+
+let { data } = await client
+.from("users")
+.select("*")
+.eq("mobile", mobile.value)
+.single();
+
+if(!data){
+alert("User not found");
+return;
+}
+
+localStorage.setItem("userId", data.id);
+
+showMenu();
+showHome();
+}
+
+// ================= HOME =================
+
+function showHome(){
+app.innerHTML = `<div class="card">Welcome</div>`;
+}
+
+// ================= ADD VISIT =================
 
 async function showAddVisit(){
+
+showMenu();
 
 let userId = localStorage.getItem("userId");
 
@@ -60,6 +135,7 @@ let { data: services } = await client.from("salon_services").select("*").eq("use
 
 window.visitCustomers = customers;
 window.visitServices = services;
+window.selectedCustomer = null; // FIX
 
 app.innerHTML = `
 <div class="card">
@@ -78,8 +154,7 @@ app.innerHTML = `
 
 <input type="date" id="vdate">
 
-<button class="blue" onclick="saveVisit()">Save Visit</button>
-<button class="gray" onclick="showHome()">Back</button>
+<button onclick="saveVisit()" style="width:100%;background:#2563eb;color:white;">Save Visit</button>
 </div>`;
 
 renderCustomerList(customers);
@@ -89,6 +164,7 @@ vdate.value = new Date().toISOString().split("T")[0];
 }
 
 // CUSTOMER
+
 function renderCustomerList(data){
 custList.innerHTML = data.map(c=>`
 <div onclick="selectCustomer('${c.id}','${c.name}')">${c.name}</div>
@@ -107,38 +183,48 @@ custList.innerHTML = "";
 }
 
 // SERVICES
+
 function renderServiceList(data){
 serviceList.innerHTML = data.map(s=>`
-<div>
+<div class="row">
 <input type="checkbox" id="chk_${s.id}" onchange="calcTotal()">
-${s.name}
+<span>${s.name}</span>
 <input type="number" id="rate_${s.id}" value="${s.rate}" onchange="calcTotal()">
 </div>
 `).join("");
 }
 
 // TOTAL
+
 function calcTotal(){
 let total = 0;
+
 visitServices.forEach(s=>{
 let chk = document.getElementById("chk_"+s.id);
-if(chk.checked){
+if(chk && chk.checked){
 total += parseFloat(document.getElementById("rate_"+s.id).value || 0);
 }
 });
-totalEl = document.getElementById("total");
-if(totalEl) totalEl.innerText = total;
+
+document.getElementById("total").innerText = total;
 }
 
-// SAVE
+// SAVE VISIT
+
 async function saveVisit(){
+
+if(!window.selectedCustomer){
+alert("Select customer first");
+return;
+}
 
 let selectedServices = [];
 let total = 0;
 
 visitServices.forEach(s=>{
 let chk = document.getElementById("chk_"+s.id);
-if(chk.checked){
+if(chk && chk.checked){
+
 let rate = parseFloat(document.getElementById("rate_"+s.id).value || 0);
 
 selectedServices.push(`${s.name} ₹${rate}`);
@@ -154,31 +240,34 @@ amount: total,
 visit_date: vdate.value
 }]);
 
-alert("Saved");
-showHome();
+alert("Visit Saved");
+
+showAddVisit(); // stay on page
 }
 
 // ================= REPORT =================
 
 function showReports(){
+
+showMenu();
+
 app.innerHTML = `
 <div class="card">
 <h2>Reports</h2>
 
-<button class="blue" onclick="todayReport()">Today</button>
+<button onclick="todayReport()" style="width:100%;background:#2563eb;color:white;">Today</button>
 
 <input type="date" id="from">
 <input type="date" id="to">
 
-<button class="blue" onclick="rangeReport()">Date Range</button>
+<button onclick="rangeReport()" style="width:100%;background:#2563eb;color:white;">Date Range</button>
 
 <div id="report"></div>
-
-<button class="gray" onclick="showHome()">Back</button>
 </div>`;
 }
 
 // TODAY
+
 async function todayReport(){
 
 let today = new Date().toISOString().split("T")[0];
@@ -186,24 +275,28 @@ let today = new Date().toISOString().split("T")[0];
 let { data } = await client
 .from("salon_visits")
 .select("*")
+.eq("user_id", localStorage.getItem("userId")) // FIX
 .eq("visit_date", today);
 
 renderReport(data);
 }
 
 // RANGE
+
 async function rangeReport(){
 
 let { data } = await client
 .from("salon_visits")
 .select("*")
+.eq("user_id", localStorage.getItem("userId")) // FIX
 .gte("visit_date", from.value)
 .lte("visit_date", to.value);
 
 renderReport(data);
 }
 
-// RENDER REPORT
+// RENDER
+
 function renderReport(data){
 
 let total = 0;
@@ -212,24 +305,12 @@ report.innerHTML = data.map(v=>{
 total += v.amount;
 
 return `
-<div class="row">
+<div class="card">
 <b>${v.customer_name}</b><br>
-<span class="small">${v.services}</span><br>
+${v.services}<br>
 ₹${v.amount}
 </div>`;
 }).join("") + `<h3>Total ₹ ${total}</h3>`;
-}
-
-// ================= LOGIN =================
-
-function showLogin(){
-app.innerHTML = `<div class="card"><input id="mobile"><button onclick="login()">Login</button></div>`;
-}
-
-async function login(){
-let { data } = await client.from("users").select("*").eq("mobile", mobile.value).single();
-localStorage.setItem("userId", data.id);
-showHome();
 }
 
 // ================= LOGOUT =================
@@ -240,7 +321,9 @@ showLogin();
 }
 
 // START
+
 if(localStorage.getItem("userId")){
+showMenu();
 showHome();
 }else{
 showLogin();
