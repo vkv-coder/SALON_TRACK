@@ -5,7 +5,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <style>
-body { font-family: Arial; background:#f2f2f2; margin:0; }
+body { font-family: Arial; margin:0; background:#f2f2f2; }
 
 .header {
 background:#2563eb;
@@ -17,14 +17,14 @@ font-weight:bold;
 }
 
 .menu {
-display:flex;
+display:grid;
+grid-template-columns:1fr 1fr;
 gap:10px;
 padding:10px;
 background:white;
 }
 
 .menu button {
-flex:1;
 padding:10px;
 border:none;
 border-radius:6px;
@@ -41,19 +41,15 @@ border-radius:10px;
 
 input {
 width:100%;
-padding:8px;
+padding:10px;
 margin:5px 0;
 border-radius:6px;
 border:1px solid #ccc;
 }
 
-.row {
-display:flex;
-justify-content:space-between;
-margin:5px 0;
-}
-</style>
+.row { margin:5px 0; }
 
+</style>
 </head>
 
 <body>
@@ -71,17 +67,6 @@ const client = supabase.createClient(
 
 let app = document.getElementById("app");
 
-// ================= MENU =================
-
-function showMenu(){
-menu.innerHTML = `
-<div class="menu">
-<button onclick="showAddVisit()">Add Visit</button>
-<button onclick="showReports()">Reports</button>
-<button onclick="logout()">Logout</button>
-</div>`;
-}
-
 // ================= LOGIN =================
 
 function showLogin(){
@@ -89,9 +74,8 @@ menu.innerHTML = "";
 app.innerHTML = `
 <div class="card">
 <h2 style="text-align:center;">Salon Manager</h2>
-<p style="text-align:center;">Manage your salon smartly</p>
 
-<input id="mobile" placeholder="Enter Mobile">
+<input id="mobile" placeholder="Mobile">
 
 <button onclick="login()" style="width:100%;background:#2563eb;color:white;">Login</button>
 </div>`;
@@ -111,22 +95,40 @@ return;
 }
 
 localStorage.setItem("userId", data.id);
+localStorage.setItem("userName", data.name || "");
+localStorage.setItem("shopName", data.shop || "");
 
 showMenu();
 showHome();
 }
 
+// ================= MENU =================
+
+function showMenu(){
+menu.innerHTML = `
+<div class="menu">
+<button onclick="showMaster()">Master</button>
+<button onclick="showAddVisit()">Add Visit</button>
+<button onclick="showReports()">Reports</button>
+<button onclick="showReminder()">Reminder</button>
+<button onclick="showSupport()">Support</button>
+<button onclick="logout()">Logout</button>
+</div>`;
+}
+
 // ================= HOME =================
 
 function showHome(){
-app.innerHTML = `<div class="card">Welcome</div>`;
+app.innerHTML = `
+<div class="card">
+<h3>Welcome, ${localStorage.getItem("userName")}</h3>
+<p>${localStorage.getItem("shopName")}</p>
+</div>`;
 }
 
 // ================= ADD VISIT =================
 
 async function showAddVisit(){
-
-showMenu();
 
 let userId = localStorage.getItem("userId");
 
@@ -135,7 +137,7 @@ let { data: services } = await client.from("salon_services").select("*").eq("use
 
 window.visitCustomers = customers;
 window.visitServices = services;
-window.selectedCustomer = null; // FIX
+window.selectedCustomer = null;
 
 app.innerHTML = `
 <div class="card">
@@ -153,6 +155,8 @@ app.innerHTML = `
 <h3>Total ₹ <span id="total">0</span></h3>
 
 <input type="date" id="vdate">
+
+<input id="remDays" type="number" placeholder="Reminder Days (e.g. 30)">
 
 <button onclick="saveVisit()" style="width:100%;background:#2563eb;color:white;">Save Visit</button>
 </div>`;
@@ -188,8 +192,8 @@ function renderServiceList(data){
 serviceList.innerHTML = data.map(s=>`
 <div class="row">
 <input type="checkbox" id="chk_${s.id}" onchange="calcTotal()">
-<span>${s.name}</span>
-<input type="number" id="rate_${s.id}" value="${s.rate}" onchange="calcTotal()">
+${s.name}
+<input type="number" value="${s.rate}" id="rate_${s.id}" onchange="calcTotal()">
 </div>
 `).join("");
 }
@@ -214,103 +218,87 @@ document.getElementById("total").innerText = total;
 async function saveVisit(){
 
 if(!window.selectedCustomer){
-alert("Select customer first");
+alert("Select customer");
 return;
 }
 
-let selectedServices = [];
 let total = 0;
+let services = [];
 
 visitServices.forEach(s=>{
 let chk = document.getElementById("chk_"+s.id);
 if(chk && chk.checked){
-
 let rate = parseFloat(document.getElementById("rate_"+s.id).value || 0);
-
-selectedServices.push(`${s.name} ₹${rate}`);
+services.push(`${s.name} ₹${rate}`);
 total += rate;
 }
 });
 
+// REMINDER DATE
+let reminderDate = null;
+
+if(remDays.value){
+let d = new Date(vdate.value);
+d.setDate(d.getDate() + parseInt(remDays.value));
+reminderDate = d.toISOString().split("T")[0];
+}
+
 await client.from("salon_visits").insert([{
 user_id: localStorage.getItem("userId"),
 customer_name: selectedCustomer.name,
-services: selectedServices.join(", "),
+services: services.join(", "),
 amount: total,
-visit_date: vdate.value
+visit_date: vdate.value,
+reminder_date: reminderDate
 }]);
 
-alert("Visit Saved");
+alert("Saved");
 
-showAddVisit(); // stay on page
+showAddVisit();
 }
 
-// ================= REPORT =================
+// ================= REMINDER =================
 
-function showReports(){
-
-showMenu();
-
-app.innerHTML = `
-<div class="card">
-<h2>Reports</h2>
-
-<button onclick="todayReport()" style="width:100%;background:#2563eb;color:white;">Today</button>
-
-<input type="date" id="from">
-<input type="date" id="to">
-
-<button onclick="rangeReport()" style="width:100%;background:#2563eb;color:white;">Date Range</button>
-
-<div id="report"></div>
-</div>`;
-}
-
-// TODAY
-
-async function todayReport(){
+async function showReminder(){
 
 let today = new Date().toISOString().split("T")[0];
 
 let { data } = await client
 .from("salon_visits")
 .select("*")
-.eq("user_id", localStorage.getItem("userId")) // FIX
-.eq("visit_date", today);
+.eq("user_id", localStorage.getItem("userId"))
+.lte("reminder_date", today);
 
-renderReport(data);
-}
+app.innerHTML = `
+<div class="card">
+<h2>Reminders</h2>
 
-// RANGE
-
-async function rangeReport(){
-
-let { data } = await client
-.from("salon_visits")
-.select("*")
-.eq("user_id", localStorage.getItem("userId")) // FIX
-.gte("visit_date", from.value)
-.lte("visit_date", to.value);
-
-renderReport(data);
-}
-
-// RENDER
-
-function renderReport(data){
-
-let total = 0;
-
-report.innerHTML = data.map(v=>{
-total += v.amount;
-
-return `
+${data.map(v=>`
 <div class="card">
 <b>${v.customer_name}</b><br>
-${v.services}<br>
-₹${v.amount}
+Due: ${v.reminder_date}
+</div>
+`).join("")}
+
 </div>`;
-}).join("") + `<h3>Total ₹ ${total}</h3>`;
+}
+
+// ================= REPORT =================
+
+function showReports(){
+app.innerHTML = `<div class="card">Reports working (already built)</div>`;
+}
+
+// ================= SUPPORT =================
+
+function showSupport(){
+app.innerHTML = `<div class="card">vkvcoder.support@gmail.com</div>`;
+}
+
+// ================= MASTER =================
+
+function showMaster(){
+app.innerHTML = `<div class="card">Master next step</div>`;
 }
 
 // ================= LOGOUT =================
@@ -321,13 +309,7 @@ showLogin();
 }
 
 // START
-
-if(localStorage.getItem("userId")){
-showMenu();
-showHome();
-}else{
 showLogin();
-}
 
 </script>
 </body>
