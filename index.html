@@ -7,6 +7,7 @@
 <style>
 body { font-family: Arial; background:#f2f2f2; margin:0; }
 .card { background:white; padding:15px; margin:10px; border-radius:10px; }
+
 .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 
 button { padding:10px; border:none; border-radius:6px; }
@@ -18,11 +19,10 @@ width:100%; padding:8px; margin:5px 0;
 border-radius:6px; border:1px solid #ccc;
 }
 
-.list-item {
-padding:10px;
-border-bottom:1px solid #eee;
-cursor:pointer;
-}
+table { width:100%; border-collapse:collapse; }
+th, td { padding:8px; border-bottom:1px solid #ddd; text-align:left; }
+th { background:#eee; }
+tr { cursor:pointer; }
 </style>
 
 </head>
@@ -142,20 +142,9 @@ app.innerHTML = `
 </div>`;
 }
 
-// ================= CUSTOMER LIST =================
+// ================= CUSTOMER TABLE VIEW =================
 
 async function showCustomerList(){
-
-app.innerHTML = `
-<div class="card">
-<h2>Customers</h2>
-
-<input id="search" placeholder="Search..." onkeyup="searchCustomer()">
-
-<div id="list"></div>
-
-<button class="gray" onclick="showCustomerMenu()">Back</button>
-</div>`;
 
 let userId = localStorage.getItem("userId");
 
@@ -166,25 +155,43 @@ let { data } = await client
 
 window.customerData = data;
 
-renderCustomerList(data);
+app.innerHTML = `
+<div class="card">
+<h2>Customers</h2>
+
+<input id="search" placeholder="Search..." onkeyup="filterCustomer()">
+
+<table id="custTable">
+<thead>
+<tr>
+<th>Name</th>
+<th>Mobile</th>
+<th>Address</th>
+<th>Birthday</th>
+</tr>
+</thead>
+
+<tbody>
+${data.map(c=>`
+<tr onclick="editCustomer('${c.id}')">
+<td>${c.name||""}</td>
+<td>${c.mobile||""}</td>
+<td>${c.address||""}</td>
+<td>${c.birthday||""}</td>
+</tr>
+`).join("")}
+</tbody>
+</table>
+
+<button class="gray" onclick="showCustomerMenu()">Back</button>
+</div>`;
 }
 
-function renderCustomerList(data){
-document.getElementById("list").innerHTML = data.map(c=>`
-<div class="list-item" onclick="editCustomer('${c.id}')">
-${c.name}
-</div>
-`).join("");
-}
-
-function searchCustomer(){
+function filterCustomer(){
 let txt = search.value.toLowerCase();
-
-let filtered = customerData.filter(c =>
-c.name.toLowerCase().includes(txt)
-);
-
-renderCustomerList(filtered);
+document.querySelectorAll("#custTable tbody tr").forEach(r=>{
+r.style.display = r.innerText.toLowerCase().includes(txt) ? "" : "none";
+});
 }
 
 // ================= ADD CUSTOMER =================
@@ -204,10 +211,9 @@ app.innerHTML = `
 }
 
 async function saveCustomer(){
-let userId = localStorage.getItem("userId");
 
 await client.from("salon_customers").insert([{
-user_id:userId,
+user_id:localStorage.getItem("userId"),
 name:cname.value,
 mobile:cmobile.value,
 address:caddress.value
@@ -216,7 +222,7 @@ address:caddress.value
 showCustomerMenu();
 }
 
-// ================= EDIT CUSTOMER (TABLE STYLE) =================
+// ================= EDIT CUSTOMER =================
 
 function editCustomer(id){
 
@@ -226,41 +232,29 @@ app.innerHTML = `
 <div class="card">
 <h2>Edit Customer</h2>
 
-<table style="width:100%; border-collapse:collapse;">
-<tr style="background:#eee;">
-<th>Name</th>
-<th>Mobile</th>
-<th>Address</th>
-<th>Birthday</th>
-</tr>
-
+<table>
+<tr><th>Name</th><th>Mobile</th><th>Address</th><th>Birthday</th></tr>
 <tr>
 <td><input id="cname" value="${c.name}"></td>
-<td><input id="cmobile" value="${c.mobile || ""}"></td>
-<td><input id="caddress" value="${c.address || ""}"></td>
-<td><input id="cbirthday" value="${c.birthday || ""}"></td>
+<td><input id="cmobile" value="${c.mobile||""}"></td>
+<td><input id="caddress" value="${c.address||""}"></td>
+<td><input id="cbirthday" value="${c.birthday||""}"></td>
 </tr>
 </table>
 
-<br>
-
 <button class="blue" onclick="updateCustomer('${id}')">Update</button>
 <button class="gray" onclick="showCustomerList()">Back</button>
-
 </div>`;
 }
 
 async function updateCustomer(id){
 
-await client
-.from("salon_customers")
-.update({
-name: cname.value,
-mobile: cmobile.value,
-address: caddress.value,
-birthday: cbirthday.value
-})
-.eq("id", id);
+await client.from("salon_customers").update({
+name:cname.value,
+mobile:cmobile.value,
+address:caddress.value,
+birthday:cbirthday.value
+}).eq("id", id);
 
 showCustomerList();
 }
@@ -279,20 +273,9 @@ app.innerHTML = `
 </div>`;
 }
 
-// ================= SERVICE LIST =================
+// ================= SERVICE TABLE =================
 
 async function showServiceList(){
-
-app.innerHTML = `
-<div class="card">
-<h2>Services</h2>
-
-<input id="search" placeholder="Search..." onkeyup="searchService()">
-
-<div id="list"></div>
-
-<button class="gray" onclick="showServiceMenu()">Back</button>
-</div>`;
 
 let userId = localStorage.getItem("userId");
 
@@ -303,25 +286,39 @@ let { data } = await client
 
 window.serviceData = data;
 
-renderServiceList(data);
+app.innerHTML = `
+<div class="card">
+<h2>Services</h2>
+
+<input id="search" placeholder="Search..." onkeyup="filterService()">
+
+<table id="srvTable">
+<thead>
+<tr>
+<th>Name</th>
+<th>Rate</th>
+</tr>
+</thead>
+
+<tbody>
+${data.map(s=>`
+<tr onclick="editService('${s.id}')">
+<td>${s.name}</td>
+<td>₹${s.rate}</td>
+</tr>
+`).join("")}
+</tbody>
+</table>
+
+<button class="gray" onclick="showServiceMenu()">Back</button>
+</div>`;
 }
 
-function renderServiceList(data){
-document.getElementById("list").innerHTML = data.map(s=>`
-<div class="list-item" onclick="editService('${s.id}')">
-${s.name} - ₹${s.rate}
-</div>
-`).join("");
-}
-
-function searchService(){
+function filterService(){
 let txt = search.value.toLowerCase();
-
-let filtered = serviceData.filter(s =>
-s.name.toLowerCase().includes(txt)
-);
-
-renderServiceList(filtered);
+document.querySelectorAll("#srvTable tbody tr").forEach(r=>{
+r.style.display = r.innerText.toLowerCase().includes(txt) ? "" : "none";
+});
 }
 
 // ================= ADD SERVICE =================
@@ -340,10 +337,9 @@ app.innerHTML = `
 }
 
 async function saveService(){
-let userId = localStorage.getItem("userId");
 
 await client.from("salon_services").insert([{
-user_id:userId,
+user_id:localStorage.getItem("userId"),
 name:sname.value,
 rate:srate.value
 }]);
@@ -371,13 +367,10 @@ app.innerHTML = `
 
 async function updateService(id){
 
-await client
-.from("salon_services")
-.update({
+await client.from("salon_services").update({
 name:sname.value,
 rate:srate.value
-})
-.eq("id", id);
+}).eq("id", id);
 
 showServiceList();
 }
