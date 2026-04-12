@@ -42,10 +42,13 @@ td, th {border:1px solid #ccc; padding:6px; font-size:13px;}
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
 <script>
-
-const client = supabase.createClient("https://jqqnnkzozjskziaizajg.supabase.co","sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P");
-
+const client = supabase.createClient(
+  "https://jqqnnkzozjskziaizajg.supabase.co",
+  "sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P"
+);
 let user_id=null;
 
 // LOGIN
