@@ -49,19 +49,48 @@ app.innerHTML=`
 }
 
 async function login(){
-let mob=mobile.value.trim();
-if(!mob){alert("Enter mobile");return;}
 
-let {data}=await client.from("users").select("*").eq("mobile",mob).limit(1);
-if(!data || data.length==0){alert("User not found");return;}
+let mob = mobile.value.trim();
 
-let user=data[0];
-localStorage.setItem("userId",user.id);
-localStorage.setItem("userName",user.name||"User");
-
-showMenu(); showHome();
+if(!mob){
+alert("Enter mobile");
+return;
 }
 
+// 🔍 try find user
+let { data } = await client
+.from("users")
+.select("*")
+.eq("mobile", mob)
+.limit(1);
+
+let user;
+
+// ❌ if not found → CREATE
+if(!data || data.length === 0){
+
+let { data: newUser } = await client
+.from("users")
+.insert([{
+mobile: mob,
+name: "User",
+plan_status: "not_started"
+}])
+.select();
+
+user = newUser[0];
+
+}else{
+user = data[0];
+}
+
+// ✅ login success
+localStorage.setItem("userId", user.id);
+localStorage.setItem("userName", user.name || "User");
+
+showMenu();
+showHome();
+}
 // ================= TRIAL =================
 async function startTrialIfNeeded(){
 let userId=localStorage.getItem("userId");
