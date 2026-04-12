@@ -49,14 +49,8 @@ border-radius:8px;
 border:1px solid #ccc;
 }
 
-.row {
-display:flex;
-gap:10px;
-}
-
-.row input {
-flex:1;
-}
+.row { display:flex; gap:10px; }
+.row input { flex:1; }
 
 .tab-btn {
 padding:10px;
@@ -65,6 +59,29 @@ background:#2563eb;
 color:white;
 border:none;
 border-radius:8px;
+}
+
+.service-row {
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin:10px 0;
+}
+
+.footer {
+text-align:center;
+font-size:13px;
+color:#666;
+padding:10px;
+}
+
+.small-btn {
+padding:6px 10px;
+margin:5px;
+background:#2563eb;
+color:white;
+border:none;
+border-radius:6px;
 }
 </style>
 </head>
@@ -83,9 +100,49 @@ const client = supabase.createClient(
 );
 
 let app = document.getElementById("app");
+let menu = document.getElementById("menu");
+
+let visitCustomers = [];
+let visitServices = [];
+let selectedCustomer = null;
+
+// ================= LOGIN =================
+function showLogin(){
+menu.innerHTML="";
+app.innerHTML=`
+<div class="card">
+<h2>SALON TRACK</h2>
+<input id="mobile" placeholder="Mobile">
+<button onclick="login()">Login</button>
+</div>`;
+}
+
+async function login(){
+let { data } = await client.from("users").select("*").eq("mobile", mobile.value).single();
+if(!data){alert("User not found");return;}
+localStorage.setItem("userId", data.id);
+localStorage.setItem("userName", data.name || "User");
+showMenu(); showHome();
+}
+
+// ================= MENU =================
+function showMenu(){
+menu.innerHTML=`
+<div class="menu">
+<button onclick="showMaster()">Master</button>
+<button onclick="showAddVisit()">Add Visit</button>
+<button onclick="showReports()">Reports</button>
+<button onclick="showReminder()">Reminder</button>
+<button onclick="logout()">Logout</button>
+</div>
+<div class="footer">📧 vkvcoder.support@gmail.com</div>`;
+}
+
+function showHome(){
+app.innerHTML=`<div class="card">Welcome ${localStorage.getItem("userName")}</div>`;
+}
 
 // ================= MASTER =================
-
 function showMaster(){
 app.innerHTML=`
 <div class="card">
@@ -95,7 +152,7 @@ app.innerHTML=`
 </div>`;
 }
 
-// -------- CUSTOMER MAIN --------
+// CUSTOMER
 function showCustomer(){
 content.innerHTML=`
 <button class="tab-btn" onclick="addCustomerUI()">Add</button>
@@ -103,9 +160,11 @@ content.innerHTML=`
 <div id="sub"></div>`;
 }
 
-// -------- ADD CUSTOMER --------
 function addCustomerUI(){
 sub.innerHTML=`
+<select id="salutation">
+<option>Mr</option><option>Mrs</option><option>Miss</option><option>Dr</option>
+</select>
 <input id="name" placeholder="Name">
 <input id="phone" placeholder="Phone">
 <input id="address" placeholder="Address">
@@ -116,6 +175,7 @@ sub.innerHTML=`
 
 async function saveCustomer(){
 await client.from("salon_customers").insert([{
+salutation:salutation.value,
 name:name.value,
 phone:phone.value,
 address:address.value,
@@ -125,56 +185,56 @@ anniversary:anni.value
 alert("Saved");
 }
 
-// -------- VIEW CUSTOMER --------
 async function viewCustomerUI(){
-
 let {data}=await client.from("salon_customers").select("*");
 
 sub.innerHTML=`
 <select id="custDrop" onchange="loadCust()">
 <option>Select</option>
-${data.map(c=>`<option value="${c.id}">${c.name}</option>`)}
+${data.map(c=>`<option value="${c.id}">${c.salutation||""} ${c.name}</option>`)}
 </select>
-
 <div id="custDetail"></div>`;
 }
 
 async function loadCust(){
-let id=custDrop.value;
-let {data}=await client.from("salon_customers").select("*").eq("id",id).single();
+let {data}=await client.from("salon_customers").select("*").eq("id",custDrop.value).single();
 
 custDetail.innerHTML=`
+<select id="e0">
+<option ${data.salutation=="Mr"?"selected":""}>Mr</option>
+<option ${data.salutation=="Mrs"?"selected":""}>Mrs</option>
+<option ${data.salutation=="Miss"?"selected":""}>Miss</option>
+<option ${data.salutation=="Dr"?"selected":""}>Dr</option>
+</select>
+
 <div class="row">
 <input id="e1" value="${data.name}">
 <input id="e2" value="${data.phone}">
 </div>
 
-<div class="row">
 <input id="e3" value="${data.address||""}">
-</div>
 
 <div class="row">
 <input id="e4" type="date" value="${data.birthday||""}">
 <input id="e5" type="date" value="${data.anniversary||""}">
 </div>
 
-<button onclick="updateCust('${data.id}')">Update</button>
-`;
+<button onclick="updateCust('${data.id}')">Update</button>`;
 }
 
 async function updateCust(id){
 await client.from("salon_customers").update({
+salutation:e0.value,
 name:e1.value,
 phone:e2.value,
 address:e3.value,
 birthday:e4.value,
 anniversary:e5.value
 }).eq("id",id);
-
 alert("Updated");
 }
 
-// -------- SERVICE --------
+// SERVICE
 function showService(){
 content.innerHTML=`
 <button class="tab-btn" onclick="addServiceUI()">Add</button>
@@ -190,10 +250,7 @@ sub.innerHTML=`
 }
 
 async function saveService(){
-await client.from("salon_services").insert([{
-name:sname.value,
-rate:srate.value
-}]);
+await client.from("salon_services").insert([{name:sname.value,rate:srate.value}]);
 alert("Saved");
 }
 
@@ -205,19 +262,16 @@ sub.innerHTML=`
 <option>Select</option>
 ${data.map(s=>`<option value="${s.id}">${s.name}</option>`)}
 </select>
-
 <div id="servDetail"></div>`;
 }
 
 async function loadServ(){
-let id=servDrop.value;
-let {data}=await client.from("salon_services").select("*").eq("id",id).single();
+let {data}=await client.from("salon_services").select("*").eq("id",servDrop.value).single();
 
 servDetail.innerHTML=`
 <input id="sn" value="${data.name}">
 <input id="sr" value="${data.rate}">
-<button onclick="updateServ('${data.id}')">Update</button>
-`;
+<button onclick="updateServ('${data.id}')">Update</button>`;
 }
 
 async function updateServ(id){
@@ -225,12 +279,174 @@ await client.from("salon_services").update({
 name:sn.value,
 rate:sr.value
 }).eq("id",id);
-
 alert("Updated");
 }
 
-// START
-showMaster();
+// ================= ADD VISIT =================
+async function showAddVisit(){
+
+let {data:c}=await client.from("salon_customers").select("*");
+let {data:s}=await client.from("salon_services").select("*");
+
+visitCustomers=c||[];
+visitServices=s||[];
+
+app.innerHTML=`
+<div class="card">
+<h2>Add Visit</h2>
+
+<input id="custSearch" placeholder="Search" onkeyup="filterCustomer()">
+<div id="custList"></div>
+
+<hr>
+<div id="serviceList"></div>
+
+<hr>Total ₹ <span id="total">0</span>
+
+<input type="date" id="vdate">
+<input id="remDays" placeholder="Reminder days">
+
+<button onclick="saveVisit()">Save</button>
+</div>`;
+
+renderCustomerList(visitCustomers);
+renderServiceList(visitServices);
+vdate.value=new Date().toISOString().split("T")[0];
+}
+
+function renderCustomerList(d){
+custList.innerHTML=d.map(x=>`<div onclick="selectCustomer('${x.name}')">${x.name}</div>`).join("");
+}
+
+function filterCustomer(){
+renderCustomerList(visitCustomers.filter(x=>x.name.toLowerCase().includes(custSearch.value.toLowerCase())));
+}
+
+function selectCustomer(n){
+selectedCustomer=n;
+custSearch.value=n;
+custList.innerHTML="";
+}
+
+function renderServiceList(d){
+serviceList.innerHTML=d.map(s=>`
+<div class="service-row">
+<div>${s.name}</div>
+<input type="checkbox" id="c${s.id}" onchange="calc()">
+<input type="number" value="${s.rate}" id="r${s.id}" onchange="calc()">
+</div>`).join("");
+}
+
+function calc(){
+let t=0;
+visitServices.forEach(s=>{
+if(document.getElementById("c"+s.id)?.checked){
+t+=parseFloat(document.getElementById("r"+s.id).value||0);
+}
+});
+total.innerText=t;
+}
+
+async function saveVisit(){
+
+let totalAmt=0, svc=[];
+visitServices.forEach(s=>{
+if(document.getElementById("c"+s.id)?.checked){
+let r=parseFloat(document.getElementById("r"+s.id).value||0);
+svc.push(s.name+" ₹"+r);
+totalAmt+=r;
+}
+});
+
+let due=null;
+if(remDays.value){
+let d=new Date(vdate.value);
+d.setDate(d.getDate()+parseInt(remDays.value));
+due=d.toISOString().split("T")[0];
+}
+
+await client.from("salon_visits").insert([{
+customer_name:selectedCustomer,
+service:svc.join(", "),
+amount:totalAmt,
+visit_date:vdate.value,
+reminder_date:due
+}]);
+
+alert("Saved");
+}
+
+// ================= REPORT =================
+async function showReports(){
+app.innerHTML=`
+<div class="card">
+<h2>Reports</h2>
+<button class="small-btn" onclick="loadReport('today')">Today</button>
+<input type="date" id="from">
+<input type="date" id="to">
+<button class="small-btn" onclick="loadReport('range')">Filter</button>
+<div id="rlist"></div>
+</div>`;
+}
+
+async function loadReport(type){
+let q=client.from("salon_visits").select("*");
+
+if(type==="today"){
+let t=new Date().toISOString().split("T")[0];
+q=q.eq("visit_date",t);
+}
+
+if(type==="range"){
+q=q.gte("visit_date",from.value).lte("visit_date",to.value);
+}
+
+let {data}=await q;
+
+rlist.innerHTML=data.map(v=>`
+<div class="card">
+<b>${v.customer_name}</b><br>
+${v.service}<br>
+₹${v.amount} | ${v.visit_date}
+</div>`).join("");
+}
+
+// ================= REMINDER =================
+async function showReminder(){
+
+let today=new Date();
+let future=new Date();
+future.setDate(today.getDate()+3);
+
+let {data}=await client.from("salon_visits").select("*");
+
+let list=data.filter(v=>{
+if(!v.reminder_date) return false;
+let d=new Date(v.reminder_date);
+return d>=today && d<=future;
+});
+
+app.innerHTML=`
+<div class="card">
+<h2>Reminder</h2>
+${list.map(v=>`
+<div class="card">
+<b>${v.customer_name}</b><br>
+Due: ${v.reminder_date}<br>
+
+<a href="https://wa.me/?text=Dear ${v.customer_name}, it is time to groom yourself. We would love to serve you again." target="_blank">💬 WhatsApp</a>
+
+</div>`).join("")}
+</div>`;
+}
+
+// ================= LOGOUT =================
+function logout(){
+localStorage.clear();
+showLogin();
+}
+
+showLogin();
 
 </script>
 </body>
