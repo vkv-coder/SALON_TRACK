@@ -28,7 +28,6 @@ border-radius:6px; border:1px solid #ccc;
 
 <script>
 
-// ===== SUPABASE =====
 const SUPABASE_URL = "https://jqqnnkzozjskziaizajg.supabase.co";
 const SUPABASE_KEY = "sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P";
 
@@ -36,7 +35,7 @@ const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let app = document.getElementById("app");
 
-// ===== LOGIN =====
+// LOGIN
 function showLogin(){
 app.innerHTML = `
 <div class="card">
@@ -47,32 +46,24 @@ app.innerHTML = `
 }
 
 async function checkLogin(){
-
 let mobile = document.getElementById("mobile").value;
 
-if(!mobile){ alert("Enter mobile"); return; }
-
-let { data, error } = await client
+let { data } = await client
 .from("users")
 .select("*")
 .eq("mobile", mobile)
 .single();
 
-if(error && error.code !== "PGRST116"){
-alert(error.message);
-return;
-}
-
 if(data){
 localStorage.setItem("currentUser", mobile);
-localStorage.setItem("userId", data.id); // ✅ UUID stored
+localStorage.setItem("userId", data.id);
 showHome();
 }else{
 showRegister(mobile);
 }
 }
 
-// ===== REGISTER =====
+// REGISTER
 function showRegister(mobile){
 app.innerHTML = `
 <div class="card">
@@ -92,43 +83,17 @@ let shop = document.getElementById("shop").value;
 let city = document.getElementById("city").value;
 let state = document.getElementById("state").value;
 
-if(!name || !shop || !city || !state){
-alert("Fill all fields");
-return;
-}
-
-let today = new Date().toISOString().split("T")[0];
-let endDate = new Date();
-endDate.setDate(endDate.getDate() + 15);
-let end = endDate.toISOString().split("T")[0];
-
-let { data, error } = await client
-.from("users")
-.insert([{
-mobile: mobile,
-name: name,
-shop: shop,
-city: city,
-state: state,
-start_date: today,
-expiry_date: end
-}])
-.select(); // ✅ important
-
-if(error){
-alert(error.message);
-return;
-}
+let { data } = await client.from("users").insert([{
+mobile, name, shop, city, state
+}]).select();
 
 localStorage.setItem("currentUser", mobile);
-localStorage.setItem("userId", data[0].id); // ✅ UUID
-
-alert("Registered");
+localStorage.setItem("userId", data[0].id);
 
 showHome();
 }
 
-// ===== HOME =====
+// HOME
 function showHome(){
 app.innerHTML = `
 <div class="card">
@@ -136,48 +101,36 @@ app.innerHTML = `
 
 <div class="grid">
 <button class="blue" onclick="showMaster()">Master</button>
-<button class="blue">Add Visit</button>
-<button class="blue">Reports</button>
-<button class="blue">Reminder</button>
+<button class="blue" onclick="showAddVisit()">Add Visit</button>
+<button class="blue" onclick="showReports()">Reports</button>
+<button class="blue" onclick="showReminder()">Reminder</button>
 </div>
 
 <button class="gray" onclick="logout()">Logout</button>
 </div>`;
 }
 
-// ===== MASTER MENU =====
+// MASTER
 function showMaster(){
 app.innerHTML = `
 <div class="card">
 <h2>Master</h2>
 
 <button class="blue" onclick="showCustomerMaster()">Customer</button>
-<button class="blue">Service</button>
+<button class="blue" onclick="showService()">Service</button>
 
 <button class="gray" onclick="showHome()">Back</button>
 </div>`;
 }
 
-// ===== CUSTOMER MASTER =====
+// CUSTOMER
 async function showCustomerMaster(){
-
 let userId = localStorage.getItem("userId");
 
-if(!userId){
-alert("Login again");
-logout();
-return;
-}
-
-let { data, error } = await client
+let { data } = await client
 .from("salon_customers")
 .select("*")
 .eq("user_id", userId);
-
-if(error){
-alert(error.message);
-return;
-}
 
 app.innerHTML = `
 <div class="card">
@@ -185,26 +138,20 @@ app.innerHTML = `
 
 <button class="blue" onclick="showAddCustomer()">+ Add Customer</button>
 
-${data.map(c=>`
-<p>${c.salutation || ""} ${c.name} - ${c.mobile || ""}</p>
-`).join("")}
+${data.map(c=>`<p>${c.name}</p>`).join("")}
 
 <button class="gray" onclick="showMaster()">Back</button>
 </div>`;
 }
 
-// ===== ADD CUSTOMER =====
 function showAddCustomer(){
 app.innerHTML = `
 <div class="card">
 <h2>Add Customer</h2>
 
 <select id="salutation">
-<option value="">Salutation</option>
 <option>Mr</option>
 <option>Ms</option>
-<option>Mrs</option>
-<option>Dr</option>
 </select>
 
 <input id="custName" placeholder="Name">
@@ -215,46 +162,67 @@ app.innerHTML = `
 </div>`;
 }
 
-// ===== SAVE CUSTOMER =====
 async function saveCustomer(){
-
-let name = document.getElementById("custName").value;
-let mobile = document.getElementById("custMobile").value;
-let salutation = document.getElementById("salutation").value;
-
 let userId = localStorage.getItem("userId");
 
-if(!name){
-alert("Enter name");
-return;
-}
-
-let { error } = await client
-.from("salon_customers")
-.insert([{
+await client.from("salon_customers").insert([{
 user_id: userId,
-name: name,
-mobile: mobile,
-salutation: salutation
+name: custName.value,
+mobile: custMobile.value,
+salutation: salutation.value
 }]);
 
-if(error){
-alert(error.message);
-return;
-}
-
-alert("Customer Saved");
-
+alert("Saved");
 showCustomerMaster();
 }
 
-// ===== LOGOUT =====
+// SERVICE (TEMP)
+function showService(){
+app.innerHTML = `
+<div class="card">
+<h2>Service Master</h2>
+<p>Coming next...</p>
+<button class="gray" onclick="showMaster()">Back</button>
+</div>`;
+}
+
+// ADD VISIT (TEMP)
+function showAddVisit(){
+app.innerHTML = `
+<div class="card">
+<h2>Add Visit</h2>
+<p>Coming next...</p>
+<button class="gray" onclick="showHome()">Back</button>
+</div>`;
+}
+
+// REPORTS (TEMP)
+function showReports(){
+app.innerHTML = `
+<div class="card">
+<h2>Reports</h2>
+<p>Coming next...</p>
+<button class="gray" onclick="showHome()">Back</button>
+</div>`;
+}
+
+// REMINDER (TEMP)
+function showReminder(){
+app.innerHTML = `
+<div class="card">
+<h2>Reminder</h2>
+<p>Coming next...</p>
+<button class="gray" onclick="showHome()">Back</button>
+</div>`;
+}
+
+// LOGOUT
 function logout(){
 localStorage.clear();
 showLogin();
 }
 
-// ===== START =====
+// START
 if(localStorage.getItem("currentUser")){
 showHome();
 }else{
