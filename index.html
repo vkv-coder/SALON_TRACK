@@ -28,7 +28,6 @@ border-radius:6px; border:1px solid #ccc;
 
 <script>
 
-// ===== SUPABASE =====
 const SUPABASE_URL = "https://jqqnnkzozjskziaizajg.supabase.co";
 const SUPABASE_KEY = "sb_publishable_XDHJ55QPN6R9Hw8ikMerNQ_QNFX_z0P";
 
@@ -36,7 +35,7 @@ const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let app = document.getElementById("app");
 
-// ===== LOGIN =====
+// LOGIN
 function showLogin(){
 app.innerHTML = `
 <div class="card">
@@ -66,7 +65,7 @@ showRegister(mobile);
 }
 }
 
-// ===== REGISTER =====
+// REGISTER
 function showRegister(mobile){
 app.innerHTML = `
 <div class="card">
@@ -118,7 +117,7 @@ alert("Registered");
 showHome();
 }
 
-// ===== HOME =====
+// HOME
 function showHome(){
 app.innerHTML = `
 <div class="card">
@@ -136,13 +135,13 @@ app.innerHTML = `
 </div>`;
 }
 
-// ===== CUSTOMER MASTER =====
+// CUSTOMER MASTER
 async function showCustomerMaster(){
 
 let user = localStorage.getItem("currentUser");
 
 let { data, error } = await client
-.from("salon_customer")
+.from("salon_customers")   // ✅ FIXED
 .select("*")
 .eq("user_id", user);
 
@@ -165,7 +164,7 @@ ${data.map(c=>`
 </div>`;
 }
 
-// ===== ADD CUSTOMER =====
+// ADD CUSTOMER
 function showAddCustomer(){
 app.innerHTML = `
 <div class="card">
@@ -187,7 +186,7 @@ app.innerHTML = `
 </div>`;
 }
 
-// ===== SAVE CUSTOMER =====
+// SAVE CUSTOMER
 async function saveCustomer(){
 
 let name = document.getElementById("custName").value;
@@ -200,7 +199,7 @@ alert("Enter name");
 return;
 }
 
-let { error } = await client.from("salon_customer").insert([{
+let { error } = await client.from("salon_customers").insert([{
 user_id: user,
 name: name,
 mobile: mobile,
@@ -217,13 +216,13 @@ alert("Customer Saved");
 showCustomerMaster();
 }
 
-// ===== LOGOUT =====
+// LOGOUT
 function logout(){
 localStorage.removeItem("currentUser");
 showLogin();
 }
 
-// ===== START =====
+// START
 if(localStorage.getItem("currentUser")){
 showHome();
 }else{
