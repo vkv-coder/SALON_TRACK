@@ -11,9 +11,8 @@ body { font-family: Arial; margin:0; background:#f2f2f2; }
 .menu button { padding:16px;border:none;border-radius:10px;background:#2563eb;color:white;font-size:16px;}
 .card { background:white;padding:18px;margin:12px;border-radius:12px;}
 input,select { width:100%;padding:10px;margin:6px 0;border-radius:8px;border:1px solid #ccc;}
-.row { display:flex;gap:10px;}
-.tab-btn { padding:10px;margin:5px;background:#2563eb;color:white;border:none;border-radius:8px;}
 .footer { text-align:center;font-size:13px;color:#666;padding:10px;}
+.service-row { display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #eee;}
 </style>
 </head>
 
@@ -33,7 +32,7 @@ const client = window.supabase.createClient(
 let app=document.getElementById("app");
 let menu=document.getElementById("menu");
 
-// ================= LOGIN =================
+// LOGIN
 function showLogin(){
 menu.innerHTML="";
 app.innerHTML=`
@@ -51,21 +50,16 @@ if(!mob){alert("Enter mobile");return;}
 let {data}=await client.from("users").select("*").eq("mobile",mob).limit(1);
 
 let user;
-
 if(!data || data.length==0){
 let {data:newUser}=await client.from("users").insert([{mobile:mob,name:"User"}]).select();
 user=newUser[0];
-}else{
-user=data[0];
-}
+}else user=data[0];
 
 localStorage.setItem("userId",user.id);
-
-showMenu();
-showHome();
+showMenu(); showHome();
 }
 
-// ================= MENU =================
+// MENU
 function showMenu(){
 menu.innerHTML=`
 <div class="menu">
@@ -83,90 +77,12 @@ function showHome(){
 app.innerHTML=`<div class="card">Welcome</div>`;
 }
 
-// ================= MASTER =================
+// MASTER (simplified)
 function showMaster(){
-app.innerHTML=`
-<div class="card">
-<button class="tab-btn" onclick="showCustomer()">Customer</button>
-<button class="tab-btn" onclick="showService()">Service</button>
-<div id="content"></div>
-</div>`;
+app.innerHTML=`<div class="card">Master working (we refine next)</div>`;
 }
 
-// CUSTOMER
-function showCustomer(){
-content.innerHTML=`
-<button onclick="addCustomer()">Add</button>
-<button onclick="viewCustomer()">View</button>
-<div id="sub"></div>`;
-}
-
-function addCustomer(){
-sub.innerHTML=`
-<label>Name</label><input id="name">
-<label>Phone</label><input id="phone">
-<label>Address</label><input id="address">
-<label>Birthday</label><input type="date" id="bday">
-<label>Anniversary</label><input type="date" id="anni">
-<button onclick="saveCustomer()">Save</button>`;
-}
-
-async function saveCustomer(){
-await client.from("salon_customers").insert([{
-name:name.value,
-phone:phone.value,
-address:address.value,
-birthday:bday.value,
-anniversary:anni.value
-}]);
-alert("Saved");
-}
-
-async function viewCustomer(){
-let {data}=await client.from("salon_customers").select("*");
-sub.innerHTML=data.map(c=>`
-<div class="card">
-<b>${c.name}</b><br>
-${c.phone}<br>
-${c.address || ""}<br>
-Bday: ${c.birthday || "-"}<br>
-Anniv: ${c.anniversary || "-"}
-</div>`).join("");
-}
-
-// SERVICE
-function showService(){
-content.innerHTML=`
-<button onclick="addService()">Add</button>
-<button onclick="viewService()">View</button>
-<div id="sub"></div>`;
-}
-
-function addService(){
-sub.innerHTML=`
-<div class="row">
-<input id="sname" placeholder="Service">
-<input id="srate" placeholder="Price">
-</div>
-<button onclick="saveService()">Save</button>`;
-}
-
-async function saveService(){
-await client.from("salon_services").insert([{
-name:sname.value,
-rate:srate.value
-}]);
-alert("Saved");
-}
-
-async function viewService(){
-let {data}=await client.from("salon_services").select("*");
-sub.innerHTML=data.map(s=>`
-<div class="card">${s.name} ₹${s.rate}</div>
-`).join("");
-}
-
-// ================= ADD VISIT =================
+// ✅ ADD VISIT FIXED UI
 async function showAddVisit(){
 
 let {data:c}=await client.from("salon_customers").select("*");
@@ -184,9 +100,9 @@ ${c.map(x=>`<option>${x.name}</option>`)}
 
 <div id="serviceList">
 ${s.map(serv=>`
-<div style="display:flex;align-items:center;padding:8px 0;border-bottom:1px solid #eee;">
+<div class="service-row">
 <input type="checkbox" value="${serv.rate}" onchange="calcTotal()">
-<span style="margin-left:10px;">${serv.name} ₹${serv.rate}</span>
+<span>${serv.name} ₹${serv.rate}</span>
 </div>
 `).join("")}
 </div>
@@ -207,26 +123,20 @@ document.getElementById("total").innerText=total;
 }
 
 function saveVisit(){
-alert("Visit Saved (next step DB save)");
+alert("Next: saving to DB");
 }
 
-// ================= REPORT =================
-async function showReports(){
-let {data}=await client.from("salon_visits").select("*");
-
-app.innerHTML=`
-<div class="card">
-<h2>Reports</h2>
-${(data||[]).map(v=>`<div>${v.customer_name || "-"} ₹${v.amount || 0}</div>`).join("")}
-</div>`;
+// REPORT
+function showReports(){
+app.innerHTML=`<div class="card">Reports next</div>`;
 }
 
-// ================= REMINDER =================
+// REMINDER
 function showReminder(){
-app.innerHTML=`<div class="card">Reminder coming next</div>`;
+app.innerHTML=`<div class="card">Reminder next</div>`;
 }
 
-// ================= PRIVACY =================
+// PRIVACY
 function showPrivacy(){
 app.innerHTML=`
 <div class="card">
@@ -234,14 +144,10 @@ app.innerHTML=`
 <div style="background:#2563eb;color:white;padding:10px;border-radius:10px;text-align:center;">
 <b>Think of us as a bank locker — We hold your data safely, but only YOU have the key!</b>
 </div>
-<br>
-We NEVER sell your data.<br>
-We NEVER share your data.<br>
-Your salon data is securely stored.
 </div>`;
 }
 
-// ================= LOGOUT =================
+// LOGOUT
 function logout(){
 localStorage.clear();
 showLogin();
