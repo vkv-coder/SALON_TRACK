@@ -190,10 +190,56 @@
   .toast.show { transform: translateX(-50%) translateY(0); }
   .toast.success { background: #2E7D32; }
   .toast.error { background: #C62828; }
+  .upgrade-banner { background: linear-gradient(135deg, #FF6F00, #FFA000); border-radius: var(--radius-sm); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .upgrade-banner p { color: white; font-size: 12px; font-weight: 600; line-height: 1.4; }
+  .upgrade-banner button { background: white; color: #E65100; border: none; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; margin-left: 10px; font-family: 'Poppins', sans-serif; }
+  .plan-status-card { background: linear-gradient(135deg, #0D47A1, #1565C0); border-radius: var(--radius-sm); padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .plan-status-card .ps-left p { font-size: 10px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1px; }
+  .plan-status-card .ps-left h4 { font-size: 15px; font-weight: 700; color: white; margin-top: 2px; }
+  .plan-status-card .ps-left span { font-size: 11px; color: rgba(255,255,255,0.75); }
+  .plan-status-card button { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; white-space: nowrap; }
+  .upgrade-screen-bg { background: linear-gradient(160deg, #0D47A1, #1976D2); align-items: center; justify-content: center; padding: 30px 22px; text-align: center; }
+  .upgrade-screen-bg h2 { color: white; font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+  .upgrade-screen-bg > p { color: rgba(255,255,255,0.8); font-size: 14px; margin-bottom: 24px; line-height: 1.6; }
+  .up-plan-card { background: white; border-radius: var(--radius); padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 2.5px solid transparent; transition: all 0.2s; margin-bottom: 12px; }
+  .up-plan-card.selected { border-color: #FFA000; box-shadow: 0 0 0 4px rgba(255,160,0,0.25); }
+  .up-plan-card h3 { font-size: 15px; font-weight: 700; color: var(--primary-dark); }
+  .up-plan-card p { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+  .up-plan-card .plan-badge { display: inline-block; background: #E8F5E9; color: #2E7D32; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-top: 4px; }
+  .up-price { font-size: 22px; font-weight: 900; color: var(--primary); }
 </style>
 </head>
 <body>
 <div class="toast" id="toast"></div>
+
+<!-- ===== UPGRADE SCREEN ===== -->
+<div class="screen upgrade-screen-bg" id="upgradeScreen">
+  <div style="font-size:56px;margin-bottom:14px">⭐</div>
+  <h2>Upgrade SALON-TRACK</h2>
+  <p>Choose a plan that works for you.<br>Secure payment via Razorpay.</p>
+  <div style="width:100%;margin-bottom:22px">
+    <div class="up-plan-card selected" id="upPlanYearly" onclick="selectUpgradePlan('yearly')">
+      <div>
+        <h3>Yearly Plan</h3>
+        <p>Renews every year</p>
+        <span class="plan-badge">Most Popular</span>
+      </div>
+      <div class="up-price">₹250</div>
+    </div>
+    <div class="up-plan-card" id="upPlanLifetime" onclick="selectUpgradePlan('lifetime')">
+      <div>
+        <h3>Lifetime Plan</h3>
+        <p>Pay once, use forever</p>
+        <span class="plan-badge">Best Value</span>
+      </div>
+      <div class="up-price">₹1,001</div>
+    </div>
+  </div>
+  <button class="btn" style="background:white;color:var(--primary-dark);font-weight:700;margin-bottom:14px" onclick="initiatePayment()">Pay Securely via Razorpay →</button>
+  <button class="link-btn" style="color:rgba(255,255,255,0.65)" onclick="goHome()">← Back to App</button>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <!-- ===== LOGIN ===== -->
 <div class="screen auth-bg active" id="loginScreen">
@@ -348,6 +394,15 @@
         <a href="mailto:vkvcoder.support@gmail.com">vkvcoder.support@gmail.com</a>
       </div>
     </div>
+    <div style="height:14px"></div>
+    <div class="plan-status-card" id="planStatusCard">
+      <div class="ps-left">
+        <p>Current Plan</p>
+        <h4 id="planStatusLabel">Trial</h4>
+        <span id="planStatusSub"></span>
+      </div>
+      <button onclick="openSection('upgradeScreen')">⭐ Upgrade</button>
+    </div>
   </div>
 </div>
 
@@ -470,7 +525,8 @@
           <div class="form-group"><label>From Date</label><input type="date" id="reportFrom"></div>
           <div class="form-group"><label>To Date</label><input type="date" id="reportTo"></div>
         </div>
-        <button class="btn btn-primary" onclick="loadRangeReport()">Get Report</button>
+        <button class="btn btn-primary" onclick="loadRangeReport()" style="margin-bottom:8px">Get Report</button>
+        <button class="btn" style="background:#E8F5E9;color:#2E7D32;border:1.5px solid #A5D6A7;font-weight:600" onclick="downloadCSV()">⬇️ Download CSV</button>
       </div>
       <div id="rangeStats" style="display:none;margin-bottom:16px">
         <div class="stat-row">
@@ -520,7 +576,7 @@
       <h3>Payments</h3>
       <p>Payments are processed securely through Razorpay. SALON-TRACK does not store any card information.</p>
       <h3>Contact</h3>
-      <p>For privacy concerns: <strong>vkvcoder.support@gmail.com</strong></p>
+      <p>For privacy concerns: <strong>support@salontrack.in</strong></p>
       <div class="divider"></div>
       <p style="font-size:11px;text-align:center;color:#90A4AE">Last updated: April 2026 • SALON-TRACK v1.0</p>
     </div>
@@ -556,6 +612,7 @@ function openSection(id){
   if(id==='addVisit'){setupVisitForm();}
   if(id==='report'){loadTodayReport();}
   if(id==='reminder'){loadReminders();}
+  if(id==='upgradeScreen'){setupUpgradeScreen();}
 }
 
 function switchSubTab(prefix,name,btn){
@@ -632,6 +689,27 @@ function checkAndLoad(user){
   document.getElementById('hTrial').textContent=user.plan==='trial'
     ? (user.expiry_date ? `🕐 Trial: ${daysLeft} day${daysLeft!==1?'s':''} left` : '🎁 Trial: Use app to start')
     : user.plan==='lifetime'?'⭐ Lifetime Member':'✅ Active';
+
+  // Plan status card
+  const lbl=document.getElementById('planStatusLabel');
+  const sub=document.getElementById('planStatusSub');
+  const card=document.getElementById('planStatusCard');
+  if(user.plan==='lifetime'){
+    lbl.textContent='⭐ Lifetime Member';
+    sub.textContent='No renewal needed';
+    card.querySelector('button').style.display='none';
+  } else if(user.plan==='yearly'){
+    lbl.textContent='✅ Yearly Plan';
+    sub.textContent=`Expires: ${user.expiry_date}`;
+    if(daysLeft<=7){
+      card.style.background='linear-gradient(135deg,#E65100,#FF6F00)';
+      sub.textContent=`⚠️ Expires in ${daysLeft} days! Renew now.`;
+    }
+  } else {
+    lbl.textContent=user.expiry_date?`🕐 Trial: ${daysLeft} days left`:'🎁 Trial (not started)';
+    sub.textContent='Upgrade anytime for full access';
+  }
+
   const todayStr=new Date().toISOString().split('T')[0];
   document.getElementById('visitDate').value=todayStr;
   document.getElementById('reportFrom').value=todayStr;
@@ -908,10 +986,97 @@ async function loadReminders(){
   }catch(e){console.error(e);}
 }
 
-// PAYWALL
+// ===== UPGRADE & RAZORPAY =====
+let selectedUpgradePlan='yearly';
+
+function setupUpgradeScreen(){
+  selectedUpgradePlan='yearly';
+  document.getElementById('upPlanYearly').classList.add('selected');
+  document.getElementById('upPlanLifetime').classList.remove('selected');
+}
+
+function selectUpgradePlan(plan){
+  selectedUpgradePlan=plan;
+  document.getElementById('upPlanYearly').classList.toggle('selected',plan==='yearly');
+  document.getElementById('upPlanLifetime').classList.toggle('selected',plan==='lifetime');
+}
+
+function initiatePayment(){
+  const amount=selectedUpgradePlan==='yearly'?250:1001;
+  const options={
+    key:'rzp_live_SWaW0o2vM1Irpq',
+    amount:amount*100,
+    currency:'INR',
+    name:'SALON-TRACK',
+    description:selectedUpgradePlan==='yearly'?'Yearly Subscription':'Lifetime Membership',
+    image:'https://vkv-coder.github.io/SALON_TRACK/favicon.ico',
+    prefill:{contact:currentUser.mobile||'',name:currentUser.name||''},
+    theme:{color:'#1565C0'},
+    handler: async function(response){
+      await handlePaymentSuccess(response, selectedUpgradePlan, amount);
+    },
+    modal:{ondismiss:function(){toast('Payment cancelled','');}}
+  };
+  const rzp=new Razorpay(options);
+  rzp.open();
+}
+
+async function handlePaymentSuccess(response, plan, amount){
+  try{
+    const expiry=new Date();
+    if(plan==='yearly') expiry.setFullYear(expiry.getFullYear()+1);
+    else expiry.setFullYear(2099);
+    const expiryStr=expiry.toISOString().split('T')[0];
+    await sb('users','PATCH',{
+      plan, expiry_date:expiryStr,
+      start_date:currentUser.start_date||new Date().toISOString().split('T')[0]
+    },`?id=eq.${currentUser.id}`);
+    currentUser.plan=plan;
+    currentUser.expiry_date=expiryStr;
+    toast(`Payment successful! ${plan==='lifetime'?'Welcome Lifetime Member ⭐':'Yearly plan activated ✅'}`,'success');
+    checkAndLoad(currentUser);
+  }catch(e){toast('Payment recorded but update failed. Contact support.','error');console.error(e);}
+}
+
+// Keep old paywall working too
 let selectedPlan='yearly';
-function selectPlan(plan){selectedPlan=plan;document.getElementById('planYearly').classList.toggle('selected',plan==='yearly');document.getElementById('planLifetime').classList.toggle('selected',plan==='lifetime');}
-function initiatePayment(){toast(`Razorpay coming in v2. Plan: ₹${selectedPlan==='yearly'?250:1001}`,'');}
+function selectPlan(plan){selectedPlan=plan;document.getElementById('planYearly')?.classList.toggle('selected',plan==='yearly');document.getElementById('planLifetime')?.classList.toggle('selected',plan==='lifetime');}
+
+// ===== CSV DOWNLOAD =====
+let lastRangeReport=[];
+
+async function downloadCSV(){
+  const from=document.getElementById('reportFrom').value;
+  const to=document.getElementById('reportTo').value;
+  if(!from||!to)return toast('Select date range first','error');
+  try{
+    const rows=await sb('salon_visits','GET',null,`?user_id=eq.${currentUser.id}&visit_date=gte.${from}&visit_date=lte.${to}&order=visit_date.desc&select=*`);
+    if(!rows||!rows.length)return toast('No data to download','error');
+    const headers=['Visit Date','Customer Name','Service','Amount (₹)','Reminder Days','Due Date'];
+    const csvRows=[headers.join(',')];
+    rows.forEach(v=>{
+      csvRows.push([
+        v.visit_date||'',
+        `"${(v.customer_name||'').replace(/"/g,'""')}"`,
+        `"${(v.service||'').replace(/"/g,'""')}"`,
+        v.amount||0,
+        v.reminder_days||'',
+        v.due_date||''
+      ].join(','));
+    });
+    // Add totals row
+    const total=rows.reduce((s,v)=>s+(v.amount||0),0);
+    csvRows.push(['','','TOTAL',total,'',''].join(','));
+    const csv=csvRows.join('\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download=`SalonTrack_${from}_to_${to}.csv`;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+    toast(`CSV downloaded! ${rows.length} records ✅`,'success');
+  }catch(e){toast('Download failed','error');console.error(e);}
+}
 
 setupPinBoxes(['p1','p2','p3','p4']);
 setupPinBoxes(['rp1','rp2','rp3','rp4']);
