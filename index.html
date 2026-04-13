@@ -1163,7 +1163,7 @@ async function sendOTP(){
     if(!rows||!rows.length)return toast('Mobile not registered','error');
     forgotMobileNum=mobile;
     // Send OTP via 2Factor
-    const res=await fetch(`https://2factor.in/API/V1/${TWOFACTOR_KEY}/SMS/${mobile}/AUTOGEN/SLNTRK`);
+    const res=await fetch(`https://2factor.in/API/V1/${TWOFACTOR_KEY}/SMS/${mobile}/AUTOGEN`);
     const data=await res.json();
     if(data.Status==='Success'){
       otpSessionId=data.Details;
