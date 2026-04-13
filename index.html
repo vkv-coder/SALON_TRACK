@@ -7,51 +7,81 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root {
-    --primary: #1565C0;
-    --primary-light: #1976D2;
-    --primary-dark: #0D47A1;
-    --accent: #42A5F5;
-    --white: #FFFFFF;
-    --bg: #F0F6FF;
-    --text: #1A237E;
-    --text-light: #546E7A;
-    --border: #BBDEFB;
-    --shadow: 0 4px 20px rgba(21,101,192,0.13);
-    --radius: 16px;
-    --radius-sm: 10px;
+    --primary: #1565C0; --primary-light: #1976D2; --primary-dark: #0D47A1;
+    --accent: #42A5F5; --white: #FFFFFF; --bg: #F0F6FF;
+    --text: #1A237E; --text-light: #546E7A; --border: #BBDEFB;
+    --shadow: 0 4px 20px rgba(21,101,192,0.13); --radius: 16px; --radius-sm: 10px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 480px; margin: 0 auto; }
   .screen { display: none; min-height: 100vh; flex-direction: column; }
   .screen.active { display: flex; }
 
-  /* AUTH */
-  .auth-bg { background: linear-gradient(160deg, #0D47A1 0%, #1565C0 45%, #1976D2 75%, #42A5F5 100%); align-items: center; justify-content: center; padding: 28px 22px; position: relative; overflow: hidden; }
-  .auth-bg::before { content: ''; position: absolute; top: -100px; right: -100px; width: 300px; height: 300px; border-radius: 50%; background: rgba(255,255,255,0.05); }
-  .auth-bg::after { content: ''; position: absolute; bottom: -80px; left: -80px; width: 220px; height: 220px; border-radius: 50%; background: rgba(255,255,255,0.04); }
-  .auth-logo { text-align: center; margin-bottom: 28px; position: relative; z-index: 1; }
-  .auth-logo .logo-icon { font-size: 54px; display: block; margin-bottom: 8px; }
-  .auth-logo h1 { font-family: 'Nunito', sans-serif; font-size: 30px; font-weight: 900; color: white; letter-spacing: 3px; }
+  /* ===== AUTH ===== */
+  .auth-bg {
+    background: linear-gradient(160deg, #0D47A1 0%, #1565C0 45%, #1976D2 75%, #42A5F5 100%);
+    align-items: center; justify-content: center; padding: 28px 22px;
+    position: relative; overflow: hidden;
+  }
+
+  /* Floating beauty icons */
+  .beauty-icon {
+    position: absolute; font-size: 28px; opacity: 0.18;
+    animation: floatIcon 6s ease-in-out infinite;
+    pointer-events: none; user-select: none;
+  }
+  .beauty-icon:nth-child(1) { top: 6%; left: 8%; font-size: 32px; animation-delay: 0s; }
+  .beauty-icon:nth-child(2) { top: 12%; right: 10%; font-size: 24px; animation-delay: 1s; }
+  .beauty-icon:nth-child(3) { top: 28%; left: 4%; font-size: 20px; animation-delay: 2s; }
+  .beauty-icon:nth-child(4) { top: 22%; right: 6%; font-size: 26px; animation-delay: 0.5s; }
+  .beauty-icon:nth-child(5) { bottom: 30%; left: 6%; font-size: 22px; animation-delay: 1.5s; }
+  .beauty-icon:nth-child(6) { bottom: 24%; right: 8%; font-size: 28px; animation-delay: 2.5s; }
+  .beauty-icon:nth-child(7) { bottom: 12%; left: 12%; font-size: 18px; animation-delay: 3s; }
+  .beauty-icon:nth-child(8) { bottom: 8%; right: 14%; font-size: 24px; animation-delay: 0.8s; }
+  .beauty-icon:nth-child(9) { top: 42%; left: 2%; font-size: 16px; animation-delay: 1.8s; }
+  .beauty-icon:nth-child(10) { top: 48%; right: 3%; font-size: 20px; animation-delay: 3.5s; }
+
+  @keyframes floatIcon {
+    0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.18; }
+    50% { transform: translateY(-12px) rotate(8deg); opacity: 0.28; }
+  }
+
+  /* Decorative circles */
+  .auth-circle1 { position: absolute; top: -80px; right: -80px; width: 220px; height: 220px; border-radius: 50%; background: rgba(255,255,255,0.06); }
+  .auth-circle2 { position: absolute; bottom: -60px; left: -60px; width: 180px; height: 180px; border-radius: 50%; background: rgba(255,255,255,0.05); }
+  .auth-circle3 { position: absolute; top: 38%; left: 50%; transform: translate(-50%,-50%); width: 300px; height: 300px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.07); }
+
+  .auth-logo { text-align: center; margin-bottom: 24px; position: relative; z-index: 1; }
+  .auth-logo .logo-main { font-size: 42px; display: block; margin-bottom: 6px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3)); }
+  .auth-logo .logo-sub-icons { font-size: 20px; letter-spacing: 6px; margin-bottom: 8px; opacity: 0.85; }
+  .auth-logo h1 { font-family: 'Nunito', sans-serif; font-size: 28px; font-weight: 900; color: white; letter-spacing: 3px; }
   .auth-logo p { font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 1.5px; margin-top: 3px; }
-  .auth-card { background: white; border-radius: 22px; padding: 26px 22px; width: 100%; box-shadow: 0 24px 64px rgba(0,0,0,0.28); position: relative; z-index: 1; }
-  .auth-card h2 { font-size: 18px; font-weight: 700; color: var(--primary-dark); margin-bottom: 4px; }
-  .auth-card .sub { font-size: 12px; color: var(--text-light); margin-bottom: 20px; }
-  .form-group { margin-bottom: 14px; }
+
+  .auth-card { background: white; border-radius: 22px; padding: 24px 20px; width: 100%; box-shadow: 0 24px 64px rgba(0,0,0,0.28); position: relative; z-index: 1; }
+  .auth-card h2 { font-size: 17px; font-weight: 700; color: var(--primary-dark); margin-bottom: 4px; }
+  .auth-card .sub { font-size: 12px; color: var(--text-light); margin-bottom: 18px; }
+
+  .form-group { margin-bottom: 13px; }
   .form-group label { display: block; font-size: 10px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
   .form-group input, .form-group select { width: 100%; padding: 11px 13px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'Poppins', sans-serif; font-size: 14px; color: var(--text); background: #F8FBFF; transition: all 0.2s; outline: none; }
   .form-group input:focus, .form-group select:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(21,101,192,0.1); }
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
   .pin-row { display: flex; gap: 10px; justify-content: center; }
-  .pin-box { width: 54px; height: 58px; border: 2px solid var(--border); border-radius: 12px; font-size: 24px; font-weight: 700; text-align: center; color: var(--primary-dark); background: #F8FBFF; transition: all 0.2s; outline: none; -webkit-text-security: disc; }
+  .pin-box { width: 52px; height: 56px; border: 2px solid var(--border); border-radius: 12px; font-size: 22px; font-weight: 700; text-align: center; color: var(--primary-dark); background: #F8FBFF; transition: all 0.2s; outline: none; -webkit-text-security: disc; }
   .pin-box:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(21,101,192,0.1); }
+
   .btn { width: 100%; padding: 13px; border: none; border-radius: var(--radius-sm); font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-  .btn-primary { background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%); color: white; box-shadow: 0 4px 16px rgba(21,101,192,0.35); }
+  .btn-primary { background: linear-gradient(135deg, var(--primary-dark), var(--primary-light)); color: white; box-shadow: 0 4px 16px rgba(21,101,192,0.35); }
   .btn-primary:active { transform: scale(0.98); opacity: 0.92; }
   .btn-white { background: white; color: var(--primary-dark); border: 2px solid var(--border); font-weight: 700; }
-  .link-btn { background: none; border: none; color: var(--primary); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: underline; font-family: 'Poppins', sans-serif; }
-  .auth-footer { text-align: center; margin-top: 14px; font-size: 13px; color: var(--text-light); }
+  .btn-sm { width: auto; padding: 8px 16px; font-size: 13px; }
+  .btn-danger-sm { background: #FFEBEE; color: #C62828; border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; }
 
-  /* HOME */
+  .link-btn { background: none; border: none; color: var(--primary); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: underline; font-family: 'Poppins', sans-serif; }
+  .auth-footer { text-align: center; margin-top: 12px; font-size: 13px; color: var(--text-light); }
+
+  /* ===== HOME ===== */
   .home-header { background: linear-gradient(135deg, var(--primary-dark), var(--primary-light)); padding: 20px 20px 22px; position: relative; overflow: hidden; }
   .home-header::after { content: ''; position: absolute; bottom: -30px; right: -30px; width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,0.06); }
   .home-header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
@@ -72,14 +102,35 @@
   .support-strip .s-text p { font-size: 10px; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 1px; }
   .support-strip .s-text a { font-size: 14px; font-weight: 700; color: white; text-decoration: none; }
 
-  /* INNER SCREENS */
+  /* ===== INNER SCREENS ===== */
   .inner-header { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); padding: 14px 16px 13px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(13,71,161,0.25); }
   .back-btn { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); color: white; font-size: 20px; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .inner-header h2 { font-family: 'Nunito', sans-serif; font-size: 19px; font-weight: 800; color: white; letter-spacing: 0.5px; }
-  .inner-body { flex: 1; overflow-y: auto; padding: 16px 16px 30px; }
+  .inner-body { flex: 1; overflow-y: auto; padding: 0 0 30px; }
+
+  /* ===== SUB TABS ===== */
+  .sub-tab-bar { display: flex; background: white; border-bottom: 2px solid var(--border); position: sticky; top: 0; z-index: 50; }
+  .sub-tab-btn { flex: 1; padding: 13px 8px; border: none; background: transparent; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600; color: var(--text-light); cursor: pointer; transition: all 0.2s; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+  .sub-tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: #F0F6FF; }
+  .sub-tab-content { display: none; padding: 16px 16px 10px; }
+  .sub-tab-content.active { display: block; }
+
+  /* ===== CARDS ===== */
   .card { background: white; border-radius: var(--radius); padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow); border: 1px solid rgba(187,222,251,0.6); }
   .card-title { font-size: 12px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; padding-bottom: 10px; border-bottom: 1.5px solid var(--bg); }
   .section-title { font-size: 13px; font-weight: 700; color: var(--primary-dark); margin-bottom: 12px; margin-top: 4px; }
+
+  /* ===== CUSTOMER VIEW TABLE ===== */
+  .cust-table-wrap { overflow-x: auto; }
+  .cust-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 480px; }
+  .cust-table thead tr { background: var(--primary); color: white; position: sticky; top: 0; z-index: 10; }
+  .cust-table thead th { padding: 10px 10px; text-align: left; font-weight: 600; font-size: 11px; letter-spacing: 0.5px; white-space: nowrap; }
+  .cust-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  .cust-table tbody tr:hover { background: #F0F6FF; }
+  .cust-table tbody td { padding: 10px 10px; color: var(--text); vertical-align: middle; }
+  .cust-table tbody td:first-child { font-weight: 600; }
+
+  /* ===== LIST ITEMS ===== */
   .list-item { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 13px 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(21,101,192,0.06); }
   .list-item-left h4 { font-size: 14px; font-weight: 600; color: var(--text); }
   .list-item-left p { font-size: 12px; color: var(--text-light); margin-top: 3px; }
@@ -88,7 +139,17 @@
   .empty-state .ei { font-size: 44px; margin-bottom: 10px; }
   .empty-state p { font-size: 13px; line-height: 1.6; }
 
-  /* REPORT */
+  /* ===== VISIT SERVICES ===== */
+  .service-lines { margin-bottom: 14px; }
+  .service-line { background: #F0F6FF; border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 10px; position: relative; }
+  .service-line-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .service-line-num { font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
+  .service-line-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .add-service-btn { width: 100%; padding: 10px; border: 2px dashed var(--primary); border-radius: 10px; background: transparent; color: var(--primary); font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 14px; transition: all 0.2s; }
+  .add-service-btn:hover { background: #E3F2FD; }
+  .due-info { font-size: 11px; color: var(--primary); margin-top: 6px; font-style: italic; }
+
+  /* ===== REPORT ===== */
   .stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
   .stat-box { border-radius: var(--radius-sm); padding: 16px 12px; text-align: center; }
   .stat-box.blue { background: linear-gradient(135deg, var(--primary-dark), var(--accent)); color: white; }
@@ -97,7 +158,7 @@
   .stat-box .sl { font-size: 11px; opacity: 0.8; margin-top: 3px; font-weight: 500; }
   .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
 
-  /* REMINDER */
+  /* ===== REMINDER ===== */
   .rem-card { background: white; border: 1px solid #FFCDD2; border-left: 4px solid #E53935; border-radius: 12px; padding: 13px 15px; margin-bottom: 10px; }
   .rem-card h4 { font-size: 14px; font-weight: 700; color: var(--text); }
   .rem-card p { font-size: 12px; color: var(--text-light); margin-top: 3px; }
@@ -106,7 +167,7 @@
   .call-btn { background: #E3F2FD; color: #1565C0; }
   .wa-btn { background: #E8F5E9; color: #1B5E20; }
 
-  /* PAYWALL */
+  /* ===== PAYWALL ===== */
   .paywall-bg { background: linear-gradient(160deg, #0D47A1, #1976D2); align-items: center; justify-content: center; padding: 30px 22px; text-align: center; }
   .paywall-bg h2 { color: white; font-size: 22px; font-weight: 800; margin-bottom: 8px; }
   .paywall-bg > p { color: rgba(255,255,255,0.8); font-size: 14px; margin-bottom: 28px; line-height: 1.6; }
@@ -118,12 +179,13 @@
   .plan-price { font-size: 22px; font-weight: 900; color: var(--primary); }
 
   /* PRIVACY */
-  .privacy-text { font-size: 13px; line-height: 1.85; color: var(--text-light); }
+  .privacy-text { font-size: 13px; line-height: 1.85; color: var(--text-light); padding: 16px; }
   .privacy-text h3 { color: var(--primary); font-size: 13px; font-weight: 700; margin: 14px 0 5px; text-transform: uppercase; letter-spacing: 0.5px; }
 
   /* MISC */
   .info-box { background: #E3F2FD; border-left: 3px solid var(--primary); border-radius: 8px; padding: 11px 13px; font-size: 13px; color: var(--primary-dark); margin-bottom: 14px; }
   .divider { height: 1px; background: var(--border); margin: 14px 0; }
+  .pad { padding: 16px; }
   .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--primary-dark); color: white; padding: 11px 22px; border-radius: 30px; font-size: 13px; font-weight: 500; z-index: 9999; transition: transform 0.3s ease; box-shadow: 0 8px 32px rgba(21,101,192,0.25); white-space: nowrap; max-width: 90vw; text-align: center; }
   .toast.show { transform: translateX(-50%) translateY(0); }
   .toast.success { background: #2E7D32; }
@@ -131,13 +193,26 @@
 </style>
 </head>
 <body>
-
 <div class="toast" id="toast"></div>
 
-<!-- LOGIN -->
+<!-- ===== LOGIN ===== -->
 <div class="screen auth-bg active" id="loginScreen">
+  <span class="beauty-icon">💄</span>
+  <span class="beauty-icon">🌸</span>
+  <span class="beauty-icon">💅</span>
+  <span class="beauty-icon">🪞</span>
+  <span class="beauty-icon">✂️</span>
+  <span class="beauty-icon">🌺</span>
+  <span class="beauty-icon">💋</span>
+  <span class="beauty-icon">🎀</span>
+  <span class="beauty-icon">👄</span>
+  <span class="beauty-icon">🌷</span>
+  <div class="auth-circle1"></div>
+  <div class="auth-circle2"></div>
+  <div class="auth-circle3"></div>
   <div class="auth-logo">
-    <span class="logo-icon">✂️</span>
+    <span class="logo-main">✂️</span>
+    <div class="logo-sub-icons">💄 💅 🪞</div>
     <h1>SALON-TRACK</h1>
     <p>SMART SALON MANAGEMENT</p>
   </div>
@@ -162,28 +237,32 @@
   </div>
 </div>
 
-<!-- REGISTER -->
+<!-- ===== REGISTER ===== -->
 <div class="screen auth-bg" id="registerScreen">
+  <span class="beauty-icon">💄</span>
+  <span class="beauty-icon">🌸</span>
+  <span class="beauty-icon">💅</span>
+  <span class="beauty-icon">🪞</span>
+  <span class="beauty-icon">✂️</span>
+  <span class="beauty-icon">🌺</span>
+  <span class="beauty-icon">💋</span>
+  <span class="beauty-icon">🎀</span>
+  <span class="beauty-icon">👄</span>
+  <span class="beauty-icon">🌷</span>
+  <div class="auth-circle1"></div>
+  <div class="auth-circle2"></div>
   <div class="auth-logo">
-    <span class="logo-icon">✂️</span>
+    <span class="logo-main">✂️</span>
+    <div class="logo-sub-icons">💄 💅 🪞</div>
     <h1>SALON-TRACK</h1>
     <p>15-DAY FREE TRIAL</p>
   </div>
   <div class="auth-card">
     <h2>Create Account</h2>
     <p class="sub">Start your free trial — no payment needed</p>
-    <div class="form-group">
-      <label>Mobile Number</label>
-      <input type="tel" id="regMobile" maxlength="10" placeholder="10-digit mobile">
-    </div>
-    <div class="form-group">
-      <label>Your Name</label>
-      <input type="text" id="regName" placeholder="Owner's full name">
-    </div>
-    <div class="form-group">
-      <label>Shop Name</label>
-      <input type="text" id="regShop" placeholder="Your salon name">
-    </div>
+    <div class="form-group"><label>Mobile Number</label><input type="tel" id="regMobile" maxlength="10" placeholder="10-digit mobile"></div>
+    <div class="form-group"><label>Your Name</label><input type="text" id="regName" placeholder="Owner's full name"></div>
+    <div class="form-group"><label>Shop Name</label><input type="text" id="regShop" placeholder="Your salon name"></div>
     <div class="two-col">
       <div class="form-group"><label>City</label><input type="text" id="regCity" placeholder="City"></div>
       <div class="form-group"><label>State</label><input type="text" id="regState" placeholder="State"></div>
@@ -202,7 +281,7 @@
   </div>
 </div>
 
-<!-- PAYWALL -->
+<!-- ===== PAYWALL ===== -->
 <div class="screen paywall-bg" id="paywallScreen">
   <div style="font-size:64px;margin-bottom:14px">🔒</div>
   <h2>Trial Expired</h2>
@@ -222,7 +301,7 @@
   <button class="link-btn" style="color:rgba(255,255,255,0.65)" onclick="doLogout()">Logout</button>
 </div>
 
-<!-- HOME DASHBOARD -->
+<!-- ===== HOME ===== -->
 <div class="screen" id="homeScreen">
   <div class="home-header">
     <div class="home-header-top">
@@ -272,146 +351,178 @@
   </div>
 </div>
 
-<!-- CUSTOMER MASTER -->
+<!-- ===== CUSTOMER MASTER ===== -->
 <div class="screen" id="customerMaster">
   <div class="inner-header">
     <button class="back-btn" onclick="goHome()">←</button>
     <h2>👤 Customer Master</h2>
   </div>
+  <div class="sub-tab-bar">
+    <button class="sub-tab-btn active" onclick="switchSubTab('cust','add',this)">➕ Add Customer</button>
+    <button class="sub-tab-btn" onclick="switchSubTab('cust','view',this)">📋 View Customers</button>
+  </div>
   <div class="inner-body">
-    <div class="card">
-      <div class="card-title">➕ Add Customer</div>
-      <div class="two-col">
-        <div class="form-group">
-          <label>Salutation</label>
-          <select id="custSalutation"><option>Mr.</option><option>Mrs.</option><option>Ms.</option><option>Master</option></select>
+    <div class="sub-tab-content active" id="cust-add">
+      <div class="card">
+        <div class="two-col">
+          <div class="form-group"><label>Salutation</label><select id="custSalutation"><option>Mr.</option><option>Mrs.</option><option>Ms.</option><option>Master</option></select></div>
+          <div class="form-group"><label>Name *</label><input type="text" id="custName" placeholder="Full name"></div>
         </div>
-        <div class="form-group"><label>Name *</label><input type="text" id="custName" placeholder="Full name"></div>
+        <div class="form-group"><label>Mobile Number</label><input type="tel" id="custMobile" maxlength="10" placeholder="10-digit mobile"></div>
+        <div class="form-group"><label>Address</label><input type="text" id="custAddress" placeholder="Address"></div>
+        <div class="two-col">
+          <div class="form-group"><label>Birthday</label><input type="date" id="custBirthday"></div>
+          <div class="form-group"><label>Anniversary</label><input type="date" id="custAnniversary"></div>
+        </div>
+        <div class="form-group"><label>Notes</label><input type="text" id="custNotes" placeholder="Any notes"></div>
+        <button class="btn btn-primary" onclick="addCustomer()">Save Customer</button>
       </div>
-      <div class="form-group"><label>Mobile Number</label><input type="tel" id="custMobile" maxlength="10" placeholder="10-digit mobile"></div>
-      <div class="form-group"><label>Address</label><input type="text" id="custAddress" placeholder="Address"></div>
-      <div class="two-col">
-        <div class="form-group"><label>Birthday</label><input type="date" id="custBirthday"></div>
-        <div class="form-group"><label>Anniversary</label><input type="date" id="custAnniversary"></div>
-      </div>
-      <div class="form-group"><label>Notes</label><input type="text" id="custNotes" placeholder="Any notes"></div>
-      <button class="btn btn-primary" onclick="addCustomer()">Save Customer</button>
     </div>
-    <div class="section-title">📋 Customer List</div>
-    <div id="customerList"><div class="empty-state"><div class="ei">⏳</div><p>Loading...</p></div></div>
+    <div class="sub-tab-content" id="cust-view">
+      <div class="cust-table-wrap">
+        <table class="cust-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Mobile</th>
+              <th>Birthday</th>
+              <th>Address</th>
+              <th>Anniversary</th>
+            </tr>
+          </thead>
+          <tbody id="customerTableBody">
+            <tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-light)">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- SERVICE MASTER -->
+<!-- ===== SERVICE MASTER ===== -->
 <div class="screen" id="serviceMaster">
   <div class="inner-header">
     <button class="back-btn" onclick="goHome()">←</button>
     <h2>💇 Service Master</h2>
   </div>
+  <div class="sub-tab-bar">
+    <button class="sub-tab-btn active" onclick="switchSubTab('svc','add',this)">➕ Add Service</button>
+    <button class="sub-tab-btn" onclick="switchSubTab('svc','view',this)">📋 View Services</button>
+  </div>
   <div class="inner-body">
-    <div class="card">
-      <div class="card-title">➕ Add Service</div>
-      <div class="form-group"><label>Service Name *</label><input type="text" id="svcName" placeholder="e.g. Haircut, Facial, Shave"></div>
-      <div class="two-col">
+    <div class="sub-tab-content active" id="svc-add">
+      <div class="card">
+        <div class="form-group"><label>Service Name *</label><input type="text" id="svcName" placeholder="e.g. Haircut, Facial, Shave"></div>
         <div class="form-group"><label>Rate (₹) *</label><input type="number" id="svcRate" placeholder="0"></div>
-        <div class="form-group"><label>Reminder Days</label><input type="number" id="svcRemDays" placeholder="e.g. 30"></div>
+        <button class="btn btn-primary" onclick="addService()">Save Service</button>
       </div>
-      <button class="btn btn-primary" onclick="addService()">Save Service</button>
     </div>
-    <div class="section-title">📋 Service List</div>
-    <div id="serviceList"><div class="empty-state"><div class="ei">⏳</div><p>Loading...</p></div></div>
+    <div class="sub-tab-content" id="svc-view">
+      <div id="serviceList"><div class="empty-state"><div class="ei">⏳</div><p>Loading...</p></div></div>
+    </div>
   </div>
 </div>
 
-<!-- ADD VISIT -->
+<!-- ===== ADD VISIT ===== -->
 <div class="screen" id="addVisit">
   <div class="inner-header">
     <button class="back-btn" onclick="goHome()">←</button>
     <h2>➕ Add Visit</h2>
   </div>
   <div class="inner-body">
-    <div class="card">
-      <div class="card-title">Visit Details</div>
-      <div class="form-group"><label>Customer *</label><select id="visitCustomer"><option value="">-- Select Customer --</option></select></div>
-      <div class="form-group"><label>Visit Date</label><input type="date" id="visitDate"></div>
-      <div class="form-group"><label>Service *</label><select id="visitService" onchange="onVisitServiceChange()"><option value="">-- Select Service --</option></select></div>
-      <div class="form-group"><label>Amount (₹)</label><input type="number" id="visitAmount" placeholder="Auto-filled, editable"></div>
-      <div class="form-group"><label>Reminder Days</label><input type="number" id="visitRemDays" placeholder="Auto-filled, editable" oninput="updateDueDate()"></div>
-      <div class="info-box" id="dueDateInfo" style="display:none">📅 Next visit due: <strong id="dueDateText"></strong></div>
+    <div class="pad">
+      <div class="card">
+        <div class="card-title">Customer & Date</div>
+        <div class="form-group"><label>Customer *</label><select id="visitCustomer"><option value="">-- Select Customer --</option></select></div>
+        <div class="form-group"><label>Visit Date</label><input type="date" id="visitDate" onchange="updateAllDueDates()"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Services</div>
+        <div class="service-lines" id="serviceLines"></div>
+        <button class="add-service-btn" onclick="addServiceLine()">➕ Add Another Service</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1.5px solid var(--bg)">
+          <span style="font-size:13px;font-weight:700;color:var(--primary-dark)">Total Amount</span>
+          <span style="font-size:20px;font-weight:800;color:var(--primary)">₹<span id="visitTotal">0</span></span>
+        </div>
+      </div>
+
       <button class="btn btn-primary" onclick="addVisit()">Save Visit</button>
     </div>
   </div>
 </div>
 
-<!-- REPORT -->
+<!-- ===== REPORT ===== -->
 <div class="screen" id="report">
   <div class="inner-header">
     <button class="back-btn" onclick="goHome()">←</button>
     <h2>📊 Report</h2>
   </div>
   <div class="inner-body">
-    <div class="stat-row">
-      <div class="stat-box blue"><div class="sv" id="todayVisits">0</div><div class="sl">Today's Visits</div></div>
-      <div class="stat-box blue"><div class="sv">₹<span id="todayTotal">0</span></div><div class="sl">Today's Revenue</div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">📅 Date Range Report</div>
-      <div class="date-row">
-        <div class="form-group"><label>From Date</label><input type="date" id="reportFrom"></div>
-        <div class="form-group"><label>To Date</label><input type="date" id="reportTo"></div>
-      </div>
-      <button class="btn btn-primary" onclick="loadRangeReport()">Get Report</button>
-    </div>
-    <div id="rangeStats" style="display:none;margin-bottom:16px">
+    <div class="pad">
       <div class="stat-row">
-        <div class="stat-box white-box"><div class="sv" id="rangeVisits">0</div><div class="sl">Total Visits</div></div>
-        <div class="stat-box white-box"><div class="sv">₹<span id="rangeTotal">0</span></div><div class="sl">Total Revenue</div></div>
+        <div class="stat-box blue"><div class="sv" id="todayVisits">0</div><div class="sl">Today's Visits</div></div>
+        <div class="stat-box blue"><div class="sv">₹<span id="todayTotal">0</span></div><div class="sl">Today's Revenue</div></div>
       </div>
+      <div class="card">
+        <div class="card-title">📅 Date Range Report</div>
+        <div class="date-row">
+          <div class="form-group"><label>From Date</label><input type="date" id="reportFrom"></div>
+          <div class="form-group"><label>To Date</label><input type="date" id="reportTo"></div>
+        </div>
+        <button class="btn btn-primary" onclick="loadRangeReport()">Get Report</button>
+      </div>
+      <div id="rangeStats" style="display:none;margin-bottom:16px">
+        <div class="stat-row">
+          <div class="stat-box white-box"><div class="sv" id="rangeVisits">0</div><div class="sl">Total Visits</div></div>
+          <div class="stat-box white-box"><div class="sv">₹<span id="rangeTotal">0</span></div><div class="sl">Total Revenue</div></div>
+        </div>
+      </div>
+      <div class="section-title">📋 Today's Visits</div>
+      <div id="todayVisitList"></div>
+      <div id="rangeVisitList"></div>
     </div>
-    <div class="section-title">📋 Today's Visits</div>
-    <div id="todayVisitList"></div>
-    <div id="rangeVisitList"></div>
   </div>
 </div>
 
-<!-- REMINDER -->
+<!-- ===== REMINDER ===== -->
 <div class="screen" id="reminder">
   <div class="inner-header">
     <button class="back-btn" onclick="goHome()">←</button>
     <h2>🔔 Reminder</h2>
   </div>
   <div class="inner-body">
-    <div class="info-box">📢 Customers due for visit within next 3 days</div>
-    <div id="reminderList"><div class="empty-state"><div class="ei">⏳</div><p>Loading...</p></div></div>
+    <div class="pad">
+      <div class="info-box">📢 Customers due for visit within next 3 days</div>
+      <div id="reminderList"><div class="empty-state"><div class="ei">⏳</div><p>Loading...</p></div></div>
+    </div>
   </div>
 </div>
 
-<!-- PRIVACY -->
+<!-- ===== PRIVACY ===== -->
 <div class="screen" id="privacy">
   <div class="inner-header">
     <button class="back-btn" onclick="goHome()">←</button>
     <h2>🔒 Privacy Policy</h2>
   </div>
   <div class="inner-body">
-    <div class="card">
-      <div class="privacy-text">
-        <h3>Data Collection</h3>
-        <p>SALON-TRACK collects only the information necessary to operate — your name, shop details, customer data, and visit history. This data is stored securely in the cloud.</p>
-        <h3>Data Usage</h3>
-        <p>Your data is used solely to provide the SALON-TRACK service. We do not sell, share, or distribute your data to any third party.</p>
-        <h3>Data Security</h3>
-        <p>All data is encrypted in transit and at rest. Access is protected by your personal PIN. Keep your PIN confidential.</p>
-        <h3>WhatsApp Messages</h3>
-        <p>Reminder messages via WhatsApp are initiated by you. SALON-TRACK does not send messages automatically.</p>
-        <h3>Data Deletion</h3>
-        <p>You may request deletion of your account and all data at any time by contacting support.</p>
-        <h3>Payments</h3>
-        <p>Payments are processed securely through Razorpay. SALON-TRACK does not store any card information.</p>
-        <h3>Contact</h3>
-        <p>For privacy concerns: <strong>support@salontrack.in</strong></p>
-        <div class="divider"></div>
-        <p style="font-size:11px;text-align:center;color:#90A4AE">Last updated: April 2026 • SALON-TRACK v1.0</p>
-      </div>
+    <div class="privacy-text">
+      <h3>Data Collection</h3>
+      <p>SALON-TRACK collects only the information necessary to operate — your name, shop details, customer data, and visit history. This data is stored securely in the cloud.</p>
+      <h3>Data Usage</h3>
+      <p>Your data is used solely to provide the SALON-TRACK service. We do not sell, share, or distribute your data to any third party.</p>
+      <h3>Data Security</h3>
+      <p>All data is encrypted in transit and at rest. Access is protected by your personal PIN. Keep your PIN confidential.</p>
+      <h3>WhatsApp Messages</h3>
+      <p>Reminder messages via WhatsApp are initiated by you. SALON-TRACK does not send messages automatically.</p>
+      <h3>Data Deletion</h3>
+      <p>You may request deletion of your account and all data at any time by contacting support.</p>
+      <h3>Payments</h3>
+      <p>Payments are processed securely through Razorpay. SALON-TRACK does not store any card information.</p>
+      <h3>Contact</h3>
+      <p>For privacy concerns: <strong>support@salontrack.in</strong></p>
+      <div class="divider"></div>
+      <p style="font-size:11px;text-align:center;color:#90A4AE">Last updated: April 2026 • SALON-TRACK v1.0</p>
     </div>
   </div>
 </div>
@@ -419,315 +530,350 @@
 <script>
 const SUPA_URL = 'https://jqqnnkzozjskziaizajg.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcW5ua3pvempza3ppYWl6YWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Mjk1ODAsImV4cCI6MjA4ODUwNTU4MH0.sEYeWnm0dvuw8bLSVnQhqmgV8LB-pELjpuVIa3Us1Gg';
+let currentUser=null, allCustomers=[], allServices=[];
 
-let currentUser = null, allCustomers = [], allServices = [];
-
-async function sb(table, method='GET', body=null, query='') {
-  const url = `${SUPA_URL}/rest/v1/${table}${query}`;
-  const headers = {
-    'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}`,
-    'Content-Type': 'application/json',
-    'Accept-Profile': 'public', 'Content-Profile': 'public'
-  };
-  if (method === 'POST') headers['Prefer'] = 'return=representation';
-  const opts = { method, headers };
-  if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(url, opts);
-  if (!res.ok) throw new Error(await res.text());
-  if (method === 'DELETE' || res.status === 204) return true;
+async function sb(table,method='GET',body=null,query='') {
+  const url=`${SUPA_URL}/rest/v1/${table}${query}`;
+  const headers={'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json','Accept-Profile':'public','Content-Profile':'public'};
+  if(method==='POST') headers['Prefer']='return=representation';
+  const opts={method,headers};
+  if(body) opts.body=JSON.stringify(body);
+  const res=await fetch(url,opts);
+  if(!res.ok) throw new Error(await res.text());
+  if(method==='DELETE'||res.status===204) return true;
   return res.json();
 }
 
-function toast(msg, type='') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = `toast ${type} show`;
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
+function toast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;setTimeout(()=>t.classList.remove('show'),3000);}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function goHome(){showScreen('homeScreen');}
 
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-function goHome() { showScreen('homeScreen'); }
-
-function openSection(id) {
+function openSection(id){
   showScreen(id);
-  if (id === 'customerMaster') loadCustomerList();
-  if (id === 'serviceMaster') loadServiceList();
-  if (id === 'addVisit') setupVisitForm();
-  if (id === 'report') loadTodayReport();
-  if (id === 'reminder') loadReminders();
+  if(id==='customerMaster'){loadCustomerTable(); resetSubTabs('cust','add');}
+  if(id==='serviceMaster'){loadServiceList(); resetSubTabs('svc','add');}
+  if(id==='addVisit'){setupVisitForm();}
+  if(id==='report'){loadTodayReport();}
+  if(id==='reminder'){loadReminders();}
 }
 
-function setupPinBoxes(ids) {
-  ids.forEach((id, i) => {
-    const el = document.getElementById(id);
-    el.addEventListener('input', function() {
-      this.value = this.value.slice(-1);
-      if (this.value && i < ids.length-1) document.getElementById(ids[i+1]).focus();
-    });
-    el.addEventListener('keydown', function(e) {
-      if (e.key==='Backspace' && !this.value && i>0) document.getElementById(ids[i-1]).focus();
-    });
+function switchSubTab(prefix,name,btn){
+  const screen=btn.closest('.screen');
+  screen.querySelectorAll('.sub-tab-btn').forEach(b=>b.classList.remove('active'));
+  screen.querySelectorAll('.sub-tab-content').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(`${prefix}-${name}`).classList.add('active');
+  if(prefix==='cust'&&name==='view') loadCustomerTable();
+  if(prefix==='svc'&&name==='view') loadServiceList();
+}
+
+function resetSubTabs(prefix,name){
+  const screenId = prefix==='cust'?'customerMaster':'serviceMaster';
+  const screen=document.getElementById(screenId);
+  screen.querySelectorAll('.sub-tab-btn').forEach((b,i)=>{b.classList.toggle('active',i===0);});
+  screen.querySelectorAll('.sub-tab-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById(`${prefix}-${name}`).classList.add('active');
+}
+
+function setupPinBoxes(ids){
+  ids.forEach((id,i)=>{
+    const el=document.getElementById(id);
+    el.addEventListener('input',function(){this.value=this.value.slice(-1);if(this.value&&i<ids.length-1)document.getElementById(ids[i+1]).focus();});
+    el.addEventListener('keydown',function(e){if(e.key==='Backspace'&&!this.value&&i>0)document.getElementById(ids[i-1]).focus();});
   });
 }
 
-async function doLogin() {
-  const mobile = document.getElementById('loginMobile').value.trim();
-  const pin = ['p1','p2','p3','p4'].map(id => document.getElementById(id).value).join('');
-  if (mobile.length !== 10) return toast('Enter valid 10-digit mobile', 'error');
-  if (pin.length !== 4) return toast('Enter 4-digit PIN', 'error');
-  try {
-    const rows = await sb('users','GET',null,`?mobile=eq.${mobile}&pin=eq.${pin}&select=*`);
-    if (!rows || !rows.length) return toast('Invalid mobile or PIN', 'error');
-    const user = rows[0];
-    if (!user.is_active) return toast('Account deactivated. Contact support.', 'error');
-    currentUser = user;
-    localStorage.setItem('st_uid', user.id);
-    checkAndLoad(user);
-  } catch(e) { toast('Login failed. Try again.', 'error'); console.error(e); }
+async function doLogin(){
+  const mobile=document.getElementById('loginMobile').value.trim();
+  const pin=['p1','p2','p3','p4'].map(id=>document.getElementById(id).value).join('');
+  if(mobile.length!==10)return toast('Enter valid 10-digit mobile','error');
+  if(pin.length!==4)return toast('Enter 4-digit PIN','error');
+  try{
+    const rows=await sb('users','GET',null,`?mobile=eq.${mobile}&pin=eq.${pin}&select=*`);
+    if(!rows||!rows.length)return toast('Invalid mobile or PIN','error');
+    const user=rows[0];
+    if(!user.is_active)return toast('Account deactivated. Contact support.','error');
+    currentUser=user; localStorage.setItem('st_uid',user.id); checkAndLoad(user);
+  }catch(e){toast('Login failed. Try again.','error');console.error(e);}
 }
 
-async function doRegister() {
-  const mobile = document.getElementById('regMobile').value.trim();
-  const name = document.getElementById('regName').value.trim();
-  const shop = document.getElementById('regShop').value.trim();
-  const city = document.getElementById('regCity').value.trim();
-  const state = document.getElementById('regState').value.trim();
-  const pin = ['rp1','rp2','rp3','rp4'].map(id => document.getElementById(id).value).join('');
-  if (mobile.length !== 10) return toast('Enter valid 10-digit mobile', 'error');
-  if (!name) return toast('Enter your name', 'error');
-  if (!shop) return toast('Enter shop name', 'error');
-  if (pin.length !== 4) return toast('Set a 4-digit PIN', 'error');
-  try {
-    const existing = await sb('users','GET',null,`?mobile=eq.${mobile}&select=id`);
-    if (existing && existing.length > 0) return toast('Mobile already registered. Please login.', 'error');
-    const trialEnd = new Date(); trialEnd.setDate(trialEnd.getDate()+15);
-    const rows = await sb('users','POST',{
-      mobile, name, shop, city, state, pin,
-      plan: 'trial',
-      start_date: new Date().toISOString().split('T')[0],
-      expiry_date: trialEnd.toISOString().split('T')[0],
-      is_active: true
-    });
-    if (!rows || !rows.length) return toast('Registration failed', 'error');
-    currentUser = rows[0];
-    localStorage.setItem('st_uid', currentUser.id);
-    toast('Welcome to SALON-TRACK! 🎉', 'success');
-    checkAndLoad(currentUser);
-  } catch(e) { toast('Registration failed. Try again.', 'error'); console.error(e); }
+async function doRegister(){
+  const mobile=document.getElementById('regMobile').value.trim();
+  const name=document.getElementById('regName').value.trim();
+  const shop=document.getElementById('regShop').value.trim();
+  const city=document.getElementById('regCity').value.trim();
+  const state=document.getElementById('regState').value.trim();
+  const pin=['rp1','rp2','rp3','rp4'].map(id=>document.getElementById(id).value).join('');
+  if(mobile.length!==10)return toast('Enter valid 10-digit mobile','error');
+  if(!name)return toast('Enter your name','error');
+  if(!shop)return toast('Enter shop name','error');
+  if(pin.length!==4)return toast('Set a 4-digit PIN','error');
+  try{
+    const existing=await sb('users','GET',null,`?mobile=eq.${mobile}&select=id`);
+    if(existing&&existing.length>0)return toast('Mobile already registered. Please login.','error');
+    const trialEnd=new Date(); trialEnd.setDate(trialEnd.getDate()+15);
+    const rows=await sb('users','POST',{mobile,name,shop,city,state,pin,plan:'trial',start_date:new Date().toISOString().split('T')[0],expiry_date:trialEnd.toISOString().split('T')[0],is_active:true});
+    if(!rows||!rows.length)return toast('Registration failed','error');
+    currentUser=rows[0]; localStorage.setItem('st_uid',currentUser.id);
+    toast('Welcome to SALON-TRACK! 🎉','success'); checkAndLoad(currentUser);
+  }catch(e){toast('Registration failed. Try again.','error');console.error(e);}
 }
 
-function checkAndLoad(user) {
-  const today = new Date(), expiry = new Date(user.expiry_date);
-  const daysLeft = Math.ceil((expiry - today) / (1000*60*60*24));
-  if ((user.plan === 'trial' && daysLeft <= 0) || user.plan === 'expired') { showScreen('paywallScreen'); return; }
-  document.getElementById('hShop').textContent = user.shop || '';
-  document.getElementById('hOwner').textContent = user.name || '';
-  document.getElementById('hTrial').textContent = user.plan === 'trial' ? `🕐 Trial: ${daysLeft} day${daysLeft!==1?'s':''} left` : user.plan === 'lifetime' ? '⭐ Lifetime Member' : '✅ Active';
-  const todayStr = new Date().toISOString().split('T')[0];
-  document.getElementById('visitDate').value = todayStr;
-  document.getElementById('reportFrom').value = todayStr;
-  document.getElementById('reportTo').value = todayStr;
+function checkAndLoad(user){
+  const today=new Date(),expiry=new Date(user.expiry_date);
+  const daysLeft=Math.ceil((expiry-today)/(1000*60*60*24));
+  if((user.plan==='trial'&&daysLeft<=0)||user.plan==='expired'){showScreen('paywallScreen');return;}
+  document.getElementById('hShop').textContent=user.shop||'';
+  document.getElementById('hOwner').textContent=user.name||'';
+  document.getElementById('hTrial').textContent=user.plan==='trial'?`🕐 Trial: ${daysLeft} day${daysLeft!==1?'s':''} left`:user.plan==='lifetime'?'⭐ Lifetime Member':'✅ Active';
+  const todayStr=new Date().toISOString().split('T')[0];
+  document.getElementById('visitDate').value=todayStr;
+  document.getElementById('reportFrom').value=todayStr;
+  document.getElementById('reportTo').value=todayStr;
   showScreen('homeScreen');
   loadAllMasterData();
 }
 
-function doLogout() {
-  currentUser = null; localStorage.removeItem('st_uid');
-  allCustomers = []; allServices = [];
-  ['p1','p2','p3','p4'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('loginMobile').value = '';
-  showScreen('loginScreen');
+function doLogout(){currentUser=null;localStorage.removeItem('st_uid');allCustomers=[];allServices=[];['p1','p2','p3','p4'].forEach(id=>document.getElementById(id).value='');document.getElementById('loginMobile').value='';showScreen('loginScreen');}
+
+async function autoLogin(){
+  const uid=localStorage.getItem('st_uid');if(!uid)return;
+  try{const rows=await sb('users','GET',null,`?id=eq.${uid}&select=*`);if(rows&&rows.length>0&&rows[0].is_active){currentUser=rows[0];checkAndLoad(currentUser);}}catch(e){console.error(e);}
 }
 
-async function autoLogin() {
-  const uid = localStorage.getItem('st_uid');
-  if (!uid) return;
-  try {
-    const rows = await sb('users','GET',null,`?id=eq.${uid}&select=*`);
-    if (rows && rows.length > 0 && rows[0].is_active) { currentUser = rows[0]; checkAndLoad(currentUser); }
-  } catch(e) { console.error(e); }
+async function loadAllMasterData(){
+  try{
+    const[custs,svcs]=await Promise.all([sb('salon_customers','GET',null,`?user_id=eq.${currentUser.id}&order=name.asc&select=*`),sb('salon_services','GET',null,`?user_id=eq.${currentUser.id}&order=name.asc&select=*`)]);
+    allCustomers=custs||[]; allServices=svcs||[];
+  }catch(e){console.error(e);}
 }
 
-async function loadAllMasterData() {
-  try {
-    const [custs, svcs] = await Promise.all([
-      sb('salon_customers','GET',null,`?user_id=eq.${currentUser.id}&order=name.asc&select=*`),
-      sb('salon_services','GET',null,`?user_id=eq.${currentUser.id}&order=name.asc&select=*`)
-    ]);
-    allCustomers = custs || []; allServices = svcs || [];
-  } catch(e) { console.error(e); }
+// CUSTOMER TABLE
+async function loadCustomerTable(){
+  try{
+    const rows=await sb('salon_customers','GET',null,`?user_id=eq.${currentUser.id}&order=name.asc&select=*`);
+    allCustomers=rows||[];
+    const tbody=document.getElementById('customerTableBody');
+    if(!allCustomers.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-light)">No customers yet. Add from the Add tab.</td></tr>';return;}
+    tbody.innerHTML=allCustomers.map(c=>`
+      <tr>
+        <td>${c.salutation||''} ${c.name}</td>
+        <td>${c.mobile||'-'}</td>
+        <td>${c.birthday?formatDate(c.birthday):'-'}</td>
+        <td>${c.address||'-'}</td>
+        <td>${c.anniversary?formatDate(c.anniversary):'-'}</td>
+      </tr>`).join('');
+  }catch(e){console.error(e);}
 }
 
-async function loadCustomerList() {
-  try {
-    const rows = await sb('salon_customers','GET',null,`?user_id=eq.${currentUser.id}&order=name.asc&select=*`);
-    allCustomers = rows || [];
-    const el = document.getElementById('customerList');
-    if (!allCustomers.length) { el.innerHTML = '<div class="empty-state"><div class="ei">👤</div><p>No customers yet.<br>Add your first customer above.</p></div>'; return; }
-    el.innerHTML = allCustomers.map(c => `
+function formatDate(d){if(!d)return '-';const dt=new Date(d);return dt.toLocaleDateString('en-IN',{day:'2-digit',month:'short'});}
+
+async function addCustomer(){
+  const name=document.getElementById('custName').value.trim();
+  if(!name)return toast('Customer name required','error');
+  try{
+    await sb('salon_customers','POST',{user_id:currentUser.id,salutation:document.getElementById('custSalutation').value,name,mobile:document.getElementById('custMobile').value.trim(),address:document.getElementById('custAddress').value.trim(),birthday:document.getElementById('custBirthday').value||null,anniversary:document.getElementById('custAnniversary').value||null,notes:document.getElementById('custNotes').value.trim()});
+    toast('Customer saved! ✅','success');
+    ['custName','custMobile','custAddress','custBirthday','custAnniversary','custNotes'].forEach(id=>document.getElementById(id).value='');
+    loadAllMasterData();
+  }catch(e){toast('Failed to save','error');console.error(e);}
+}
+
+// SERVICE
+async function loadServiceList(){
+  try{
+    const rows=await sb('salon_services','GET',null,`?user_id=eq.${currentUser.id}&order=name.asc&select=*`);
+    allServices=rows||[];
+    const el=document.getElementById('serviceList');
+    if(!allServices.length){el.innerHTML='<div class="empty-state"><div class="ei">💇</div><p>No services yet.<br>Add from the Add tab.</p></div>';return;}
+    el.innerHTML='<div style="padding:0 16px">'+allServices.map(s=>`
       <div class="list-item">
-        <div class="list-item-left"><h4>${c.salutation||''} ${c.name}</h4><p>📱 ${c.mobile||'-'}</p></div>
-        <div style="font-size:12px;color:var(--text-light)">${c.city||''}</div>
-      </div>`).join('');
-  } catch(e) { console.error(e); }
-}
-
-async function addCustomer() {
-  const name = document.getElementById('custName').value.trim();
-  if (!name) return toast('Customer name required', 'error');
-  try {
-    await sb('salon_customers','POST',{
-      user_id: currentUser.id,
-      salutation: document.getElementById('custSalutation').value,
-      name, mobile: document.getElementById('custMobile').value.trim(),
-      address: document.getElementById('custAddress').value.trim(),
-      birthday: document.getElementById('custBirthday').value || null,
-      anniversary: document.getElementById('custAnniversary').value || null,
-      notes: document.getElementById('custNotes').value.trim()
-    });
-    toast('Customer saved! ✅', 'success');
-    ['custName','custMobile','custAddress','custBirthday','custAnniversary','custNotes'].forEach(id => document.getElementById(id).value = '');
-    loadCustomerList(); loadAllMasterData();
-  } catch(e) { toast('Failed to save', 'error'); console.error(e); }
-}
-
-async function loadServiceList() {
-  try {
-    const rows = await sb('salon_services','GET',null,`?user_id=eq.${currentUser.id}&order=name.asc&select=*`);
-    allServices = rows || [];
-    const el = document.getElementById('serviceList');
-    if (!allServices.length) { el.innerHTML = '<div class="empty-state"><div class="ei">💇</div><p>No services yet.<br>Add your first service above.</p></div>'; return; }
-    el.innerHTML = allServices.map(s => `
-      <div class="list-item">
-        <div class="list-item-left"><h4>${s.name}</h4><p>🔔 Reminder: ${s.reminder_days||'-'} days</p></div>
+        <div class="list-item-left"><h4>${s.name}</h4></div>
         <div class="list-item-right">₹${s.rate}</div>
-      </div>`).join('');
-  } catch(e) { console.error(e); }
+      </div>`).join('')+'</div>';
+  }catch(e){console.error(e);}
 }
 
-async function addService() {
-  const name = document.getElementById('svcName').value.trim();
-  const rate = document.getElementById('svcRate').value;
-  if (!name) return toast('Service name required', 'error');
-  if (!rate) return toast('Rate required', 'error');
-  try {
-    await sb('salon_services','POST',{
-      user_id: currentUser.id, name, rate: parseFloat(rate),
-      reminder_days: parseInt(document.getElementById('svcRemDays').value) || null
-    });
-    toast('Service saved! ✅', 'success');
-    ['svcName','svcRate','svcRemDays'].forEach(id => document.getElementById(id).value = '');
+async function addService(){
+  const name=document.getElementById('svcName').value.trim();
+  const rate=document.getElementById('svcRate').value;
+  if(!name)return toast('Service name required','error');
+  if(!rate)return toast('Rate required','error');
+  try{
+    await sb('salon_services','POST',{user_id:currentUser.id,name,rate:parseFloat(rate)});
+    toast('Service saved! ✅','success');
+    ['svcName','svcRate'].forEach(id=>document.getElementById(id).value='');
     loadServiceList(); loadAllMasterData();
-  } catch(e) { toast('Failed to save', 'error'); console.error(e); }
+  }catch(e){toast('Failed to save','error');console.error(e);}
 }
 
-function setupVisitForm() {
-  const cSel = document.getElementById('visitCustomer');
-  const sSel = document.getElementById('visitService');
-  cSel.innerHTML = '<option value="">-- Select Customer --</option>';
-  allCustomers.forEach(c => cSel.innerHTML += `<option value="${c.id}">${c.salutation||''} ${c.name}</option>`);
-  sSel.innerHTML = '<option value="">-- Select Service --</option>';
-  allServices.forEach(s => sSel.innerHTML += `<option value="${s.id}" data-rate="${s.rate}" data-days="${s.reminder_days||''}">${s.name}</option>`);
+// VISIT - MULTIPLE SERVICE LINES
+let serviceLineCount=0;
+
+function setupVisitForm(){
+  serviceLineCount=0;
+  document.getElementById('serviceLines').innerHTML='';
+  document.getElementById('visitTotal').textContent='0';
+  const cSel=document.getElementById('visitCustomer');
+  cSel.innerHTML='<option value="">-- Select Customer --</option>';
+  allCustomers.forEach(c=>cSel.innerHTML+=`<option value="${c.id}">${c.salutation||''} ${c.name} ${c.mobile?'('+c.mobile+')':''}</option>`);
+  addServiceLine();
 }
 
-function onVisitServiceChange() {
-  const sel = document.getElementById('visitService');
-  const opt = sel.options[sel.selectedIndex];
-  if (opt && opt.dataset.rate) {
-    document.getElementById('visitAmount').value = opt.dataset.rate;
-    document.getElementById('visitRemDays').value = opt.dataset.days || '';
-    updateDueDate();
+function addServiceLine(){
+  serviceLineCount++;
+  const id=serviceLineCount;
+  const svcOptions=allServices.map(s=>`<option value="${s.id}" data-rate="${s.rate}">${s.name}</option>`).join('');
+  const html=`
+    <div class="service-line" id="sline-${id}">
+      <div class="service-line-header">
+        <span class="service-line-num">Service ${id}</span>
+        ${id>1?`<button class="btn-danger-sm" onclick="removeServiceLine(${id})">✕ Remove</button>`:''}
+      </div>
+      <div class="form-group">
+        <label>Service *</label>
+        <select id="svc-sel-${id}" onchange="onSvcChange(${id})">
+          <option value="">-- Select Service --</option>
+          ${svcOptions}
+        </select>
+      </div>
+      <div class="service-line-grid">
+        <div class="form-group">
+          <label>Amount (₹)</label>
+          <input type="number" id="svc-amt-${id}" placeholder="Auto-filled" oninput="calcTotal()">
+        </div>
+        <div class="form-group">
+          <label>Reminder Days</label>
+          <input type="number" id="svc-rem-${id}" placeholder="Enter days" oninput="updateLineDueDate(${id})">
+        </div>
+      </div>
+      <div class="due-info" id="svc-due-${id}" style="display:none">📅 Next due: <strong id="svc-due-text-${id}"></strong></div>
+    </div>`;
+  document.getElementById('serviceLines').insertAdjacentHTML('beforeend',html);
+}
+
+function removeServiceLine(id){
+  document.getElementById(`sline-${id}`).remove();
+  calcTotal();
+}
+
+function onSvcChange(id){
+  const sel=document.getElementById(`svc-sel-${id}`);
+  const opt=sel.options[sel.selectedIndex];
+  if(opt&&opt.dataset.rate){
+    document.getElementById(`svc-amt-${id}`).value=opt.dataset.rate;
+    calcTotal();
+    updateLineDueDate(id);
   }
 }
 
-function updateDueDate() {
-  const date = document.getElementById('visitDate').value;
-  const days = parseInt(document.getElementById('visitRemDays').value);
-  if (date && days) {
-    const due = new Date(date); due.setDate(due.getDate()+days);
-    document.getElementById('dueDateText').textContent = due.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
-    document.getElementById('dueDateInfo').style.display = 'block';
-  } else { document.getElementById('dueDateInfo').style.display = 'none'; }
+function updateLineDueDate(id){
+  const date=document.getElementById('visitDate').value;
+  const days=parseInt(document.getElementById(`svc-rem-${id}`).value);
+  const dueEl=document.getElementById(`svc-due-${id}`);
+  const dueTxt=document.getElementById(`svc-due-text-${id}`);
+  if(date&&days){
+    const due=new Date(date); due.setDate(due.getDate()+days);
+    dueTxt.textContent=due.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+    dueEl.style.display='block';
+  }else{dueEl.style.display='none';}
 }
 
-document.getElementById('visitDate').addEventListener('change', updateDueDate);
+function updateAllDueDates(){
+  for(let i=1;i<=serviceLineCount;i++){
+    if(document.getElementById(`sline-${i}`)) updateLineDueDate(i);
+  }
+}
 
-async function addVisit() {
-  const cSel = document.getElementById('visitCustomer');
-  const sSel = document.getElementById('visitService');
-  const date = document.getElementById('visitDate').value;
-  const amount = document.getElementById('visitAmount').value;
-  if (!cSel.value) return toast('Select a customer', 'error');
-  if (!sSel.value) return toast('Select a service', 'error');
-  if (!date) return toast('Select visit date', 'error');
-  if (!amount) return toast('Enter amount', 'error');
-  const remDays = parseInt(document.getElementById('visitRemDays').value) || null;
-  let dueDate = null;
-  if (remDays) { const d=new Date(date); d.setDate(d.getDate()+remDays); dueDate=d.toISOString().split('T')[0]; }
-  try {
-    await sb('salon_visits','POST',{
-      user_id: currentUser.id, customer_id: cSel.value,
-      customer_name: cSel.options[cSel.selectedIndex].text,
-      visit_date: date, service: sSel.options[sSel.selectedIndex].text,
-      amount: parseFloat(amount), reminder_days: remDays, due_date: dueDate
+function calcTotal(){
+  let total=0;
+  for(let i=1;i<=serviceLineCount;i++){
+    const el=document.getElementById(`svc-amt-${i}`);
+    if(el) total+=parseFloat(el.value)||0;
+  }
+  document.getElementById('visitTotal').textContent=total.toLocaleString('en-IN');
+}
+
+async function addVisit(){
+  const custSel=document.getElementById('visitCustomer');
+  const date=document.getElementById('visitDate').value;
+  if(!custSel.value)return toast('Select a customer','error');
+  if(!date)return toast('Select visit date','error');
+
+  const custName=custSel.options[custSel.selectedIndex].text;
+  const lines=[];
+  for(let i=1;i<=serviceLineCount;i++){
+    const lineEl=document.getElementById(`sline-${i}`);
+    if(!lineEl)continue;
+    const svcSel=document.getElementById(`svc-sel-${i}`);
+    const amt=document.getElementById(`svc-amt-${i}`).value;
+    const remDays=parseInt(document.getElementById(`svc-rem-${i}`).value)||null;
+    if(!svcSel.value)return toast(`Select service for line ${i}`,'error');
+    if(!amt)return toast(`Enter amount for line ${i}`,'error');
+    let dueDate=null;
+    if(remDays){const d=new Date(date);d.setDate(d.getDate()+remDays);dueDate=d.toISOString().split('T')[0];}
+    lines.push({
+      user_id:currentUser.id, customer_id:custSel.value,
+      customer_name:custName.replace(/\(.*\)/,'').trim(),
+      visit_date:date, service:svcSel.options[svcSel.selectedIndex].text,
+      amount:parseFloat(amt), reminder_days:remDays, due_date:dueDate
     });
-    toast('Visit saved! ✅', 'success');
-    cSel.value=''; sSel.value='';
-    ['visitAmount','visitRemDays'].forEach(id => document.getElementById(id).value='');
-    document.getElementById('dueDateInfo').style.display='none';
-    document.getElementById('visitDate').value=new Date().toISOString().split('T')[0];
-  } catch(e) { toast('Failed to save visit', 'error'); console.error(e); }
+  }
+  if(!lines.length)return toast('Add at least one service','error');
+  try{
+    for(const line of lines) await sb('salon_visits','POST',line);
+    toast(`Visit saved! ${lines.length} service${lines.length>1?'s':''} recorded ✅`,'success');
+    setupVisitForm();
+  }catch(e){toast('Failed to save visit','error');console.error(e);}
 }
 
-async function loadTodayReport() {
-  const today = new Date().toISOString().split('T')[0];
-  try {
-    const rows = await sb('salon_visits','GET',null,`?user_id=eq.${currentUser.id}&visit_date=eq.${today}&order=created_at.desc&select=*`);
-    const visits = rows||[], total = visits.reduce((s,v)=>s+(v.amount||0),0);
-    document.getElementById('todayVisits').textContent = visits.length;
-    document.getElementById('todayTotal').textContent = total.toLocaleString('en-IN');
-    renderVisits('todayVisitList', visits);
-  } catch(e) { console.error(e); }
+// REPORT
+async function loadTodayReport(){
+  const today=new Date().toISOString().split('T')[0];
+  try{
+    const rows=await sb('salon_visits','GET',null,`?user_id=eq.${currentUser.id}&visit_date=eq.${today}&order=created_at.desc&select=*`);
+    const visits=rows||[],total=visits.reduce((s,v)=>s+(v.amount||0),0);
+    document.getElementById('todayVisits').textContent=visits.length;
+    document.getElementById('todayTotal').textContent=total.toLocaleString('en-IN');
+    renderVisits('todayVisitList',visits);
+  }catch(e){console.error(e);}
 }
 
-async function loadRangeReport() {
-  const from = document.getElementById('reportFrom').value, to = document.getElementById('reportTo').value;
-  if (!from||!to) return toast('Select both dates','error');
-  try {
-    const rows = await sb('salon_visits','GET',null,`?user_id=eq.${currentUser.id}&visit_date=gte.${from}&visit_date=lte.${to}&order=visit_date.desc&select=*`);
-    const visits = rows||[], total = visits.reduce((s,v)=>s+(v.amount||0),0);
-    document.getElementById('rangeVisits').textContent = visits.length;
-    document.getElementById('rangeTotal').textContent = total.toLocaleString('en-IN');
-    document.getElementById('rangeStats').style.display = 'block';
-    renderVisits('rangeVisitList', visits, true);
-  } catch(e) { toast('Failed to load','error'); }
+async function loadRangeReport(){
+  const from=document.getElementById('reportFrom').value,to=document.getElementById('reportTo').value;
+  if(!from||!to)return toast('Select both dates','error');
+  try{
+    const rows=await sb('salon_visits','GET',null,`?user_id=eq.${currentUser.id}&visit_date=gte.${from}&visit_date=lte.${to}&order=visit_date.desc&select=*`);
+    const visits=rows||[],total=visits.reduce((s,v)=>s+(v.amount||0),0);
+    document.getElementById('rangeVisits').textContent=visits.length;
+    document.getElementById('rangeTotal').textContent=total.toLocaleString('en-IN');
+    document.getElementById('rangeStats').style.display='block';
+    renderVisits('rangeVisitList',visits,true);
+  }catch(e){toast('Failed to load','error');}
 }
 
-function renderVisits(elId, visits, showDate=false) {
-  const el = document.getElementById(elId);
-  if (!visits.length) { el.innerHTML = '<div class="empty-state"><div class="ei">📋</div><p>No visits found.</p></div>'; return; }
-  el.innerHTML = visits.map(v => `
+function renderVisits(elId,visits,showDate=false){
+  const el=document.getElementById(elId);
+  if(!visits.length){el.innerHTML='<div class="empty-state"><div class="ei">📋</div><p>No visits found.</p></div>';return;}
+  el.innerHTML=visits.map(v=>`
     <div class="list-item">
       <div class="list-item-left"><h4>${v.customer_name||'-'}</h4><p>${v.service||'-'}${showDate?' | '+v.visit_date:''}</p></div>
       <div class="list-item-right">₹${(v.amount||0).toLocaleString('en-IN')}</div>
     </div>`).join('');
 }
 
-async function loadReminders() {
+// REMINDERS
+async function loadReminders(){
   const today=new Date().toISOString().split('T')[0];
-  const in3=new Date(); in3.setDate(in3.getDate()+3);
-  const in3Str=in3.toISOString().split('T')[0];
-  try {
-    const rows = await sb('salon_visits','GET',null,`?user_id=eq.${currentUser.id}&due_date=gte.${today}&due_date=lte.${in3Str}&order=due_date.asc&select=*`);
-    const el = document.getElementById('reminderList');
-    if (!rows||!rows.length) { el.innerHTML='<div class="empty-state"><div class="ei">🔔</div><p>No reminders due<br>in the next 3 days. All good! ✅</p></div>'; return; }
+  const in3=new Date();in3.setDate(in3.getDate()+3);const in3Str=in3.toISOString().split('T')[0];
+  try{
+    const rows=await sb('salon_visits','GET',null,`?user_id=eq.${currentUser.id}&due_date=gte.${today}&due_date=lte.${in3Str}&order=due_date.asc&select=*`);
+    const el=document.getElementById('reminderList');
+    if(!rows||!rows.length){el.innerHTML='<div class="empty-state"><div class="ei">🔔</div><p>No reminders due<br>in the next 3 days. All good! ✅</p></div>';return;}
     const custIds=[...new Set(rows.map(r=>r.customer_id))];
     let custMap={};
-    if (custIds.length) { const c=await sb('salon_customers','GET',null,`?id=in.(${custIds.join(',')})&select=id,mobile`); (c||[]).forEach(x=>custMap[x.id]=x.mobile); }
-    el.innerHTML = rows.map(v => {
+    if(custIds.length){const c=await sb('salon_customers','GET',null,`?id=in.(${custIds.join(',')})&select=id,mobile`);(c||[]).forEach(x=>custMap[x.id]=x.mobile);}
+    el.innerHTML=rows.map(v=>{
       const mob=custMap[v.customer_id]||'';
       const waMsg=encodeURIComponent(`Hello ${v.customer_name}, it's time to groom yourself. Please visit us! ✂️`);
       return `<div class="rem-card">
@@ -736,16 +882,13 @@ async function loadReminders() {
         ${mob?`<div class="action-btns"><a href="tel:${mob}" class="call-btn">📞 Call</a><a href="https://wa.me/91${mob}?text=${waMsg}" class="wa-btn" target="_blank">💬 WhatsApp</a></div>`:'<p style="font-size:11px;color:#90A4AE;margin-top:6px">No mobile on record</p>'}
       </div>`;
     }).join('');
-  } catch(e) { console.error(e); }
+  }catch(e){console.error(e);}
 }
 
+// PAYWALL
 let selectedPlan='yearly';
-function selectPlan(plan) {
-  selectedPlan=plan;
-  document.getElementById('planYearly').classList.toggle('selected',plan==='yearly');
-  document.getElementById('planLifetime').classList.toggle('selected',plan==='lifetime');
-}
-function initiatePayment() { toast(`Razorpay coming in v2. Plan: ₹${selectedPlan==='yearly'?250:1001}`,''); }
+function selectPlan(plan){selectedPlan=plan;document.getElementById('planYearly').classList.toggle('selected',plan==='yearly');document.getElementById('planLifetime').classList.toggle('selected',plan==='lifetime');}
+function initiatePayment(){toast(`Razorpay coming in v2. Plan: ₹${selectedPlan==='yearly'?250:1001}`,'');}
 
 setupPinBoxes(['p1','p2','p3','p4']);
 setupPinBoxes(['rp1','rp2','rp3','rp4']);
