@@ -4,626 +4,146 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>SALON-TRACK</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root {
     --primary: #1565C0;
     --primary-light: #1976D2;
     --primary-dark: #0D47A1;
     --accent: #42A5F5;
-    --accent-light: #90CAF9;
     --white: #FFFFFF;
     --bg: #F0F6FF;
-    --card: #FFFFFF;
     --text: #1A237E;
     --text-light: #546E7A;
     --border: #BBDEFB;
-    --success: #2E7D32;
-    --danger: #C62828;
-    --warning: #F57F17;
-    --shadow: 0 4px 20px rgba(21,101,192,0.12);
-    --shadow-lg: 0 8px 32px rgba(21,101,192,0.18);
-    --radius: 14px;
-    --radius-sm: 8px;
+    --shadow: 0 4px 20px rgba(21,101,192,0.13);
+    --radius: 16px;
+    --radius-sm: 10px;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    max-width: 480px;
-    margin: 0 auto;
-    position: relative;
-  }
-
-  /* ===== SCREENS ===== */
+  body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 480px; margin: 0 auto; }
   .screen { display: none; min-height: 100vh; flex-direction: column; }
   .screen.active { display: flex; }
 
-  /* ===== AUTH SCREENS ===== */
-  .auth-screen {
-    background: linear-gradient(160deg, #0D47A1 0%, #1565C0 40%, #1976D2 70%, #42A5F5 100%);
-    align-items: center;
-    justify-content: center;
-    padding: 30px 24px;
-    position: relative;
-    overflow: hidden;
-  }
+  /* AUTH */
+  .auth-bg { background: linear-gradient(160deg, #0D47A1 0%, #1565C0 45%, #1976D2 75%, #42A5F5 100%); align-items: center; justify-content: center; padding: 28px 22px; position: relative; overflow: hidden; }
+  .auth-bg::before { content: ''; position: absolute; top: -100px; right: -100px; width: 300px; height: 300px; border-radius: 50%; background: rgba(255,255,255,0.05); }
+  .auth-bg::after { content: ''; position: absolute; bottom: -80px; left: -80px; width: 220px; height: 220px; border-radius: 50%; background: rgba(255,255,255,0.04); }
+  .auth-logo { text-align: center; margin-bottom: 28px; position: relative; z-index: 1; }
+  .auth-logo .logo-icon { font-size: 54px; display: block; margin-bottom: 8px; }
+  .auth-logo h1 { font-family: 'Nunito', sans-serif; font-size: 30px; font-weight: 900; color: white; letter-spacing: 3px; }
+  .auth-logo p { font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 1.5px; margin-top: 3px; }
+  .auth-card { background: white; border-radius: 22px; padding: 26px 22px; width: 100%; box-shadow: 0 24px 64px rgba(0,0,0,0.28); position: relative; z-index: 1; }
+  .auth-card h2 { font-size: 18px; font-weight: 700; color: var(--primary-dark); margin-bottom: 4px; }
+  .auth-card .sub { font-size: 12px; color: var(--text-light); margin-bottom: 20px; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 10px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+  .form-group input, .form-group select { width: 100%; padding: 11px 13px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'Poppins', sans-serif; font-size: 14px; color: var(--text); background: #F8FBFF; transition: all 0.2s; outline: none; }
+  .form-group input:focus, .form-group select:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(21,101,192,0.1); }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pin-row { display: flex; gap: 10px; justify-content: center; }
+  .pin-box { width: 54px; height: 58px; border: 2px solid var(--border); border-radius: 12px; font-size: 24px; font-weight: 700; text-align: center; color: var(--primary-dark); background: #F8FBFF; transition: all 0.2s; outline: none; -webkit-text-security: disc; }
+  .pin-box:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(21,101,192,0.1); }
+  .btn { width: 100%; padding: 13px; border: none; border-radius: var(--radius-sm); font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-primary { background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%); color: white; box-shadow: 0 4px 16px rgba(21,101,192,0.35); }
+  .btn-primary:active { transform: scale(0.98); opacity: 0.92; }
+  .btn-white { background: white; color: var(--primary-dark); border: 2px solid var(--border); font-weight: 700; }
+  .link-btn { background: none; border: none; color: var(--primary); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: underline; font-family: 'Poppins', sans-serif; }
+  .auth-footer { text-align: center; margin-top: 14px; font-size: 13px; color: var(--text-light); }
 
-  .auth-screen::before {
-    content: '';
-    position: absolute;
-    top: -80px; right: -80px;
-    width: 260px; height: 260px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.06);
-  }
-  .auth-screen::after {
-    content: '';
-    position: absolute;
-    bottom: -60px; left: -60px;
-    width: 200px; height: 200px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.05);
-  }
+  /* HOME */
+  .home-header { background: linear-gradient(135deg, var(--primary-dark), var(--primary-light)); padding: 20px 20px 22px; position: relative; overflow: hidden; }
+  .home-header::after { content: ''; position: absolute; bottom: -30px; right: -30px; width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,0.06); }
+  .home-header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+  .home-header h1 { font-family: 'Nunito', sans-serif; font-size: 22px; font-weight: 900; color: white; letter-spacing: 1.5px; }
+  .home-header .shop-label { font-size: 13px; color: rgba(255,255,255,0.88); font-weight: 600; margin-top: 3px; }
+  .home-header .owner-label { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 1px; }
+  .logout-btn { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); color: white; font-size: 18px; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .trial-pill { display: inline-block; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.35); color: white; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 20px; margin-top: 10px; }
+  .dashboard-body { flex: 1; padding: 20px 16px 24px; overflow-y: auto; }
+  .tiles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+  .tile { background: white; border-radius: var(--radius); padding: 24px 14px 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; border: 1.5px solid var(--border); box-shadow: var(--shadow); transition: all 0.18s; min-height: 115px; position: relative; overflow: hidden; }
+  .tile::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: var(--radius) var(--radius) 0 0; }
+  .tile:active { transform: scale(0.95); box-shadow: none; }
+  .tile .tile-icon { font-size: 38px; margin-bottom: 10px; }
+  .tile .tile-label { font-size: 13px; font-weight: 700; color: var(--primary-dark); line-height: 1.35; }
+  .support-strip { background: var(--primary-dark); border-radius: var(--radius-sm); padding: 15px 18px; display: flex; align-items: center; gap: 14px; }
+  .support-strip .s-icon { font-size: 24px; }
+  .support-strip .s-text p { font-size: 10px; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 1px; }
+  .support-strip .s-text a { font-size: 14px; font-weight: 700; color: white; text-decoration: none; }
 
-  .auth-logo {
-    text-align: center;
-    margin-bottom: 36px;
-    position: relative; z-index: 1;
-  }
-
-  .auth-logo .scissors-icon {
-    font-size: 52px;
-    display: block;
-    margin-bottom: 8px;
-    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
-  }
-
-  .auth-logo h1 {
-    font-family: 'Nunito', sans-serif;
-    font-size: 28px;
-    font-weight: 800;
-    color: white;
-    letter-spacing: 2px;
-  }
-
-  .auth-logo p {
-    font-size: 12px;
-    color: rgba(255,255,255,0.75);
-    letter-spacing: 1px;
-    margin-top: 2px;
-  }
-
-  .auth-card {
-    background: white;
-    border-radius: 20px;
-    padding: 28px 24px;
-    width: 100%;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-    position: relative; z-index: 1;
-  }
-
-  .auth-card h2 {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--primary-dark);
-    margin-bottom: 6px;
-  }
-
-  .auth-card p.sub {
-    font-size: 12px;
-    color: var(--text-light);
-    margin-bottom: 22px;
-  }
-
-  .form-group { margin-bottom: 16px; }
-
-  .form-group label {
-    display: block;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--primary);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 6px;
-  }
-
-  .form-group input, .form-group select, .form-group textarea {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-family: 'Poppins', sans-serif;
-    font-size: 14px;
-    color: var(--text);
-    background: #F8FBFF;
-    transition: all 0.2s;
-    outline: none;
-  }
-
-  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-    border-color: var(--primary);
-    background: white;
-    box-shadow: 0 0 0 3px rgba(21,101,192,0.1);
-  }
-
-  .pin-row {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-  }
-
-  .pin-box {
-    width: 52px; height: 56px;
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    font-size: 22px;
-    font-weight: 700;
-    text-align: center;
-    color: var(--primary-dark);
-    background: #F8FBFF;
-    transition: all 0.2s;
-    outline: none;
-    -webkit-text-security: disc;
-  }
-
-  .pin-box:focus {
-    border-color: var(--primary);
-    background: white;
-    box-shadow: 0 0 0 3px rgba(21,101,192,0.1);
-  }
-
-  .btn {
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: var(--radius-sm);
-    font-family: 'Poppins', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.3px;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-    color: white;
-    box-shadow: 0 4px 15px rgba(21,101,192,0.35);
-  }
-
-  .btn-primary:active { transform: scale(0.98); }
-
-  .btn-outline {
-    background: transparent;
-    border: 1.5px solid var(--primary);
-    color: var(--primary);
-  }
-
-  .btn-sm {
-    width: auto;
-    padding: 8px 16px;
-    font-size: 13px;
-  }
-
-  .btn-success {
-    background: linear-gradient(135deg, #2E7D32, #43A047);
-    color: white;
-  }
-
-  .btn-danger {
-    background: linear-gradient(135deg, #C62828, #E53935);
-    color: white;
-  }
-
-  .link-btn {
-    background: none;
-    border: none;
-    color: var(--primary);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: underline;
-    font-family: 'Poppins', sans-serif;
-    padding: 4px 0;
-  }
-
-  .auth-footer {
-    text-align: center;
-    margin-top: 16px;
-    font-size: 13px;
-    color: var(--text-light);
-  }
-
-  /* ===== MAIN APP ===== */
-  .app-header {
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-    padding: 14px 20px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 2px 12px rgba(13,71,161,0.3);
-    position: sticky; top: 0; z-index: 100;
-  }
-
-  .app-header h1 {
-    font-family: 'Nunito', sans-serif;
-    font-size: 20px;
-    font-weight: 800;
-    color: white;
-    letter-spacing: 1px;
-  }
-
-  .app-header .shop-name {
-    font-size: 11px;
-    color: rgba(255,255,255,0.75);
-    margin-top: 1px;
-  }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .trial-badge {
-    background: rgba(255,255,255,0.2);
-    color: white;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 3px 8px;
-    border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.3);
-  }
-
-  .logout-btn {
-    background: rgba(255,255,255,0.15);
-    border: none;
-    color: white;
-    font-size: 18px;
-    width: 34px; height: 34px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-  }
-
-  .content-area {
-    flex: 1;
-    overflow-y: auto;
-    padding-bottom: 80px;
-  }
-
-  /* ===== BOTTOM NAV ===== */
-  .bottom-nav {
-    position: fixed;
-    bottom: 0; left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 480px;
-    background: white;
-    display: flex;
-    box-shadow: 0 -4px 20px rgba(21,101,192,0.12);
-    border-top: 1px solid var(--border);
-    z-index: 200;
-  }
-
-  .nav-item {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 2px 6px;
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    color: #90A4AE;
-    font-family: 'Poppins', sans-serif;
-    font-size: 9px;
-    font-weight: 500;
-    transition: all 0.2s;
-    position: relative;
-  }
-
-  .nav-item .nav-icon { font-size: 20px; margin-bottom: 2px; }
-
-  .nav-item.active {
-    color: var(--primary);
-  }
-
-  .nav-item.active::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 15%; right: 15%;
-    height: 3px;
-    background: linear-gradient(90deg, var(--primary), var(--accent));
-    border-radius: 0 0 4px 4px;
-  }
-
-  .nav-item.active .nav-icon {
-    filter: drop-shadow(0 2px 6px rgba(21,101,192,0.4));
-    transform: scale(1.15);
-  }
-
-  /* ===== TAB CONTENT ===== */
-  .tab-content { display: none; padding: 16px; }
-  .tab-content.active { display: block; }
-
-  /* ===== CARDS ===== */
-  .card {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 16px;
-    margin-bottom: 14px;
-    box-shadow: var(--shadow);
-    border: 1px solid rgba(187,222,251,0.5);
-  }
-
-  .card-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--primary);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  /* ===== SUB TABS ===== */
-  .sub-tabs {
-    display: flex;
-    background: var(--bg);
-    border-radius: 10px;
-    padding: 4px;
-    margin-bottom: 16px;
-    border: 1px solid var(--border);
-  }
-
-  .sub-tab {
-    flex: 1;
-    padding: 9px;
-    border: none;
-    background: transparent;
-    border-radius: 8px;
-    font-family: 'Poppins', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-light);
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .sub-tab.active {
-    background: var(--primary);
-    color: white;
-    box-shadow: 0 2px 8px rgba(21,101,192,0.3);
-    font-weight: 600;
-  }
-
-  /* ===== LIST ITEMS ===== */
-  .list-item {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 8px rgba(21,101,192,0.06);
-  }
-
+  /* INNER SCREENS */
+  .inner-header { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); padding: 14px 16px 13px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(13,71,161,0.25); }
+  .back-btn { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); color: white; font-size: 20px; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .inner-header h2 { font-family: 'Nunito', sans-serif; font-size: 19px; font-weight: 800; color: white; letter-spacing: 0.5px; }
+  .inner-body { flex: 1; overflow-y: auto; padding: 16px 16px 30px; }
+  .card { background: white; border-radius: var(--radius); padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow); border: 1px solid rgba(187,222,251,0.6); }
+  .card-title { font-size: 12px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; padding-bottom: 10px; border-bottom: 1.5px solid var(--bg); }
+  .section-title { font-size: 13px; font-weight: 700; color: var(--primary-dark); margin-bottom: 12px; margin-top: 4px; }
+  .list-item { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 13px 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(21,101,192,0.06); }
   .list-item-left h4 { font-size: 14px; font-weight: 600; color: var(--text); }
-  .list-item-left p { font-size: 12px; color: var(--text-light); margin-top: 2px; }
-  .list-item-right { font-size: 16px; font-weight: 700; color: var(--primary); }
+  .list-item-left p { font-size: 12px; color: var(--text-light); margin-top: 3px; }
+  .list-item-right { font-size: 17px; font-weight: 700; color: var(--primary); white-space: nowrap; }
+  .empty-state { text-align: center; padding: 36px 20px; color: var(--text-light); }
+  .empty-state .ei { font-size: 44px; margin-bottom: 10px; }
+  .empty-state p { font-size: 13px; line-height: 1.6; }
 
-  .empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--text-light);
-  }
-  .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
-  .empty-state p { font-size: 14px; }
+  /* REPORT */
+  .stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .stat-box { border-radius: var(--radius-sm); padding: 16px 12px; text-align: center; }
+  .stat-box.blue { background: linear-gradient(135deg, var(--primary-dark), var(--accent)); color: white; }
+  .stat-box.white-box { background: white; border: 1.5px solid var(--border); color: var(--primary-dark); box-shadow: var(--shadow); }
+  .stat-box .sv { font-size: 26px; font-weight: 800; }
+  .stat-box .sl { font-size: 11px; opacity: 0.8; margin-top: 3px; font-weight: 500; }
+  .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
 
-  /* ===== REPORT ===== */
-  .stat-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 14px;
-  }
-
-  .stat-box {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-    border-radius: var(--radius-sm);
-    padding: 14px;
-    text-align: center;
-    color: white;
-  }
-
-  .stat-box.white {
-    background: white;
-    border: 1px solid var(--border);
-    color: var(--primary);
-    box-shadow: var(--shadow);
-  }
-
-  .stat-box .stat-val { font-size: 22px; font-weight: 700; }
-  .stat-box .stat-label { font-size: 11px; opacity: 0.85; margin-top: 2px; }
-
-  .date-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-
-  /* ===== REMINDER ===== */
-  .reminder-card {
-    background: white;
-    border: 1px solid #FFCDD2;
-    border-left: 4px solid #E53935;
-    border-radius: 10px;
-    padding: 12px 14px;
-    margin-bottom: 10px;
-  }
-
-  .reminder-card h4 { font-size: 14px; font-weight: 600; color: var(--text); }
-  .reminder-card p { font-size: 12px; color: var(--text-light); margin-top: 2px; }
-
-  .action-btns {
-    display: flex;
-    gap: 8px;
-    margin-top: 10px;
-  }
-
-  .action-btns a {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    padding: 8px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s;
-  }
-
+  /* REMINDER */
+  .rem-card { background: white; border: 1px solid #FFCDD2; border-left: 4px solid #E53935; border-radius: 12px; padding: 13px 15px; margin-bottom: 10px; }
+  .rem-card h4 { font-size: 14px; font-weight: 700; color: var(--text); }
+  .rem-card p { font-size: 12px; color: var(--text-light); margin-top: 3px; }
+  .action-btns { display: flex; gap: 8px; margin-top: 10px; }
+  .action-btns a { flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 9px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; }
   .call-btn { background: #E3F2FD; color: #1565C0; }
-  .wa-btn { background: #E8F5E9; color: #2E7D32; }
+  .wa-btn { background: #E8F5E9; color: #1B5E20; }
 
-  /* ===== TOAST ===== */
-  .toast {
-    position: fixed;
-    top: 20px; left: 50%;
-    transform: translateX(-50%) translateY(-80px);
-    background: var(--primary-dark);
-    color: white;
-    padding: 12px 24px;
-    border-radius: 30px;
-    font-size: 13px;
-    font-weight: 500;
-    z-index: 999;
-    transition: transform 0.3s ease;
-    box-shadow: var(--shadow-lg);
-    white-space: nowrap;
-  }
+  /* PAYWALL */
+  .paywall-bg { background: linear-gradient(160deg, #0D47A1, #1976D2); align-items: center; justify-content: center; padding: 30px 22px; text-align: center; }
+  .paywall-bg h2 { color: white; font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+  .paywall-bg > p { color: rgba(255,255,255,0.8); font-size: 14px; margin-bottom: 28px; line-height: 1.6; }
+  .plan-cards { width: 100%; display: flex; flex-direction: column; gap: 12px; margin-bottom: 22px; }
+  .plan-card { background: white; border-radius: var(--radius); padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 2.5px solid transparent; transition: all 0.2s; }
+  .plan-card.selected { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(66,165,245,0.25); }
+  .plan-card h3 { font-size: 15px; font-weight: 700; color: var(--primary-dark); }
+  .plan-card p { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+  .plan-price { font-size: 22px; font-weight: 900; color: var(--primary); }
 
+  /* PRIVACY */
+  .privacy-text { font-size: 13px; line-height: 1.85; color: var(--text-light); }
+  .privacy-text h3 { color: var(--primary); font-size: 13px; font-weight: 700; margin: 14px 0 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* MISC */
+  .info-box { background: #E3F2FD; border-left: 3px solid var(--primary); border-radius: 8px; padding: 11px 13px; font-size: 13px; color: var(--primary-dark); margin-bottom: 14px; }
+  .divider { height: 1px; background: var(--border); margin: 14px 0; }
+  .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--primary-dark); color: white; padding: 11px 22px; border-radius: 30px; font-size: 13px; font-weight: 500; z-index: 9999; transition: transform 0.3s ease; box-shadow: 0 8px 32px rgba(21,101,192,0.25); white-space: nowrap; max-width: 90vw; text-align: center; }
   .toast.show { transform: translateX(-50%) translateY(0); }
   .toast.success { background: #2E7D32; }
   .toast.error { background: #C62828; }
-
-  /* ===== PAYWALL ===== */
-  .paywall-screen {
-    background: linear-gradient(160deg, #0D47A1, #1976D2);
-    align-items: center;
-    justify-content: center;
-    padding: 30px 24px;
-    text-align: center;
-  }
-
-  .paywall-icon { font-size: 64px; margin-bottom: 16px; }
-  .paywall-screen h2 { color: white; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-  .paywall-screen p { color: rgba(255,255,255,0.8); font-size: 14px; margin-bottom: 28px; }
-
-  .plan-cards { width: 100%; display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-
-  .plan-card {
-    background: white;
-    border-radius: var(--radius);
-    padding: 18px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: all 0.2s;
-  }
-
-  .plan-card.selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(66,165,245,0.3); }
-  .plan-card h3 { font-size: 15px; font-weight: 700; color: var(--primary-dark); }
-  .plan-card p { font-size: 12px; color: var(--text-light); }
-  .plan-price { font-size: 20px; font-weight: 800; color: var(--primary); }
-
-  /* ===== MISC ===== */
-  .section-header {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--primary-dark);
-    margin-bottom: 14px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid var(--border);
-  }
-
-  .divider { height: 1px; background: var(--border); margin: 16px 0; }
-
-  .info-block {
-    background: #E3F2FD;
-    border-radius: 8px;
-    padding: 12px;
-    font-size: 13px;
-    color: var(--primary-dark);
-    margin-bottom: 14px;
-    border-left: 3px solid var(--primary);
-  }
-
-  .privacy-text { font-size: 13px; line-height: 1.8; color: var(--text-light); }
-  .privacy-text h3 { color: var(--primary); font-size: 14px; margin: 14px 0 6px; }
-
-  .support-icon { font-size: 48px; text-align: center; margin: 20px 0 12px; }
-  .support-email {
-    background: var(--primary);
-    color: white;
-    padding: 14px;
-    border-radius: 10px;
-    text-align: center;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-    margin-bottom: 12px;
-  }
-
-  .loading { text-align: center; padding: 30px; color: var(--text-light); font-size: 14px; }
-
-  select option { font-size: 14px; }
-
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-  .tag {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-size: 10px;
-    font-weight: 600;
-    background: #E3F2FD;
-    color: var(--primary);
-    margin-left: 6px;
-  }
 </style>
 </head>
 <body>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- ===== LOGIN SCREEN ===== -->
-<div class="screen auth-screen active" id="loginScreen">
+<!-- LOGIN -->
+<div class="screen auth-bg active" id="loginScreen">
   <div class="auth-logo">
-    <span class="scissors-icon">✂️</span>
+    <span class="logo-icon">✂️</span>
     <h1>SALON-TRACK</h1>
     <p>SMART SALON MANAGEMENT</p>
   </div>
   <div class="auth-card">
     <h2>Welcome Back!</h2>
-    <p class="sub">Login with your mobile number & PIN</p>
+    <p class="sub">Enter your mobile number & PIN to login</p>
     <div class="form-group">
       <label>Mobile Number</label>
       <input type="tel" id="loginMobile" maxlength="10" placeholder="10-digit mobile number">
@@ -637,23 +157,21 @@
         <input type="number" class="pin-box" id="p4" maxlength="1" min="0" max="9">
       </div>
     </div>
-    <button class="btn btn-primary" onclick="doLogin()" style="margin-top:8px">Login →</button>
-    <div class="auth-footer">
-      New user? <button class="link-btn" onclick="showScreen('registerScreen')">Register here</button>
-    </div>
+    <button class="btn btn-primary" onclick="doLogin()" style="margin-top:10px">Login →</button>
+    <div class="auth-footer">New user? <button class="link-btn" onclick="showScreen('registerScreen')">Register here</button></div>
   </div>
 </div>
 
-<!-- ===== REGISTER SCREEN ===== -->
-<div class="screen auth-screen" id="registerScreen">
+<!-- REGISTER -->
+<div class="screen auth-bg" id="registerScreen">
   <div class="auth-logo">
-    <span class="scissors-icon">✂️</span>
+    <span class="logo-icon">✂️</span>
     <h1>SALON-TRACK</h1>
-    <p>CREATE YOUR ACCOUNT</p>
+    <p>15-DAY FREE TRIAL</p>
   </div>
   <div class="auth-card">
-    <h2>Register</h2>
-    <p class="sub">15-day free trial • No credit card needed</p>
+    <h2>Create Account</h2>
+    <p class="sub">Start your free trial — no payment needed</p>
     <div class="form-group">
       <label>Mobile Number</label>
       <input type="tel" id="regMobile" maxlength="10" placeholder="10-digit mobile">
@@ -667,14 +185,8 @@
       <input type="text" id="regShop" placeholder="Your salon name">
     </div>
     <div class="two-col">
-      <div class="form-group">
-        <label>City</label>
-        <input type="text" id="regCity" placeholder="City">
-      </div>
-      <div class="form-group">
-        <label>State</label>
-        <input type="text" id="regState" placeholder="State">
-      </div>
+      <div class="form-group"><label>City</label><input type="text" id="regCity" placeholder="City"></div>
+      <div class="form-group"><label>State</label><input type="text" id="regState" placeholder="State"></div>
     </div>
     <div class="form-group">
       <label>Set 4-Digit PIN</label>
@@ -685,378 +197,296 @@
         <input type="number" class="pin-box" id="rp4" maxlength="1" min="0" max="9">
       </div>
     </div>
-    <button class="btn btn-primary" onclick="doRegister()" style="margin-top:8px">Create Account →</button>
-    <div class="auth-footer">
-      Already registered? <button class="link-btn" onclick="showScreen('loginScreen')">Login</button>
-    </div>
+    <button class="btn btn-primary" onclick="doRegister()" style="margin-top:10px">Create Account →</button>
+    <div class="auth-footer">Already registered? <button class="link-btn" onclick="showScreen('loginScreen')">Login</button></div>
   </div>
 </div>
 
-<!-- ===== PAYWALL SCREEN ===== -->
-<div class="screen paywall-screen" id="paywallScreen">
-  <div class="paywall-icon">🔒</div>
+<!-- PAYWALL -->
+<div class="screen paywall-bg" id="paywallScreen">
+  <div style="font-size:64px;margin-bottom:14px">🔒</div>
   <h2>Trial Expired</h2>
   <p>Your 15-day free trial has ended.<br>Choose a plan to continue.</p>
   <div class="plan-cards">
     <div class="plan-card selected" id="planYearly" onclick="selectPlan('yearly')">
-      <div>
-        <h3>Yearly Plan</h3>
-        <p>Renews every year</p>
-      </div>
+      <div><h3>Yearly Plan</h3><p>Renews every year</p></div>
       <div class="plan-price">₹250</div>
     </div>
     <div class="plan-card" id="planLifetime" onclick="selectPlan('lifetime')">
-      <div>
-        <h3>Lifetime Plan</h3>
-        <p>Pay once, use forever</p>
-      </div>
+      <div><h3>Lifetime Plan</h3><p>Pay once, use forever</p></div>
       <div class="plan-price">₹1,001</div>
     </div>
   </div>
-  <button class="btn btn-primary" onclick="initiatePayment()" style="background:white;color:var(--primary-dark);font-weight:700;">
-    Pay & Continue →
-  </button>
-  <button class="link-btn" onclick="doLogout()" style="color:rgba(255,255,255,0.7);margin-top:16px;display:block;">Logout</button>
+  <button class="btn btn-white" onclick="initiatePayment()">Pay & Continue →</button>
+  <br><br>
+  <button class="link-btn" style="color:rgba(255,255,255,0.65)" onclick="doLogout()">Logout</button>
 </div>
 
-<!-- ===== MAIN APP SCREEN ===== -->
-<div class="screen" id="mainScreen">
-  <!-- Header -->
-  <div class="app-header">
-    <div>
-      <h1>✂️ SALON-TRACK</h1>
-      <div class="shop-name" id="headerShopName"></div>
-    </div>
-    <div class="header-right">
-      <span class="trial-badge" id="trialBadge"></span>
+<!-- HOME DASHBOARD -->
+<div class="screen" id="homeScreen">
+  <div class="home-header">
+    <div class="home-header-top">
+      <div>
+        <h1>✂️ SALON-TRACK</h1>
+        <div class="shop-label" id="hShop"></div>
+        <div class="owner-label" id="hOwner"></div>
+      </div>
       <button class="logout-btn" onclick="doLogout()">⏻</button>
     </div>
+    <div class="trial-pill" id="hTrial"></div>
   </div>
-
-  <!-- Content -->
-  <div class="content-area">
-    <!-- MASTER TAB -->
-    <div class="tab-content active" id="tab-master">
-      <div class="sub-tabs">
-        <button class="sub-tab active" onclick="switchSubTab('customer')">👤 Customers</button>
-        <button class="sub-tab" onclick="switchSubTab('service')">💇 Services</button>
+  <div class="dashboard-body">
+    <div class="tiles-grid">
+      <div class="tile" onclick="openSection('customerMaster')">
+        <div class="tile-icon">👤</div>
+        <div class="tile-label">Customer<br>Master</div>
       </div>
-
-      <!-- Customer Sub Tab -->
-      <div id="subtab-customer">
-        <div class="card">
-          <div class="card-title">➕ Add Customer</div>
-          <div class="two-col">
-            <div class="form-group">
-              <label>Salutation</label>
-              <select id="custSalutation">
-                <option>Mr.</option><option>Mrs.</option><option>Ms.</option><option>Master</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Name *</label>
-              <input type="text" id="custName" placeholder="Customer name">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Mobile Number</label>
-            <input type="tel" id="custMobile" maxlength="10" placeholder="10-digit mobile">
-          </div>
-          <div class="form-group">
-            <label>Address</label>
-            <input type="text" id="custAddress" placeholder="Address">
-          </div>
-          <div class="two-col">
-            <div class="form-group">
-              <label>Birthday</label>
-              <input type="date" id="custBirthday">
-            </div>
-            <div class="form-group">
-              <label>Anniversary</label>
-              <input type="date" id="custAnniversary">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Notes</label>
-            <input type="text" id="custNotes" placeholder="Any notes">
-          </div>
-          <button class="btn btn-primary" onclick="addCustomer()">Save Customer</button>
-        </div>
-
-        <div class="section-header">Customer List</div>
-        <div id="customerList"><div class="loading">Loading...</div></div>
+      <div class="tile" onclick="openSection('serviceMaster')">
+        <div class="tile-icon">💇</div>
+        <div class="tile-label">Service<br>Master</div>
       </div>
-
-      <!-- Service Sub Tab -->
-      <div id="subtab-service" style="display:none">
-        <div class="card">
-          <div class="card-title">➕ Add Service</div>
-          <div class="form-group">
-            <label>Service Name *</label>
-            <input type="text" id="svcName" placeholder="e.g. Haircut, Facial, Shave">
-          </div>
-          <div class="two-col">
-            <div class="form-group">
-              <label>Rate (₹) *</label>
-              <input type="number" id="svcRate" placeholder="0">
-            </div>
-            <div class="form-group">
-              <label>Reminder Days</label>
-              <input type="number" id="svcRemDays" placeholder="e.g. 30">
-            </div>
-          </div>
-          <button class="btn btn-primary" onclick="addService()">Save Service</button>
-        </div>
-
-        <div class="section-header">Service List</div>
-        <div id="serviceList"><div class="loading">Loading...</div></div>
+      <div class="tile" onclick="openSection('addVisit')">
+        <div class="tile-icon">➕</div>
+        <div class="tile-label">Add<br>Visit</div>
+      </div>
+      <div class="tile" onclick="openSection('report')">
+        <div class="tile-icon">📊</div>
+        <div class="tile-label">Report</div>
+      </div>
+      <div class="tile" onclick="openSection('reminder')">
+        <div class="tile-icon">🔔</div>
+        <div class="tile-label">Reminder</div>
+      </div>
+      <div class="tile" onclick="openSection('privacy')">
+        <div class="tile-icon">🔒</div>
+        <div class="tile-label">Privacy<br>Policy</div>
       </div>
     </div>
-
-    <!-- ADD VISIT TAB -->
-    <div class="tab-content" id="tab-visit">
-      <div class="card">
-        <div class="card-title">➕ Add Visit</div>
-        <div class="form-group">
-          <label>Customer *</label>
-          <select id="visitCustomer" onchange="onVisitCustomerChange()">
-            <option value="">-- Select Customer --</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Visit Date</label>
-          <input type="date" id="visitDate">
-        </div>
-        <div class="form-group">
-          <label>Service *</label>
-          <select id="visitService" onchange="onVisitServiceChange()">
-            <option value="">-- Select Service --</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Amount (₹)</label>
-          <input type="number" id="visitAmount" placeholder="Auto from service, editable">
-        </div>
-        <div class="form-group">
-          <label>Reminder Days</label>
-          <input type="number" id="visitRemDays" placeholder="Auto from service, editable">
-        </div>
-        <div class="info-block" id="dueDateInfo" style="display:none">
-          📅 Next visit due on: <strong id="dueDateText"></strong>
-        </div>
-        <button class="btn btn-primary" onclick="addVisit()">Save Visit</button>
+    <div class="support-strip">
+      <div class="s-icon">🎧</div>
+      <div class="s-text">
+        <p>Support &amp; Help</p>
+        <a href="mailto:support@salontrack.in">support@salontrack.in</a>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- REPORT TAB -->
-    <div class="tab-content" id="tab-report">
+<!-- CUSTOMER MASTER -->
+<div class="screen" id="customerMaster">
+  <div class="inner-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <h2>👤 Customer Master</h2>
+  </div>
+  <div class="inner-body">
+    <div class="card">
+      <div class="card-title">➕ Add Customer</div>
+      <div class="two-col">
+        <div class="form-group">
+          <label>Salutation</label>
+          <select id="custSalutation"><option>Mr.</option><option>Mrs.</option><option>Ms.</option><option>Master</option></select>
+        </div>
+        <div class="form-group"><label>Name *</label><input type="text" id="custName" placeholder="Full name"></div>
+      </div>
+      <div class="form-group"><label>Mobile Number</label><input type="tel" id="custMobile" maxlength="10" placeholder="10-digit mobile"></div>
+      <div class="form-group"><label>Address</label><input type="text" id="custAddress" placeholder="Address"></div>
+      <div class="two-col">
+        <div class="form-group"><label>Birthday</label><input type="date" id="custBirthday"></div>
+        <div class="form-group"><label>Anniversary</label><input type="date" id="custAnniversary"></div>
+      </div>
+      <div class="form-group"><label>Notes</label><input type="text" id="custNotes" placeholder="Any notes"></div>
+      <button class="btn btn-primary" onclick="addCustomer()">Save Customer</button>
+    </div>
+    <div class="section-title">📋 Customer List</div>
+    <div id="customerList"><div class="empty-state"><div class="ei">⏳</div><p>Loading...</p></div></div>
+  </div>
+</div>
+
+<!-- SERVICE MASTER -->
+<div class="screen" id="serviceMaster">
+  <div class="inner-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <h2>💇 Service Master</h2>
+  </div>
+  <div class="inner-body">
+    <div class="card">
+      <div class="card-title">➕ Add Service</div>
+      <div class="form-group"><label>Service Name *</label><input type="text" id="svcName" placeholder="e.g. Haircut, Facial, Shave"></div>
+      <div class="two-col">
+        <div class="form-group"><label>Rate (₹) *</label><input type="number" id="svcRate" placeholder="0"></div>
+        <div class="form-group"><label>Reminder Days</label><input type="number" id="svcRemDays" placeholder="e.g. 30"></div>
+      </div>
+      <button class="btn btn-primary" onclick="addService()">Save Service</button>
+    </div>
+    <div class="section-title">📋 Service List</div>
+    <div id="serviceList"><div class="empty-state"><div class="ei">⏳</div><p>Loading...</p></div></div>
+  </div>
+</div>
+
+<!-- ADD VISIT -->
+<div class="screen" id="addVisit">
+  <div class="inner-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <h2>➕ Add Visit</h2>
+  </div>
+  <div class="inner-body">
+    <div class="card">
+      <div class="card-title">Visit Details</div>
+      <div class="form-group"><label>Customer *</label><select id="visitCustomer"><option value="">-- Select Customer --</option></select></div>
+      <div class="form-group"><label>Visit Date</label><input type="date" id="visitDate"></div>
+      <div class="form-group"><label>Service *</label><select id="visitService" onchange="onVisitServiceChange()"><option value="">-- Select Service --</option></select></div>
+      <div class="form-group"><label>Amount (₹)</label><input type="number" id="visitAmount" placeholder="Auto-filled, editable"></div>
+      <div class="form-group"><label>Reminder Days</label><input type="number" id="visitRemDays" placeholder="Auto-filled, editable" oninput="updateDueDate()"></div>
+      <div class="info-box" id="dueDateInfo" style="display:none">📅 Next visit due: <strong id="dueDateText"></strong></div>
+      <button class="btn btn-primary" onclick="addVisit()">Save Visit</button>
+    </div>
+  </div>
+</div>
+
+<!-- REPORT -->
+<div class="screen" id="report">
+  <div class="inner-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <h2>📊 Report</h2>
+  </div>
+  <div class="inner-body">
+    <div class="stat-row">
+      <div class="stat-box blue"><div class="sv" id="todayVisits">0</div><div class="sl">Today's Visits</div></div>
+      <div class="stat-box blue"><div class="sv">₹<span id="todayTotal">0</span></div><div class="sl">Today's Revenue</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📅 Date Range Report</div>
+      <div class="date-row">
+        <div class="form-group"><label>From Date</label><input type="date" id="reportFrom"></div>
+        <div class="form-group"><label>To Date</label><input type="date" id="reportTo"></div>
+      </div>
+      <button class="btn btn-primary" onclick="loadRangeReport()">Get Report</button>
+    </div>
+    <div id="rangeStats" style="display:none;margin-bottom:16px">
       <div class="stat-row">
-        <div class="stat-box">
-          <div class="stat-val" id="todayVisits">0</div>
-          <div class="stat-label">Today's Visits</div>
-        </div>
-        <div class="stat-box" style="background:linear-gradient(135deg,#1565C0,#42A5F5)">
-          <div class="stat-val">₹<span id="todayTotal">0</span></div>
-          <div class="stat-label">Today's Revenue</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">📅 Date Range Report</div>
-        <div class="date-row">
-          <div class="form-group">
-            <label>From Date</label>
-            <input type="date" id="reportFrom">
-          </div>
-          <div class="form-group">
-            <label>To Date</label>
-            <input type="date" id="reportTo">
-          </div>
-        </div>
-        <button class="btn btn-primary" onclick="loadRangeReport()">Get Report</button>
-      </div>
-
-      <div id="rangeStats" style="display:none">
-        <div class="stat-row">
-          <div class="stat-box white">
-            <div class="stat-val" id="rangeVisits">0</div>
-            <div class="stat-label">Total Visits</div>
-          </div>
-          <div class="stat-box white">
-            <div class="stat-val">₹<span id="rangeTotal">0</span></div>
-            <div class="stat-label">Total Revenue</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="section-header" style="margin-top:4px">Today's Visits</div>
-      <div id="todayVisitList"><div class="loading">Loading...</div></div>
-
-      <div id="rangeVisitList"></div>
-    </div>
-
-    <!-- REMINDER TAB -->
-    <div class="tab-content" id="tab-reminder">
-      <div class="info-block">
-        📢 Customers due for visit within next 3 days
-      </div>
-      <div id="reminderList"><div class="loading">Loading...</div></div>
-    </div>
-
-    <!-- PRIVACY TAB -->
-    <div class="tab-content" id="tab-privacy">
-      <div class="card">
-        <div class="card-title">🔒 Privacy Policy</div>
-        <div class="privacy-text">
-          <h3>Data Collection</h3>
-          <p>SALON-TRACK collects only the information necessary to operate the application — including your name, shop details, customer data, and visit history. This data is stored securely in the cloud.</p>
-          <h3>Data Usage</h3>
-          <p>Your data is used solely to provide the SALON-TRACK service. We do not sell, share, or distribute your data to any third party under any circumstances.</p>
-          <h3>Data Security</h3>
-          <p>All data is encrypted in transit and at rest. Access is protected by your personal PIN. You are solely responsible for keeping your PIN confidential.</p>
-          <h3>WhatsApp Messages</h3>
-          <p>Reminder messages sent via WhatsApp are initiated by you. SALON-TRACK does not automatically send messages without your action.</p>
-          <h3>Data Deletion</h3>
-          <p>You may request complete deletion of your account and all associated data at any time by contacting our support team.</p>
-          <h3>Subscription & Payments</h3>
-          <p>Payments are processed securely through Razorpay. SALON-TRACK does not store any payment card information.</p>
-          <h3>Contact</h3>
-          <p>For privacy concerns, please write to our support email available in the Support section.</p>
-          <div class="divider"></div>
-          <p style="font-size:11px;text-align:center;color:#90A4AE">Last updated: April 2026 • SALON-TRACK v1.0</p>
-        </div>
+        <div class="stat-box white-box"><div class="sv" id="rangeVisits">0</div><div class="sl">Total Visits</div></div>
+        <div class="stat-box white-box"><div class="sv">₹<span id="rangeTotal">0</span></div><div class="sl">Total Revenue</div></div>
       </div>
     </div>
-
-    <!-- SUPPORT TAB -->
-    <div class="tab-content" id="tab-support">
-      <div class="card">
-        <div class="support-icon">🎧</div>
-        <div class="card-title" style="justify-content:center">Support & Help</div>
-        <p style="font-size:13px;color:var(--text-light);text-align:center;margin-bottom:20px">
-          Having trouble? We're here to help.<br>Write to us and we'll respond within 24 hours.
-        </p>
-        <div class="support-email">📧 support@salontrack.in</div>
-        <div class="divider"></div>
-        <p style="font-size:12px;color:var(--text-light);text-align:center">
-          App Version: 1.0 &nbsp;|&nbsp; Build: Apr 2026
-        </p>
-      </div>
-    </div>
+    <div class="section-title">📋 Today's Visits</div>
+    <div id="todayVisitList"></div>
+    <div id="rangeVisitList"></div>
   </div>
+</div>
 
-  <!-- Bottom Nav -->
-  <div class="bottom-nav">
-    <button class="nav-item active" onclick="switchTab('master', this)">
-      <span class="nav-icon">📋</span>Master
-    </button>
-    <button class="nav-item" onclick="switchTab('visit', this)">
-      <span class="nav-icon">➕</span>Visit
-    </button>
-    <button class="nav-item" onclick="switchTab('report', this)">
-      <span class="nav-icon">📊</span>Report
-    </button>
-    <button class="nav-item" onclick="switchTab('reminder', this)">
-      <span class="nav-icon">🔔</span>Remind
-    </button>
-    <button class="nav-item" onclick="switchTab('privacy', this)">
-      <span class="nav-icon">🔒</span>Privacy
-    </button>
-    <button class="nav-item" onclick="switchTab('support', this)">
-      <span class="nav-icon">🎧</span>Support
-    </button>
+<!-- REMINDER -->
+<div class="screen" id="reminder">
+  <div class="inner-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <h2>🔔 Reminder</h2>
+  </div>
+  <div class="inner-body">
+    <div class="info-box">📢 Customers due for visit within next 3 days</div>
+    <div id="reminderList"><div class="empty-state"><div class="ei">⏳</div><p>Loading...</p></div></div>
+  </div>
+</div>
+
+<!-- PRIVACY -->
+<div class="screen" id="privacy">
+  <div class="inner-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <h2>🔒 Privacy Policy</h2>
+  </div>
+  <div class="inner-body">
+    <div class="card">
+      <div class="privacy-text">
+        <h3>Data Collection</h3>
+        <p>SALON-TRACK collects only the information necessary to operate — your name, shop details, customer data, and visit history. This data is stored securely in the cloud.</p>
+        <h3>Data Usage</h3>
+        <p>Your data is used solely to provide the SALON-TRACK service. We do not sell, share, or distribute your data to any third party.</p>
+        <h3>Data Security</h3>
+        <p>All data is encrypted in transit and at rest. Access is protected by your personal PIN. Keep your PIN confidential.</p>
+        <h3>WhatsApp Messages</h3>
+        <p>Reminder messages via WhatsApp are initiated by you. SALON-TRACK does not send messages automatically.</p>
+        <h3>Data Deletion</h3>
+        <p>You may request deletion of your account and all data at any time by contacting support.</p>
+        <h3>Payments</h3>
+        <p>Payments are processed securely through Razorpay. SALON-TRACK does not store any card information.</p>
+        <h3>Contact</h3>
+        <p>For privacy concerns: <strong>support@salontrack.in</strong></p>
+        <div class="divider"></div>
+        <p style="font-size:11px;text-align:center;color:#90A4AE">Last updated: April 2026 • SALON-TRACK v1.0</p>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
-// ===== CONFIG =====
 const SUPA_URL = 'https://jqqnnkzozjskziaizajg.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcW5ua3pvempza3ppYWl6YWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Mjk1ODAsImV4cCI6MjA4ODUwNTU4MH0.sEYeWnm0dvuw8bLSVnQhqmgV8LB-pELjpuVIa3Us1Gg';
-const SUPPORT_EMAIL = 'support@salontrack.in';
 
-let currentUser = null;
-let allCustomers = [];
-let allServices = [];
+let currentUser = null, allCustomers = [], allServices = [];
 
-// ===== SUPABASE FETCH =====
 async function sb(table, method='GET', body=null, query='') {
   const url = `${SUPA_URL}/rest/v1/${table}${query}`;
-  const opts = {
-    method,
-    headers: {
-      'apikey': SUPA_KEY,
-      'Authorization': `Bearer ${SUPA_KEY}`,
-      'Content-Type': 'application/json',
-      'Prefer': method === 'POST' ? 'return=representation' : '',
-'Accept-Profile': 'public',
-'Content-Profile': 'public'
-    }
+  const headers = {
+    'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}`,
+    'Content-Type': 'application/json',
+    'Accept-Profile': 'public', 'Content-Profile': 'public'
   };
+  if (method === 'POST') headers['Prefer'] = 'return=representation';
+  const opts = { method, headers };
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(url, opts);
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(err);
-  }
+  if (!res.ok) throw new Error(await res.text());
   if (method === 'DELETE' || res.status === 204) return true;
   return res.json();
 }
 
-// ===== SCREEN MANAGEMENT =====
+function toast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-// ===== TOAST =====
-function toast(msg, type='') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = `toast ${type} show`;
-  setTimeout(() => t.classList.remove('show'), 3000);
+function goHome() { showScreen('homeScreen'); }
+
+function openSection(id) {
+  showScreen(id);
+  if (id === 'customerMaster') loadCustomerList();
+  if (id === 'serviceMaster') loadServiceList();
+  if (id === 'addVisit') setupVisitForm();
+  if (id === 'report') loadTodayReport();
+  if (id === 'reminder') loadReminders();
 }
 
-// ===== PIN HELPERS =====
-function getPin(prefix) {
-  return ['p1','p2','p3','p4'].map(id => document.getElementById(prefix === 'r' ? 'r'+id : id).value).join('');
-}
-
-function setupPinBoxes(prefix) {
-  const ids = prefix === 'r' ? ['rp1','rp2','rp3','rp4'] : ['p1','p2','p3','p4'];
+function setupPinBoxes(ids) {
   ids.forEach((id, i) => {
     const el = document.getElementById(id);
     el.addEventListener('input', function() {
       this.value = this.value.slice(-1);
-      if (this.value && i < ids.length - 1) document.getElementById(ids[i+1]).focus();
+      if (this.value && i < ids.length-1) document.getElementById(ids[i+1]).focus();
     });
     el.addEventListener('keydown', function(e) {
-      if (e.key === 'Backspace' && !this.value && i > 0) document.getElementById(ids[i-1]).focus();
+      if (e.key==='Backspace' && !this.value && i>0) document.getElementById(ids[i-1]).focus();
     });
   });
 }
 
-// ===== AUTH =====
 async function doLogin() {
   const mobile = document.getElementById('loginMobile').value.trim();
   const pin = ['p1','p2','p3','p4'].map(id => document.getElementById(id).value).join('');
-
   if (mobile.length !== 10) return toast('Enter valid 10-digit mobile', 'error');
   if (pin.length !== 4) return toast('Enter 4-digit PIN', 'error');
-
   try {
-    const rows = await sb('users', 'GET', null, `?mobile=eq.${mobile}&pin=eq.${pin}&select=*`);
-    if (!rows || rows.length === 0) return toast('Invalid mobile or PIN', 'error');
-
+    const rows = await sb('users','GET',null,`?mobile=eq.${mobile}&pin=eq.${pin}&select=*`);
+    if (!rows || !rows.length) return toast('Invalid mobile or PIN', 'error');
     const user = rows[0];
     if (!user.is_active) return toast('Account deactivated. Contact support.', 'error');
-
     currentUser = user;
-    localStorage.setItem('st_user_id', user.id);
-    checkTrialAndLoad(user);
-  } catch(e) {
-    toast('Login failed. Try again.', 'error');
-    console.error(e);
-  }
+    localStorage.setItem('st_uid', user.id);
+    checkAndLoad(user);
+  } catch(e) { toast('Login failed. Try again.', 'error'); console.error(e); }
 }
 
 async function doRegister() {
@@ -1066,192 +496,116 @@ async function doRegister() {
   const city = document.getElementById('regCity').value.trim();
   const state = document.getElementById('regState').value.trim();
   const pin = ['rp1','rp2','rp3','rp4'].map(id => document.getElementById(id).value).join('');
-
   if (mobile.length !== 10) return toast('Enter valid 10-digit mobile', 'error');
   if (!name) return toast('Enter your name', 'error');
   if (!shop) return toast('Enter shop name', 'error');
   if (pin.length !== 4) return toast('Set a 4-digit PIN', 'error');
-
   try {
-    const existing = await sb('users', 'GET', null, `?mobile=eq.${mobile}&select=id`);
+    const existing = await sb('users','GET',null,`?mobile=eq.${mobile}&select=id`);
     if (existing && existing.length > 0) return toast('Mobile already registered. Please login.', 'error');
-
-    const trialEnd = new Date();
-    trialEnd.setDate(trialEnd.getDate() + 15);
-
-    const rows = await sb('users', 'POST', {
-      mobile, name, shop: shop, city, state, pin,
+    const trialEnd = new Date(); trialEnd.setDate(trialEnd.getDate()+15);
+    const rows = await sb('users','POST',{
+      mobile, name, shop, city, state, pin,
       plan: 'trial',
       start_date: new Date().toISOString().split('T')[0],
       expiry_date: trialEnd.toISOString().split('T')[0],
       is_active: true
     });
-
-    if (!rows || rows.length === 0) return toast('Registration failed', 'error');
+    if (!rows || !rows.length) return toast('Registration failed', 'error');
     currentUser = rows[0];
-    localStorage.setItem('st_user_id', currentUser.id);
-    toast('Registered successfully! Welcome to SALON-TRACK 🎉', 'success');
-    checkTrialAndLoad(currentUser);
-  } catch(e) {
-    toast('Registration failed. Try again.', 'error');
-    console.error(e);
-  }
+    localStorage.setItem('st_uid', currentUser.id);
+    toast('Welcome to SALON-TRACK! 🎉', 'success');
+    checkAndLoad(currentUser);
+  } catch(e) { toast('Registration failed. Try again.', 'error'); console.error(e); }
 }
 
-function checkTrialAndLoad(user) {
-  const today = new Date();
-  const expiry = new Date(user.expiry_date);
+function checkAndLoad(user) {
+  const today = new Date(), expiry = new Date(user.expiry_date);
   const daysLeft = Math.ceil((expiry - today) / (1000*60*60*24));
-
-  if (user.plan === 'trial' && daysLeft <= 0) {
-    showScreen('paywallScreen');
-    return;
-  }
-  if (user.plan === 'expired') {
-    showScreen('paywallScreen');
-    return;
-  }
-
-  showScreen('mainScreen');
-  document.getElementById('headerShopName').textContent = user.shop || '';
-
-  if (user.plan === 'trial') {
-    document.getElementById('trialBadge').textContent = `Trial: ${daysLeft}d left`;
-  } else {
-    document.getElementById('trialBadge').textContent = user.plan === 'lifetime' ? '⭐ Lifetime' : '✅ Active';
-  }
-
-  loadMasterData();
-  loadTodayReport();
-  loadReminders();
-
-  const today2 = new Date().toISOString().split('T')[0];
-  document.getElementById('visitDate').value = today2;
-  document.getElementById('reportFrom').value = today2;
-  document.getElementById('reportTo').value = today2;
+  if ((user.plan === 'trial' && daysLeft <= 0) || user.plan === 'expired') { showScreen('paywallScreen'); return; }
+  document.getElementById('hShop').textContent = user.shop || '';
+  document.getElementById('hOwner').textContent = user.name || '';
+  document.getElementById('hTrial').textContent = user.plan === 'trial' ? `🕐 Trial: ${daysLeft} day${daysLeft!==1?'s':''} left` : user.plan === 'lifetime' ? '⭐ Lifetime Member' : '✅ Active';
+  const todayStr = new Date().toISOString().split('T')[0];
+  document.getElementById('visitDate').value = todayStr;
+  document.getElementById('reportFrom').value = todayStr;
+  document.getElementById('reportTo').value = todayStr;
+  showScreen('homeScreen');
+  loadAllMasterData();
 }
 
-async function doLogout() {
-  currentUser = null;
-  localStorage.removeItem('st_user_id');
-  showScreen('loginScreen');
+function doLogout() {
+  currentUser = null; localStorage.removeItem('st_uid');
+  allCustomers = []; allServices = [];
   ['p1','p2','p3','p4'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('loginMobile').value = '';
+  showScreen('loginScreen');
 }
 
-// ===== AUTO LOGIN =====
 async function autoLogin() {
-  const uid = localStorage.getItem('st_user_id');
+  const uid = localStorage.getItem('st_uid');
   if (!uid) return;
   try {
-    const rows = await sb('users', 'GET', null, `?id=eq.${uid}&select=*`);
-    if (rows && rows.length > 0 && rows[0].is_active) {
-      currentUser = rows[0];
-      checkTrialAndLoad(currentUser);
-    }
-  } catch(e) {}
-}
-
-// ===== TABS =====
-function switchTab(name, el) {
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  el.classList.add('active');
-  if (name === 'report') { loadTodayReport(); }
-  if (name === 'reminder') { loadReminders(); }
-  if (name === 'visit') { populateVisitDropdowns(); }
-}
-
-function switchSubTab(name) {
-  document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('[id^="subtab-"]').forEach(t => t.style.display = 'none');
-  event.target.classList.add('active');
-  document.getElementById('subtab-' + name).style.display = 'block';
-  if (name === 'customer') loadCustomerList();
-  if (name === 'service') loadServiceList();
-}
-
-// ===== MASTER - CUSTOMERS =====
-async function loadMasterData() {
-  await loadCustomerList();
-  await loadServiceList();
-}
-
-async function loadCustomerList() {
-  if (!currentUser) return;
-  try {
-    const rows = await sb('salon_customers', 'GET', null, `?user_id=eq.${currentUser.id}&order=created_at.desc&select=*`);
-    allCustomers = rows || [];
-    renderCustomerList(allCustomers);
+    const rows = await sb('users','GET',null,`?id=eq.${uid}&select=*`);
+    if (rows && rows.length > 0 && rows[0].is_active) { currentUser = rows[0]; checkAndLoad(currentUser); }
   } catch(e) { console.error(e); }
 }
 
-function renderCustomerList(customers) {
-  const el = document.getElementById('customerList');
-  if (!customers.length) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">👤</div><p>No customers yet.<br>Add your first customer above.</p></div>';
-    return;
-  }
-  el.innerHTML = customers.map(c => `
-    <div class="list-item">
-      <div class="list-item-left">
-        <h4>${c.salutation || ''} ${c.name}</h4>
-        <p>📱 ${c.mobile || '-'} &nbsp;|&nbsp; 🏠 ${c.city || c.address || '-'}</p>
-      </div>
-    </div>
-  `).join('');
+async function loadAllMasterData() {
+  try {
+    const [custs, svcs] = await Promise.all([
+      sb('salon_customers','GET',null,`?user_id=eq.${currentUser.id}&order=name.asc&select=*`),
+      sb('salon_services','GET',null,`?user_id=eq.${currentUser.id}&order=name.asc&select=*`)
+    ]);
+    allCustomers = custs || []; allServices = svcs || [];
+  } catch(e) { console.error(e); }
+}
+
+async function loadCustomerList() {
+  try {
+    const rows = await sb('salon_customers','GET',null,`?user_id=eq.${currentUser.id}&order=name.asc&select=*`);
+    allCustomers = rows || [];
+    const el = document.getElementById('customerList');
+    if (!allCustomers.length) { el.innerHTML = '<div class="empty-state"><div class="ei">👤</div><p>No customers yet.<br>Add your first customer above.</p></div>'; return; }
+    el.innerHTML = allCustomers.map(c => `
+      <div class="list-item">
+        <div class="list-item-left"><h4>${c.salutation||''} ${c.name}</h4><p>📱 ${c.mobile||'-'}</p></div>
+        <div style="font-size:12px;color:var(--text-light)">${c.city||''}</div>
+      </div>`).join('');
+  } catch(e) { console.error(e); }
 }
 
 async function addCustomer() {
   const name = document.getElementById('custName').value.trim();
   if (!name) return toast('Customer name required', 'error');
-
   try {
-    await sb('salon_customers', 'POST', {
+    await sb('salon_customers','POST',{
       user_id: currentUser.id,
       salutation: document.getElementById('custSalutation').value,
-      name,
-      mobile: document.getElementById('custMobile').value.trim(),
+      name, mobile: document.getElementById('custMobile').value.trim(),
       address: document.getElementById('custAddress').value.trim(),
       birthday: document.getElementById('custBirthday').value || null,
       anniversary: document.getElementById('custAnniversary').value || null,
       notes: document.getElementById('custNotes').value.trim()
     });
-    toast('Customer added! ✅', 'success');
+    toast('Customer saved! ✅', 'success');
     ['custName','custMobile','custAddress','custBirthday','custAnniversary','custNotes'].forEach(id => document.getElementById(id).value = '');
-    await loadCustomerList();
-  } catch(e) {
-    toast('Failed to add customer', 'error');
-    console.error(e);
-  }
+    loadCustomerList(); loadAllMasterData();
+  } catch(e) { toast('Failed to save', 'error'); console.error(e); }
 }
 
-// ===== MASTER - SERVICES =====
 async function loadServiceList() {
-  if (!currentUser) return;
   try {
-    const rows = await sb('salon_services', 'GET', null, `?user_id=eq.${currentUser.id}&order=created_at.desc&select=*`);
+    const rows = await sb('salon_services','GET',null,`?user_id=eq.${currentUser.id}&order=name.asc&select=*`);
     allServices = rows || [];
-    renderServiceList(allServices);
+    const el = document.getElementById('serviceList');
+    if (!allServices.length) { el.innerHTML = '<div class="empty-state"><div class="ei">💇</div><p>No services yet.<br>Add your first service above.</p></div>'; return; }
+    el.innerHTML = allServices.map(s => `
+      <div class="list-item">
+        <div class="list-item-left"><h4>${s.name}</h4><p>🔔 Reminder: ${s.reminder_days||'-'} days</p></div>
+        <div class="list-item-right">₹${s.rate}</div>
+      </div>`).join('');
   } catch(e) { console.error(e); }
-}
-
-function renderServiceList(services) {
-  const el = document.getElementById('serviceList');
-  if (!services.length) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">💇</div><p>No services yet.<br>Add your first service above.</p></div>';
-    return;
-  }
-  el.innerHTML = services.map(s => `
-    <div class="list-item">
-      <div class="list-item-left">
-        <h4>${s.name}</h4>
-        <p>🔔 Reminder: ${s.reminder_days || '-'} days</p>
-      </div>
-      <div class="list-item-right">₹${s.rate}</div>
-    </div>
-  `).join('');
 }
 
 async function addService() {
@@ -1259,41 +613,24 @@ async function addService() {
   const rate = document.getElementById('svcRate').value;
   if (!name) return toast('Service name required', 'error');
   if (!rate) return toast('Rate required', 'error');
-
   try {
-    await sb('salon_services', 'POST', {
-      user_id: currentUser.id,
-      name,
-      rate: parseFloat(rate),
+    await sb('salon_services','POST',{
+      user_id: currentUser.id, name, rate: parseFloat(rate),
       reminder_days: parseInt(document.getElementById('svcRemDays').value) || null
     });
-    toast('Service added! ✅', 'success');
+    toast('Service saved! ✅', 'success');
     ['svcName','svcRate','svcRemDays'].forEach(id => document.getElementById(id).value = '');
-    await loadServiceList();
-  } catch(e) {
-    toast('Failed to add service', 'error');
-    console.error(e);
-  }
+    loadServiceList(); loadAllMasterData();
+  } catch(e) { toast('Failed to save', 'error'); console.error(e); }
 }
 
-// ===== ADD VISIT =====
-function populateVisitDropdowns() {
-  const custSel = document.getElementById('visitCustomer');
-  const svcSel = document.getElementById('visitService');
-
-  const custVal = custSel.value;
-  custSel.innerHTML = '<option value="">-- Select Customer --</option>';
-  allCustomers.forEach(c => {
-    custSel.innerHTML += `<option value="${c.id}" data-name="${c.salutation || ''} ${c.name}" data-mobile="${c.mobile || ''}">${c.salutation || ''} ${c.name}</option>`;
-  });
-  custSel.value = custVal;
-
-  const svcVal = svcSel.value;
-  svcSel.innerHTML = '<option value="">-- Select Service --</option>';
-  allServices.forEach(s => {
-    svcSel.innerHTML += `<option value="${s.id}" data-rate="${s.rate}" data-days="${s.reminder_days || ''}">${s.name}</option>`;
-  });
-  svcSel.value = svcVal;
+function setupVisitForm() {
+  const cSel = document.getElementById('visitCustomer');
+  const sSel = document.getElementById('visitService');
+  cSel.innerHTML = '<option value="">-- Select Customer --</option>';
+  allCustomers.forEach(c => cSel.innerHTML += `<option value="${c.id}">${c.salutation||''} ${c.name}</option>`);
+  sSel.innerHTML = '<option value="">-- Select Service --</option>';
+  allServices.forEach(s => sSel.innerHTML += `<option value="${s.id}" data-rate="${s.rate}" data-days="${s.reminder_days||''}">${s.name}</option>`);
 }
 
 function onVisitServiceChange() {
@@ -1306,183 +643,112 @@ function onVisitServiceChange() {
   }
 }
 
-function onVisitCustomerChange() {}
-
 function updateDueDate() {
   const date = document.getElementById('visitDate').value;
   const days = parseInt(document.getElementById('visitRemDays').value);
   if (date && days) {
-    const due = new Date(date);
-    due.setDate(due.getDate() + days);
-    document.getElementById('dueDateText').textContent = due.toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'});
+    const due = new Date(date); due.setDate(due.getDate()+days);
+    document.getElementById('dueDateText').textContent = due.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
     document.getElementById('dueDateInfo').style.display = 'block';
-  } else {
-    document.getElementById('dueDateInfo').style.display = 'none';
-  }
+  } else { document.getElementById('dueDateInfo').style.display = 'none'; }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('visitDate').addEventListener('change', updateDueDate);
-  document.getElementById('visitRemDays').addEventListener('input', updateDueDate);
-});
+document.getElementById('visitDate').addEventListener('change', updateDueDate);
 
 async function addVisit() {
-  const custSel = document.getElementById('visitCustomer');
-  const svcSel = document.getElementById('visitService');
+  const cSel = document.getElementById('visitCustomer');
+  const sSel = document.getElementById('visitService');
   const date = document.getElementById('visitDate').value;
   const amount = document.getElementById('visitAmount').value;
-
-  if (!custSel.value) return toast('Select a customer', 'error');
-  if (!svcSel.value) return toast('Select a service', 'error');
+  if (!cSel.value) return toast('Select a customer', 'error');
+  if (!sSel.value) return toast('Select a service', 'error');
   if (!date) return toast('Select visit date', 'error');
   if (!amount) return toast('Enter amount', 'error');
-
-  const custName = custSel.options[custSel.selectedIndex].dataset.name;
-  const svcName = svcSel.options[svcSel.selectedIndex].text;
   const remDays = parseInt(document.getElementById('visitRemDays').value) || null;
-
   let dueDate = null;
-  if (remDays && date) {
-    const d = new Date(date);
-    d.setDate(d.getDate() + remDays);
-    dueDate = d.toISOString().split('T')[0];
-  }
-
+  if (remDays) { const d=new Date(date); d.setDate(d.getDate()+remDays); dueDate=d.toISOString().split('T')[0]; }
   try {
-    await sb('salon_visits', 'POST', {
-      user_id: currentUser.id,
-      customer_id: custSel.value,
-      customer_name: custName,
-      visit_date: date,
-      service: svcName,
-      amount: parseFloat(amount),
-      reminder_days: remDays,
-      due_date: dueDate,
-      credited_at: new Date().toISOString()
+    await sb('salon_visits','POST',{
+      user_id: currentUser.id, customer_id: cSel.value,
+      customer_name: cSel.options[cSel.selectedIndex].text,
+      visit_date: date, service: sSel.options[sSel.selectedIndex].text,
+      amount: parseFloat(amount), reminder_days: remDays, due_date: dueDate
     });
     toast('Visit saved! ✅', 'success');
-    document.getElementById('visitCustomer').value = '';
-    document.getElementById('visitService').value = '';
-    document.getElementById('visitAmount').value = '';
-    document.getElementById('visitRemDays').value = '';
-    document.getElementById('dueDateInfo').style.display = 'none';
-    document.getElementById('visitDate').value = new Date().toISOString().split('T')[0];
-  } catch(e) {
-    toast('Failed to save visit', 'error');
-    console.error(e);
-  }
+    cSel.value=''; sSel.value='';
+    ['visitAmount','visitRemDays'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('dueDateInfo').style.display='none';
+    document.getElementById('visitDate').value=new Date().toISOString().split('T')[0];
+  } catch(e) { toast('Failed to save visit', 'error'); console.error(e); }
 }
 
-// ===== REPORT =====
 async function loadTodayReport() {
-  if (!currentUser) return;
   const today = new Date().toISOString().split('T')[0];
   try {
-    const rows = await sb('salon_visits', 'GET', null, `?user_id=eq.${currentUser.id}&visit_date=eq.${today}&order=credited_at.desc&select=*`);
-    const visits = rows || [];
-    const total = visits.reduce((s, v) => s + (v.amount || 0), 0);
+    const rows = await sb('salon_visits','GET',null,`?user_id=eq.${currentUser.id}&visit_date=eq.${today}&order=created_at.desc&select=*`);
+    const visits = rows||[], total = visits.reduce((s,v)=>s+(v.amount||0),0);
     document.getElementById('todayVisits').textContent = visits.length;
     document.getElementById('todayTotal').textContent = total.toLocaleString('en-IN');
-    renderVisitList('todayVisitList', visits);
+    renderVisits('todayVisitList', visits);
   } catch(e) { console.error(e); }
 }
 
 async function loadRangeReport() {
-  const from = document.getElementById('reportFrom').value;
-  const to = document.getElementById('reportTo').value;
-  if (!from || !to) return toast('Select both dates', 'error');
-
+  const from = document.getElementById('reportFrom').value, to = document.getElementById('reportTo').value;
+  if (!from||!to) return toast('Select both dates','error');
   try {
-    const rows = await sb('salon_visits', 'GET', null, `?user_id=eq.${currentUser.id}&visit_date=gte.${from}&visit_date=lte.${to}&order=visit_date.desc&select=*`);
-    const visits = rows || [];
-    const total = visits.reduce((s, v) => s + (v.amount || 0), 0);
+    const rows = await sb('salon_visits','GET',null,`?user_id=eq.${currentUser.id}&visit_date=gte.${from}&visit_date=lte.${to}&order=visit_date.desc&select=*`);
+    const visits = rows||[], total = visits.reduce((s,v)=>s+(v.amount||0),0);
     document.getElementById('rangeVisits').textContent = visits.length;
     document.getElementById('rangeTotal').textContent = total.toLocaleString('en-IN');
     document.getElementById('rangeStats').style.display = 'block';
-    renderVisitList('rangeVisitList', visits, true);
-  } catch(e) {
-    toast('Failed to load report', 'error');
-  }
+    renderVisits('rangeVisitList', visits, true);
+  } catch(e) { toast('Failed to load','error'); }
 }
 
-function renderVisitList(elId, visits, showDate=false) {
+function renderVisits(elId, visits, showDate=false) {
   const el = document.getElementById(elId);
-  if (!visits.length) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>No visits found.</p></div>';
-    return;
-  }
+  if (!visits.length) { el.innerHTML = '<div class="empty-state"><div class="ei">📋</div><p>No visits found.</p></div>'; return; }
   el.innerHTML = visits.map(v => `
     <div class="list-item">
-      <div class="list-item-left">
-        <h4>${v.customer_name || '-'}</h4>
-        <p>${v.service || '-'}${showDate ? ' &nbsp;|&nbsp; ' + v.visit_date : ''}</p>
-      </div>
+      <div class="list-item-left"><h4>${v.customer_name||'-'}</h4><p>${v.service||'-'}${showDate?' | '+v.visit_date:''}</p></div>
       <div class="list-item-right">₹${(v.amount||0).toLocaleString('en-IN')}</div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-// ===== REMINDERS =====
 async function loadReminders() {
-  if (!currentUser) return;
-  const today = new Date();
-  const in3 = new Date(); in3.setDate(in3.getDate() + 3);
-  const todayStr = today.toISOString().split('T')[0];
-  const in3Str = in3.toISOString().split('T')[0];
-
+  const today=new Date().toISOString().split('T')[0];
+  const in3=new Date(); in3.setDate(in3.getDate()+3);
+  const in3Str=in3.toISOString().split('T')[0];
   try {
-    const rows = await sb('salon_visits', 'GET', null, `?user_id=eq.${currentUser.id}&due_date=gte.${todayStr}&due_date=lte.${in3Str}&order=due_date.asc&select=*`);
+    const rows = await sb('salon_visits','GET',null,`?user_id=eq.${currentUser.id}&due_date=gte.${today}&due_date=lte.${in3Str}&order=due_date.asc&select=*`);
     const el = document.getElementById('reminderList');
-    if (!rows || rows.length === 0) {
-      el.innerHTML = '<div class="empty-state"><div class="empty-icon">🔔</div><p>No reminders due<br>in the next 3 days.</p></div>';
-      return;
-    }
-
-    // Get mobile numbers for customers
-    const custIds = [...new Set(rows.map(r => r.customer_id))];
-    let custMap = {};
-    if (custIds.length) {
-      const custs = await sb('salon_customers', 'GET', null, `?id=in.(${custIds.join(',')})&select=id,mobile`);
-      (custs || []).forEach(c => custMap[c.id] = c.mobile);
-    }
-
+    if (!rows||!rows.length) { el.innerHTML='<div class="empty-state"><div class="ei">🔔</div><p>No reminders due<br>in the next 3 days. All good! ✅</p></div>'; return; }
+    const custIds=[...new Set(rows.map(r=>r.customer_id))];
+    let custMap={};
+    if (custIds.length) { const c=await sb('salon_customers','GET',null,`?id=in.(${custIds.join(',')})&select=id,mobile`); (c||[]).forEach(x=>custMap[x.id]=x.mobile); }
     el.innerHTML = rows.map(v => {
-      const mobile = custMap[v.customer_id] || '';
-      const waMsg = encodeURIComponent(`Hello ${v.customer_name}, it's time to groom yourself. Please visit us! 💈`);
-      return `
-        <div class="reminder-card">
-          <h4>✂️ ${v.customer_name || '-'}</h4>
-          <p>📅 Due: ${v.due_date} &nbsp;|&nbsp; 💇 ${v.service || '-'}</p>
-          ${mobile ? `
-          <div class="action-btns">
-            <a href="tel:${mobile}" class="call-btn">📞 Call</a>
-            <a href="https://wa.me/91${mobile}?text=${waMsg}" class="wa-btn" target="_blank">💬 WhatsApp</a>
-          </div>` : '<p style="font-size:11px;color:#90A4AE;margin-top:6px">No mobile on record</p>'}
-        </div>
-      `;
+      const mob=custMap[v.customer_id]||'';
+      const waMsg=encodeURIComponent(`Hello ${v.customer_name}, it's time to groom yourself. Please visit us! ✂️`);
+      return `<div class="rem-card">
+        <h4>✂️ ${v.customer_name||'-'}</h4>
+        <p>📅 Due: ${v.due_date} &nbsp;|&nbsp; 💇 ${v.service||'-'}</p>
+        ${mob?`<div class="action-btns"><a href="tel:${mob}" class="call-btn">📞 Call</a><a href="https://wa.me/91${mob}?text=${waMsg}" class="wa-btn" target="_blank">💬 WhatsApp</a></div>`:'<p style="font-size:11px;color:#90A4AE;margin-top:6px">No mobile on record</p>'}
+      </div>`;
     }).join('');
-  } catch(e) {
-    console.error(e);
-  }
+  } catch(e) { console.error(e); }
 }
 
-// ===== PAYWALL =====
-let selectedPlan = 'yearly';
+let selectedPlan='yearly';
 function selectPlan(plan) {
-  selectedPlan = plan;
-  document.getElementById('planYearly').classList.toggle('selected', plan === 'yearly');
-  document.getElementById('planLifetime').classList.toggle('selected', plan === 'lifetime');
+  selectedPlan=plan;
+  document.getElementById('planYearly').classList.toggle('selected',plan==='yearly');
+  document.getElementById('planLifetime').classList.toggle('selected',plan==='lifetime');
 }
+function initiatePayment() { toast(`Razorpay coming in v2. Plan: ₹${selectedPlan==='yearly'?250:1001}`,''); }
 
-function initiatePayment() {
-  const amount = selectedPlan === 'yearly' ? 250 : 1001;
-  toast(`Razorpay integration coming in v2. Plan: ₹${amount}`, '');
-  // TODO: Razorpay integration in v2
-}
-
-// ===== INIT =====
-setupPinBoxes('');
-setupPinBoxes('r');
+setupPinBoxes(['p1','p2','p3','p4']);
+setupPinBoxes(['rp1','rp2','rp3','rp4']);
 autoLogin();
 </script>
 </body>
