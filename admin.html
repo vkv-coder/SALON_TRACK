@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SALON-TRACK Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #1565C0; --primary-dark: #0D47A1; --primary-light: #1976D2;
+    --accent: #42A5F5; --bg: #F0F6FF; --white: #fff;
+    --text: #1A237E; --text-light: #546E7A; --border: #BBDEFB;
+    --success: #2E7D32; --danger: #C62828; --warning: #F57F17;
+    --shadow: 0 4px 20px rgba(21,101,192,0.13); --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* LOGIN */
+  .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(160deg, #0D47A1, #1565C0, #42A5F5); }
+  .login-card { background: white; border-radius: 20px; padding: 36px 32px; width: 360px; box-shadow: 0 24px 64px rgba(0,0,0,0.25); text-align: center; }
+  .login-card .logo { font-size: 40px; margin-bottom: 8px; }
+  .login-card h1 { font-family: 'Nunito', sans-serif; font-size: 22px; font-weight: 900; color: var(--primary-dark); letter-spacing: 1px; margin-bottom: 4px; }
+  .login-card p { font-size: 12px; color: var(--text-light); margin-bottom: 24px; }
+  .login-card input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 15px; text-align: center; letter-spacing: 4px; color: var(--text); outline: none; margin-bottom: 14px; }
+  .login-card input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(21,101,192,0.1); }
+  .login-card button { width: 100%; padding: 13px; background: linear-gradient(135deg, var(--primary-dark), var(--primary-light)); color: white; border: none; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .login-error { color: #C62828; font-size: 13px; margin-top: 10px; }
+
+  /* ADMIN APP */
+  .admin-wrap { display: none; }
+  .admin-header { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); padding: 16px 28px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 12px rgba(13,71,161,0.3); }
+  .admin-header h1 { font-family: 'Nunito', sans-serif; font-size: 22px; font-weight: 900; color: white; letter-spacing: 1px; }
+  .admin-header span { font-size: 12px; color: rgba(255,255,255,0.7); }
+  .logout-btn { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 7px 16px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: 'Poppins', sans-serif; }
+
+  .admin-body { padding: 24px 28px; max-width: 1200px; margin: 0 auto; }
+
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: white; border-radius: var(--radius); padding: 20px; text-align: center; box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .stat-card .sv { font-size: 32px; font-weight: 800; color: var(--primary); }
+  .stat-card .sl { font-size: 12px; color: var(--text-light); margin-top: 4px; font-weight: 500; }
+  .stat-card.green .sv { color: var(--success); }
+  .stat-card.orange .sv { color: #E65100; }
+  .stat-card.red .sv { color: var(--danger); }
+
+  /* TABLE */
+  .table-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; }
+  .table-header { padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+  .table-header h2 { font-size: 16px; font-weight: 700; color: var(--primary-dark); }
+  .search-box { padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 13px; color: var(--text); outline: none; width: 220px; }
+  .search-box:focus { border-color: var(--primary); }
+
+  .users-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .users-table thead tr { background: var(--primary); color: white; }
+  .users-table thead th { padding: 12px 14px; text-align: left; font-weight: 600; font-size: 12px; letter-spacing: 0.5px; white-space: nowrap; }
+  .users-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  .users-table tbody tr:hover { background: #F0F6FF; }
+  .users-table tbody td { padding: 12px 14px; color: var(--text); vertical-align: middle; }
+
+  .plan-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .plan-trial { background: #FFF9C4; color: #F57F17; }
+  .plan-yearly { background: #E3F2FD; color: #1565C0; }
+  .plan-lifetime { background: #E8F5E9; color: #2E7D32; }
+  .plan-expired { background: #FFEBEE; color: #C62828; }
+
+  .status-badge { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+  .status-active { background: #4CAF50; }
+  .status-inactive { background: #F44336; }
+
+  .toggle-btn { padding: 6px 14px; border: none; border-radius: 6px; font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .toggle-active { background: #FFEBEE; color: #C62828; }
+  .toggle-inactive { background: #E8F5E9; color: #2E7D32; }
+
+  .refresh-btn { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; }
+
+  .toast { position: fixed; top: 20px; right: 20px; background: var(--primary-dark); color: white; padding: 12px 24px; border-radius: 10px; font-size: 13px; font-weight: 500; z-index: 9999; transform: translateX(200px); transition: transform 0.3s ease; box-shadow: var(--shadow); }
+  .toast.show { transform: translateX(0); }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--danger); }
+
+  .loading { text-align: center; padding: 40px; color: var(--text-light); font-size: 14px; }
+  .empty { text-align: center; padding: 40px; color: var(--text-light); }
+
+  .days-left { font-size: 11px; }
+  .days-ok { color: var(--success); }
+  .days-warn { color: var(--warning); }
+  .days-danger { color: var(--danger); }
+
+  @media(max-width:900px){
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .admin-body { padding: 16px; }
+    .users-table { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <div class="logo">✂️</div>
+    <h1>SALON-TRACK</h1>
+    <p>Admin Panel — Authorised Access Only</p>
+    <input type="password" id="adminPw" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')adminLogin()">
+    <button onclick="adminLogin()">Login to Admin Panel</button>
+    <div class="login-error" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div class="admin-wrap" id="adminWrap">
+  <div class="admin-header">
+    <div>
+      <h1>✂️ SALON-TRACK Admin</h1>
+      <span>User Management Panel</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span style="color:rgba(255,255,255,0.8);font-size:13px" id="lastRefresh"></span>
+      <button class="logout-btn" onclick="adminLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="admin-body">
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="sv" id="statTotal">-</div>
+        <div class="sl">Total Users</div>
+      </div>
+      <div class="stat-card green">
+        <div class="sv" id="statActive">-</div>
+        <div class="sl">Active Users</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="sv" id="statPaid">-</div>
+        <div class="sl">Paid Users</div>
+      </div>
+      <div class="stat-card red">
+        <div class="sv" id="statInactive">-</div>
+        <div class="sl">Inactive / Blocked</div>
+      </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="table-card">
+      <div class="table-header">
+        <h2>👤 All Registered Users</h2>
+        <div style="display:flex;gap:10px;align-items:center">
+          <input type="text" class="search-box" id="searchBox" placeholder="Search name / mobile / shop..." oninput="filterUsers()">
+          <button class="refresh-btn" onclick="loadUsers()">↻ Refresh</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Status</th>
+              <th>Name</th>
+              <th>Shop Name</th>
+              <th>Mobile</th>
+              <th>City</th>
+              <th>State</th>
+              <th>Plan</th>
+              <th>Trial Start</th>
+              <th>Expiry</th>
+              <th>Days Left</th>
+              <th>Registered</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <tr><td colspan="13" class="loading">Loading users...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://jqqnnkzozjskziaizajg.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcW5ua3pvempza3ppYWl6YWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Mjk1ODAsImV4cCI6MjA4ODUwNTU4MH0.sEYeWnm0dvuw8bLSVnQhqmgV8LB-pELjpuVIa3Us1Gg';
+const ADMIN_PW='@salon201';
+let allUsers=[];
+
+async function sb(table,method='GET',body=null,query=''){
+  const url=`${SUPA_URL}/rest/v1/${table}${query}`;
+  const headers={'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json','Accept-Profile':'public','Content-Profile':'public'};
+  if(method==='PATCH') headers['Prefer']='return=representation';
+  const opts={method,headers};
+  if(body) opts.body=JSON.stringify(body);
+  const res=await fetch(url,opts);
+  if(!res.ok) throw new Error(await res.text());
+  if(res.status===204) return true;
+  return res.json();
+}
+
+function toast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function adminLogin(){
+  const pw=document.getElementById('adminPw').value;
+  if(pw===ADMIN_PW){
+    document.getElementById('loginWrap').style.display='none';
+    document.getElementById('adminWrap').style.display='block';
+    loadUsers();
+  } else {
+    document.getElementById('loginErr').textContent='Incorrect password. Try again.';
+    document.getElementById('adminPw').value='';
+  }
+}
+
+function adminLogout(){
+  document.getElementById('loginWrap').style.display='flex';
+  document.getElementById('adminWrap').style.display='none';
+  document.getElementById('adminPw').value='';
+  document.getElementById('loginErr').textContent='';
+}
+
+async function loadUsers(){
+  try{
+    const rows=await sb('users','GET',null,'?order=created_at.desc&select=*');
+    allUsers=rows||[];
+    updateStats(allUsers);
+    renderUsers(allUsers);
+    document.getElementById('lastRefresh').textContent='Last refreshed: '+new Date().toLocaleTimeString('en-IN');
+  }catch(e){
+    document.getElementById('usersTableBody').innerHTML='<tr><td colspan="13" class="loading">Failed to load users.</td></tr>';
+    console.error(e);
+  }
+}
+
+function updateStats(users){
+  const active=users.filter(u=>u.is_active).length;
+  const inactive=users.filter(u=>!u.is_active).length;
+  const paid=users.filter(u=>u.plan==='yearly'||u.plan==='lifetime').length;
+  document.getElementById('statTotal').textContent=users.length;
+  document.getElementById('statActive').textContent=active;
+  document.getElementById('statPaid').textContent=paid;
+  document.getElementById('statInactive').textContent=inactive;
+}
+
+function daysLeft(expiry){
+  if(!expiry)return null;
+  const diff=Math.ceil((new Date(expiry)-new Date())/(1000*60*60*24));
+  return diff;
+}
+
+function renderUsers(users){
+  const tbody=document.getElementById('usersTableBody');
+  if(!users.length){
+    tbody.innerHTML='<tr><td colspan="13" class="empty">No users found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML=users.map((u,i)=>{
+    const dl=daysLeft(u.expiry_date);
+    let daysHtml='-';
+    if(dl!==null){
+      const cls=dl>7?'days-ok':dl>0?'days-warn':'days-danger';
+      daysHtml=`<span class="days-left ${cls}">${dl>0?dl+' days':'Expired'}</span>`;
+    }
+    if(u.plan==='lifetime') daysHtml='<span class="days-left days-ok">∞ Lifetime</span>';
+
+    const planClass={'trial':'plan-trial','yearly':'plan-yearly','lifetime':'plan-lifetime','expired':'plan-expired'}[u.plan]||'plan-trial';
+
+    return `<tr>
+      <td>${i+1}</td>
+      <td>
+        <span class="status-badge ${u.is_active?'status-active':'status-inactive'}"></span>
+        ${u.is_active?'Active':'Blocked'}
+      </td>
+      <td><strong>${u.name||'-'}</strong></td>
+      <td>${u.shop||'-'}</td>
+      <td>${u.mobile||'-'}</td>
+      <td>${u.city||'-'}</td>
+      <td>${u.state||'-'}</td>
+      <td><span class="plan-badge ${planClass}">${u.plan||'trial'}</span></td>
+      <td>${u.start_date||'Not started'}</td>
+      <td>${u.expiry_date||'-'}</td>
+      <td>${daysHtml}</td>
+      <td>${u.created_at?new Date(u.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'-'}</td>
+      <td>
+        <button class="toggle-btn ${u.is_active?'toggle-active':'toggle-inactive'}"
+          onclick="toggleUser('${u.id}',${u.is_active})">
+          ${u.is_active?'🚫 Deactivate':'✅ Activate'}
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function toggleUser(id,currentStatus){
+  const newStatus=!currentStatus;
+  const action=newStatus?'Activate':'Deactivate';
+  if(!confirm(`${action} this user?`))return;
+  try{
+    await sb('users','PATCH',{is_active:newStatus},`?id=eq.${id}`);
+    toast(`User ${action}d successfully ✅`,'success');
+    loadUsers();
+  }catch(e){toast('Failed to update user','error');console.error(e);}
+}
+
+function filterUsers(){
+  const q=document.getElementById('searchBox').value.toLowerCase();
+  if(!q){renderUsers(allUsers);return;}
+  const filtered=allUsers.filter(u=>
+    (u.name||'').toLowerCase().includes(q)||
+    (u.mobile||'').includes(q)||
+    (u.shop||'').toLowerCase().includes(q)||
+    (u.city||'').toLowerCase().includes(q)
+  );
+  renderUsers(filtered);
+}
+
+document.getElementById('adminPw').addEventListener('keydown',function(e){
+  if(e.key==='Enter')adminLogin();
+});
+</script>
+</body>
+</html>
