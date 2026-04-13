@@ -987,7 +987,9 @@ async function sb(table, method='GET', body=null, query='') {
       'apikey': SUPA_KEY,
       'Authorization': `Bearer ${SUPA_KEY}`,
       'Content-Type': 'application/json',
-      'Prefer': method === 'POST' ? 'return=representation' : ''
+      'Prefer': method === 'POST' ? 'return=representation' : '',
+'Accept-Profile': 'public',
+'Content-Profile': 'public'
     }
   };
   if (body) opts.body = JSON.stringify(body);
