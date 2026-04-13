@@ -345,7 +345,7 @@
       <div class="s-icon">🎧</div>
       <div class="s-text">
         <p>Support &amp; Help</p>
-        <a href="mailto:"vkvcoder.support@gmail.com">vkvcoder.support@gmail.com</a>
+        <a href="mailto:support@salontrack.in">support@salontrack.in</a>
       </div>
     </div>
   </div>
@@ -520,7 +520,7 @@
       <h3>Payments</h3>
       <p>Payments are processed securely through Razorpay. SALON-TRACK does not store any card information.</p>
       <h3>Contact</h3>
-      <p>For privacy concerns: <strong>vkvcoder.support@gmail.com</strong></p>
+      <p>For privacy concerns: <strong>support@salontrack.in</strong></p>
       <div class="divider"></div>
       <p style="font-size:11px;text-align:center;color:#90A4AE">Last updated: April 2026 • SALON-TRACK v1.0</p>
     </div>
@@ -536,6 +536,7 @@ async function sb(table,method='GET',body=null,query='') {
   const url=`${SUPA_URL}/rest/v1/${table}${query}`;
   const headers={'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json','Accept-Profile':'public','Content-Profile':'public'};
   if(method==='POST') headers['Prefer']='return=representation';
+  if(method==='PATCH') headers['Prefer']='return=representation';
   const opts={method,headers};
   if(body) opts.body=JSON.stringify(body);
   const res=await fetch(url,opts);
@@ -612,7 +613,7 @@ async function doRegister(){
     const existing=await sb('users','GET',null,`?mobile=eq.${mobile}&select=id`);
     if(existing&&existing.length>0)return toast('Mobile already registered. Please login.','error');
     const trialEnd=new Date(); trialEnd.setDate(trialEnd.getDate()+15);
-    const rows=await sb('users','POST',{mobile,name,shop,city,state,pin,plan:'trial',start_date:new Date().toISOString().split('T')[0],expiry_date:trialEnd.toISOString().split('T')[0],is_active:true});
+    const rows=await sb('users','POST',{mobile,name,shop,city,state,pin,plan:'trial',start_date:null,expiry_date:null,is_active:true});
     if(!rows||!rows.length)return toast('Registration failed','error');
     currentUser=rows[0]; localStorage.setItem('st_uid',currentUser.id);
     toast('Welcome to SALON-TRACK! 🎉','success'); checkAndLoad(currentUser);
@@ -620,12 +621,17 @@ async function doRegister(){
 }
 
 function checkAndLoad(user){
-  const today=new Date(),expiry=new Date(user.expiry_date);
-  const daysLeft=Math.ceil((expiry-today)/(1000*60*60*24));
-  if((user.plan==='trial'&&daysLeft<=0)||user.plan==='expired'){showScreen('paywallScreen');return;}
+  let daysLeft=15;
+  if(user.expiry_date){
+    const today=new Date(),expiry=new Date(user.expiry_date);
+    daysLeft=Math.ceil((expiry-today)/(1000*60*60*24));
+    if((user.plan==='trial'&&daysLeft<=0)||user.plan==='expired'){showScreen('paywallScreen');return;}
+  }
   document.getElementById('hShop').textContent=user.shop||'';
   document.getElementById('hOwner').textContent=user.name||'';
-  document.getElementById('hTrial').textContent=user.plan==='trial'?`🕐 Trial: ${daysLeft} day${daysLeft!==1?'s':''} left`:user.plan==='lifetime'?'⭐ Lifetime Member':'✅ Active';
+  document.getElementById('hTrial').textContent=user.plan==='trial'
+    ? (user.expiry_date ? `🕐 Trial: ${daysLeft} day${daysLeft!==1?'s':''} left` : '🎁 Trial: Use app to start')
+    : user.plan==='lifetime'?'⭐ Lifetime Member':'✅ Active';
   const todayStr=new Date().toISOString().split('T')[0];
   document.getElementById('visitDate').value=todayStr;
   document.getElementById('reportFrom').value=todayStr;
@@ -639,6 +645,19 @@ function doLogout(){currentUser=null;localStorage.removeItem('st_uid');allCustom
 async function autoLogin(){
   const uid=localStorage.getItem('st_uid');if(!uid)return;
   try{const rows=await sb('users','GET',null,`?id=eq.${uid}&select=*`);if(rows&&rows.length>0&&rows[0].is_active){currentUser=rows[0];checkAndLoad(currentUser);}}catch(e){console.error(e);}
+}
+
+async function activateTrialIfNeeded(){
+  if(!currentUser||currentUser.expiry_date) return;
+  try{
+    const start=new Date().toISOString().split('T')[0];
+    const expiry=new Date(); expiry.setDate(expiry.getDate()+15);
+    const expiryStr=expiry.toISOString().split('T')[0];
+    await sb('users','PATCH',{start_date:start,expiry_date:expiryStr},`?id=eq.${currentUser.id}`);
+    currentUser.start_date=start;
+    currentUser.expiry_date=expiryStr;
+    document.getElementById('hTrial').textContent=`🕐 Trial: 15 days left`;
+  }catch(e){console.error('Trial activation failed',e);}
 }
 
 async function loadAllMasterData(){
@@ -673,6 +692,7 @@ async function addCustomer(){
   if(!name)return toast('Customer name required','error');
   try{
     await sb('salon_customers','POST',{user_id:currentUser.id,salutation:document.getElementById('custSalutation').value,name,mobile:document.getElementById('custMobile').value.trim(),address:document.getElementById('custAddress').value.trim(),birthday:document.getElementById('custBirthday').value||null,anniversary:document.getElementById('custAnniversary').value||null,notes:document.getElementById('custNotes').value.trim()});
+    await activateTrialIfNeeded();
     toast('Customer saved! ✅','success');
     ['custName','custMobile','custAddress','custBirthday','custAnniversary','custNotes'].forEach(id=>document.getElementById(id).value='');
     loadAllMasterData();
@@ -701,6 +721,7 @@ async function addService(){
   if(!rate)return toast('Rate required','error');
   try{
     await sb('salon_services','POST',{user_id:currentUser.id,name,rate:parseFloat(rate)});
+    await activateTrialIfNeeded();
     toast('Service saved! ✅','success');
     ['svcName','svcRate'].forEach(id=>document.getElementById(id).value='');
     loadServiceList(); loadAllMasterData();
@@ -822,6 +843,7 @@ async function addVisit(){
   if(!lines.length)return toast('Add at least one service','error');
   try{
     for(const line of lines) await sb('salon_visits','POST',line);
+    await activateTrialIfNeeded();
     toast(`Visit saved! ${lines.length} service${lines.length>1?'s':''} recorded ✅`,'success');
     setupVisitForm();
   }catch(e){toast('Failed to save visit','error');console.error(e);}
@@ -875,7 +897,8 @@ async function loadReminders(){
     if(custIds.length){const c=await sb('salon_customers','GET',null,`?id=in.(${custIds.join(',')})&select=id,mobile`);(c||[]).forEach(x=>custMap[x.id]=x.mobile);}
     el.innerHTML=rows.map(v=>{
       const mob=custMap[v.customer_id]||'';
-      const waMsg=encodeURIComponent(`Hello ${v.customer_name}, it's time to groom yourself. Please visit us! ✂️`);
+      const lastVisit=v.visit_date?new Date(v.visit_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'';
+      const waMsg=encodeURIComponent(`Dear ${v.customer_name},\n\nYour last visit was on ${lastVisit}. It's time to groom yourself. Please visit us! ✂️\n\n${currentUser.shop||''}\n${currentUser.name||''}`);
       return `<div class="rem-card">
         <h4>✂️ ${v.customer_name||'-'}</h4>
         <p>📅 Due: ${v.due_date} &nbsp;|&nbsp; 💇 ${v.service||'-'}</p>
