@@ -279,7 +279,68 @@
       </div>
     </div>
     <button class="btn btn-primary" onclick="doLogin()" style="margin-top:10px">Login →</button>
-    <div class="auth-footer">New user? <button class="link-btn" onclick="showScreen('registerScreen')">Register here</button></div>
+    <div class="auth-footer">
+      <button class="link-btn" onclick="showScreen('forgotScreen')" style="color:#E57373">Forgot PIN?</button>
+      &nbsp;|&nbsp; New user? <button class="link-btn" onclick="showScreen('registerScreen')">Register here</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FORGOT PIN ===== -->
+<div class="screen auth-bg" id="forgotScreen">
+  <span class="beauty-icon">💄</span><span class="beauty-icon">🌸</span><span class="beauty-icon">💅</span>
+  <span class="beauty-icon">🪞</span><span class="beauty-icon">✂️</span><span class="beauty-icon">🌺</span>
+  <span class="beauty-icon">💋</span><span class="beauty-icon">🎀</span><span class="beauty-icon">👄</span>
+  <span class="beauty-icon">🌷</span>
+  <div class="auth-circle1"></div><div class="auth-circle2"></div>
+  <div class="auth-logo">
+    <span class="logo-main">✂️</span>
+    <div class="logo-sub-icons">💄 💅 🪞</div>
+    <h1>SALON-TRACK</h1>
+    <p>RESET YOUR PIN</p>
+  </div>
+
+  <!-- Step 1: Enter Mobile -->
+  <div class="auth-card" id="forgot-step1">
+    <h2>Forgot PIN?</h2>
+    <p class="sub">Enter your registered mobile number to receive OTP</p>
+    <div class="form-group">
+      <label>Mobile Number</label>
+      <input type="tel" id="forgotMobile" maxlength="10" placeholder="10-digit mobile number">
+    </div>
+    <button class="btn btn-primary" onclick="sendOTP()" style="margin-top:8px">Send OTP →</button>
+    <div class="auth-footer"><button class="link-btn" onclick="showScreen('loginScreen')">← Back to Login</button></div>
+  </div>
+
+  <!-- Step 2: Enter OTP -->
+  <div class="auth-card" id="forgot-step2" style="display:none">
+    <h2>Enter OTP</h2>
+    <p class="sub" id="otpSentMsg">OTP sent to your mobile</p>
+    <div class="form-group">
+      <label>6-Digit OTP</label>
+      <input type="number" id="otpInput" maxlength="6" placeholder="Enter OTP received" style="font-size:20px;font-weight:700;text-align:center;letter-spacing:8px">
+    </div>
+    <button class="btn btn-primary" onclick="verifyOTP()" style="margin-top:8px">Verify OTP →</button>
+    <div class="auth-footer">
+      <button class="link-btn" onclick="sendOTP()">Resend OTP</button>
+      &nbsp;|&nbsp; <button class="link-btn" onclick="showScreen('loginScreen')">← Cancel</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Set New PIN -->
+  <div class="auth-card" id="forgot-step3" style="display:none">
+    <h2>Set New PIN</h2>
+    <p class="sub">Choose a new 4-digit PIN for your account</p>
+    <div class="form-group">
+      <label>New 4-Digit PIN</label>
+      <div class="pin-row">
+        <input type="number" class="pin-box" id="np1" maxlength="1" min="0" max="9">
+        <input type="number" class="pin-box" id="np2" maxlength="1" min="0" max="9">
+        <input type="number" class="pin-box" id="np3" maxlength="1" min="0" max="9">
+        <input type="number" class="pin-box" id="np4" maxlength="1" min="0" max="9">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="resetPin()" style="margin-top:8px">Save New PIN →</button>
   </div>
 </div>
 
@@ -1080,7 +1141,70 @@ async function downloadCSV(){
 
 setupPinBoxes(['p1','p2','p3','p4']);
 setupPinBoxes(['rp1','rp2','rp3','rp4']);
+setupPinBoxes(['np1','np2','np3','np4']);
 autoLogin();
+
+// ===== FORGOT PIN =====
+const TWOFACTOR_KEY='6aa4f7ee-371f-11f1-9800-0200cd936042';
+let forgotMobileNum='', otpSessionId='';
+
+function showForgotStep(n){
+  ['forgot-step1','forgot-step2','forgot-step3'].forEach((id,i)=>{
+    document.getElementById(id).style.display=(i===n-1)?'block':'none';
+  });
+}
+
+async function sendOTP(){
+  const mobile=document.getElementById('forgotMobile').value.trim();
+  if(mobile.length!==10)return toast('Enter valid 10-digit mobile','error');
+  try{
+    // Check mobile exists
+    const rows=await sb('users','GET',null,`?mobile=eq.${mobile}&select=id`);
+    if(!rows||!rows.length)return toast('Mobile not registered','error');
+    forgotMobileNum=mobile;
+    // Send OTP via 2Factor
+    const res=await fetch(`https://2factor.in/API/V1/${TWOFACTOR_KEY}/SMS/${mobile}/AUTOGEN/SLNTRK`);
+    const data=await res.json();
+    if(data.Status==='Success'){
+      otpSessionId=data.Details;
+      document.getElementById('otpSentMsg').textContent=`OTP sent to ${mobile.slice(0,3)}XXXXXXX${mobile.slice(-2)}`;
+      showForgotStep(2);
+      toast('OTP sent! Check your mobile 📱','success');
+    } else {
+      toast('Failed to send OTP. Try again.','error');
+    }
+  }catch(e){toast('Error sending OTP','error');console.error(e);}
+}
+
+async function verifyOTP(){
+  const otp=document.getElementById('otpInput').value.trim();
+  if(!otp||otp.length<4)return toast('Enter the OTP received','error');
+  try{
+    const res=await fetch(`https://2factor.in/API/V1/${TWOFACTOR_KEY}/SMS/VERIFY/${otpSessionId}/${otp}`);
+    const data=await res.json();
+    if(data.Status==='Success'&&data.Details==='OTP Matched'){
+      showForgotStep(3);
+      toast('OTP verified! Set your new PIN ✅','success');
+    } else {
+      toast('Invalid OTP. Try again.','error');
+    }
+  }catch(e){toast('Verification failed','error');console.error(e);}
+}
+
+async function resetPin(){
+  const pin=['np1','np2','np3','np4'].map(id=>document.getElementById(id).value).join('');
+  if(pin.length!==4)return toast('Enter 4-digit PIN','error');
+  try{
+    await sb('users','PATCH',{pin},`?mobile=eq.${forgotMobileNum}`);
+    toast('PIN reset successfully! Please login ✅','success');
+    // Clear and go to login
+    ['np1','np2','np3','np4'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('otpInput').value='';
+    document.getElementById('forgotMobile').value='';
+    showForgotStep(1);
+    showScreen('loginScreen');
+  }catch(e){toast('Failed to reset PIN','error');console.error(e);}
+}
 </script>
 </body>
 </html>
