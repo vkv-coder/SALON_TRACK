@@ -90,13 +90,13 @@
   .home-header .owner-label { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 1px; }
   .logout-btn { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); color: white; font-size: 18px; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .trial-pill { display: inline-block; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.35); color: white; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 20px; margin-top: 10px; }
-  .dashboard-body { flex: 1; padding: 20px 16px 24px; overflow-y: auto; }
-  .tiles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
-  .tile { background: white; border-radius: var(--radius); padding: 24px 14px 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; border: 1.5px solid var(--border); box-shadow: var(--shadow); transition: all 0.18s; min-height: 115px; position: relative; overflow: hidden; }
-  .tile::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: var(--radius) var(--radius) 0 0; }
+  .dashboard-body { flex: 1; padding: 12px 14px 16px; overflow-y: auto; }
+  .tiles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .tile { background: white; border-radius: var(--radius); padding: 14px 10px 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; border: 1.5px solid var(--border); box-shadow: var(--shadow); transition: all 0.18s; min-height: 88px; position: relative; overflow: hidden; }
+  .tile::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: var(--radius) var(--radius) 0 0; }
   .tile:active { transform: scale(0.95); box-shadow: none; }
-  .tile .tile-icon { font-size: 38px; margin-bottom: 10px; }
-  .tile .tile-label { font-size: 13px; font-weight: 700; color: var(--primary-dark); line-height: 1.35; }
+  .tile .tile-icon { font-size: 28px; margin-bottom: 6px; }
+  .tile .tile-label { font-size: 12px; font-weight: 700; color: var(--primary-dark); line-height: 1.3; }
   .support-strip { background: var(--primary-dark); border-radius: var(--radius-sm); padding: 15px 18px; display: flex; align-items: center; gap: 14px; }
   .support-strip .s-icon { font-size: 24px; }
   .support-strip .s-text p { font-size: 10px; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 1px; }
@@ -438,6 +438,14 @@
     <div class="trial-pill" id="hTrial"></div>
   </div>
   <div class="dashboard-body">
+    <div class="plan-status-card" id="planStatusCard" style="margin-bottom:14px">
+      <div class="ps-left">
+        <p>Current Plan</p>
+        <h4 id="planStatusLabel">Trial</h4>
+        <span id="planStatusSub"></span>
+      </div>
+      <button onclick="openSection('upgradeScreen')">⭐ Upgrade</button>
+    </div>
     <div class="tiles-grid">
       <div class="tile" onclick="openSection('customerMaster')">
         <div class="tile-icon">👤</div>
@@ -467,22 +475,10 @@
         <div class="tile-icon">🔒</div>
         <div class="tile-label">Privacy<br>Policy</div>
       </div>
-    </div>
-    <div class="support-strip">
-      <div class="s-icon">🎧</div>
-      <div class="s-text">
-        <p>Support &amp; Help</p>
-        <a href="mailto:vkvcoder.support@gmail.com">vkvcoder.support@gmail.com</a>
-      </div>
-    </div>
-    <div style="height:14px"></div>
-    <div class="plan-status-card" id="planStatusCard">
-      <div class="ps-left">
-        <p>Current Plan</p>
-        <h4 id="planStatusLabel">Trial</h4>
-        <span id="planStatusSub"></span>
-      </div>
-      <button onclick="openSection('upgradeScreen')">⭐ Upgrade</button>
+      <a href="mailto:vkvcoder.support@gmail.com" class="tile" style="text-decoration:none">
+        <div class="tile-icon">🎧</div>
+        <div class="tile-label">Support<br><span style="font-size:10px;color:var(--accent);font-weight:600">vkvcoder.support<br>@gmail.com</span></div>
+      </a>
     </div>
   </div>
 </div>
