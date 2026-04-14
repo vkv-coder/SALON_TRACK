@@ -207,6 +207,22 @@
   .up-plan-card p { font-size: 12px; color: var(--text-light); margin-top: 2px; }
   .up-plan-card .plan-badge { display: inline-block; background: #E8F5E9; color: #2E7D32; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-top: 4px; }
   .up-price { font-size: 22px; font-weight: 900; color: var(--primary); }
+
+  /* APPOINTMENT CARDS */
+  .appt-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 13px 15px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(21,101,192,0.06); }
+  .appt-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .appt-card h4 { font-size: 14px; font-weight: 700; color: var(--text); }
+  .appt-card p { font-size: 12px; color: var(--text-light); margin-top: 3px; }
+  .appt-status { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .status-pending { background: #FFF9C4; color: #F57F17; }
+  .status-confirmed { background: #E3F2FD; color: #1565C0; }
+  .status-done { background: #E8F5E9; color: #2E7D32; }
+  .status-cancelled { background: #FFEBEE; color: #C62828; }
+  .appt-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .appt-actions button { padding: 6px 12px; border: none; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; }
+  .btn-done { background: #E8F5E9; color: #2E7D32; }
+  .btn-cancel { background: #FFEBEE; color: #C62828; }
+  .btn-wa { background: #E8F5E9; color: #1B5E20; }
 </style>
 </head>
 <body>
@@ -272,10 +288,10 @@
     <div class="form-group">
       <label>4-Digit PIN</label>
       <div class="pin-row">
-        <input type="tel" class="pin-box" id="p1" maxlength="1" min="0" max="9">
-        <input type="tel" class="pin-box" id="p2" maxlength="1" min="0" max="9">
-        <input type="tel" class="pin-box" id="p3" maxlength="1" min="0" max="9">
-        <input type="tel" class="pin-box" id="p4" maxlength="1" min="0" max="9">
+        <input type="number" class="pin-box" id="p1" maxlength="1" min="0" max="9">
+        <input type="number" class="pin-box" id="p2" maxlength="1" min="0" max="9">
+        <input type="number" class="pin-box" id="p3" maxlength="1" min="0" max="9">
+        <input type="number" class="pin-box" id="p4" maxlength="1" min="0" max="9">
       </div>
     </div>
     <button class="btn btn-primary" onclick="doLogin()" style="margin-top:10px">Login →</button>
@@ -334,10 +350,10 @@
     <div class="form-group">
       <label>New 4-Digit PIN</label>
       <div class="pin-row">
-        <input type="tel" class="pin-box" id="np1" maxlength="1" min="0" max="9">
-        <input type="tel" class="pin-box" id="np2" maxlength="1" min="0" max="9">
-        <input type="tel" class="pin-box" id="np3" maxlength="1" min="0" max="9">
-        <input type="tel" class="pin-box" id="np4" maxlength="1" min="0" max="9">
+        <input type="number" class="pin-box" id="np1" maxlength="1" min="0" max="9">
+        <input type="number" class="pin-box" id="np2" maxlength="1" min="0" max="9">
+        <input type="number" class="pin-box" id="np3" maxlength="1" min="0" max="9">
+        <input type="number" class="pin-box" id="np4" maxlength="1" min="0" max="9">
       </div>
     </div>
     <button class="btn btn-primary" onclick="resetPin()" style="margin-top:8px">Save New PIN →</button>
@@ -377,10 +393,10 @@
     <div class="form-group">
       <label>Set 4-Digit PIN</label>
       <div class="pin-row">
-        <input type="tel" class="pin-box" id="rp1" maxlength="1" min="0" max="9">
-        <input type="tel" class="pin-box" id="rp2" maxlength="1" min="0" max="9">
-        <input type="tel" class="pin-box" id="rp3" maxlength="1" min="0" max="9">
-        <input type="tel" class="pin-box" id="rp4" maxlength="1" min="0" max="9">
+        <input type="number" class="pin-box" id="rp1" maxlength="1" min="0" max="9">
+        <input type="number" class="pin-box" id="rp2" maxlength="1" min="0" max="9">
+        <input type="number" class="pin-box" id="rp3" maxlength="1" min="0" max="9">
+        <input type="number" class="pin-box" id="rp4" maxlength="1" min="0" max="9">
       </div>
     </div>
     <button class="btn btn-primary" onclick="doRegister()" style="margin-top:10px">Create Account →</button>
@@ -442,6 +458,10 @@
       <div class="tile" onclick="openSection('reminder')">
         <div class="tile-icon">🔔</div>
         <div class="tile-label">Reminder</div>
+      </div>
+      <div class="tile" onclick="openSection('appointments')">
+        <div class="tile-icon">📅</div>
+        <div class="tile-label">Appointments</div>
       </div>
       <div class="tile" onclick="openSection('privacy')">
         <div class="tile-icon">🔒</div>
@@ -616,6 +636,69 @@
   </div>
 </div>
 
+<!-- ===== APPOINTMENTS ===== -->
+<div class="screen" id="appointments">
+  <div class="inner-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <h2>📅 Appointments</h2>
+  </div>
+  <div class="sub-tab-bar">
+    <button class="sub-tab-btn active" onclick="switchSubTab('appt','book',this)">➕ Book</button>
+    <button class="sub-tab-btn" onclick="switchSubTab('appt','upcoming',this)">📋 Upcoming</button>
+    <button class="sub-tab-btn" onclick="switchSubTab('appt','remind',this)">🔔 Reminders</button>
+  </div>
+  <div class="inner-body">
+
+    <!-- BOOK TAB -->
+    <div class="sub-tab-content active" id="appt-book">
+      <div class="card">
+        <div class="card-title">📅 New Appointment</div>
+        <div class="form-group"><label>Customer *</label>
+          <select id="apptCustomer"><option value="">-- Select Customer --</option></select>
+        </div>
+        <div class="two-col">
+          <div class="form-group"><label>Date *</label><input type="date" id="apptDate"></div>
+          <div class="form-group"><label>Time *</label><input type="time" id="apptTime"></div>
+        </div>
+        <div class="form-group"><label>Service</label>
+          <select id="apptService"><option value="">-- Select Service --</option></select>
+        </div>
+        <div class="form-group"><label>Notes</label>
+          <input type="text" id="apptNotes" placeholder="e.g. Bridal makeup, special instructions">
+        </div>
+        <div class="form-group"><label>Status</label>
+          <select id="apptStatus">
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="bookAppointment()">Save Appointment</button>
+      </div>
+    </div>
+
+    <!-- UPCOMING TAB -->
+    <div class="sub-tab-content" id="appt-upcoming">
+      <div class="pad" style="padding-bottom:0">
+        <div class="info-box">📋 All upcoming & recent appointments</div>
+      </div>
+      <div class="pad" style="padding-top:0">
+        <div id="apptList"><div class="empty-state"><div class="ei">⏳</div><p>Loading...</p></div></div>
+      </div>
+    </div>
+
+    <!-- REMINDERS TAB -->
+    <div class="sub-tab-content" id="appt-remind">
+      <div class="pad" style="padding-bottom:0">
+        <div class="info-box">🔔 Appointments today & tomorrow — send WhatsApp reminder</div>
+      </div>
+      <div class="pad" style="padding-top:0">
+        <div id="apptReminderList"><div class="empty-state"><div class="ei">⏳</div><p>Loading...</p></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <!-- ===== PRIVACY ===== -->
 <div class="screen" id="privacy">
   <div class="inner-header">
@@ -674,6 +757,7 @@ function openSection(id){
   if(id==='report'){loadTodayReport();}
   if(id==='reminder'){loadReminders();}
   if(id==='upgradeScreen'){setupUpgradeScreen();}
+  if(id==='appointments'){setupAppointmentForm(); resetSubTabs('appt','book');}
 }
 
 function switchSubTab(prefix,name,btn){
@@ -684,6 +768,8 @@ function switchSubTab(prefix,name,btn){
   document.getElementById(`${prefix}-${name}`).classList.add('active');
   if(prefix==='cust'&&name==='view') loadCustomerTable();
   if(prefix==='svc'&&name==='view') loadServiceList();
+  if(prefix==='appt'&&name==='upcoming') loadAppointments();
+  if(prefix==='appt'&&name==='remind') loadApptReminders();
 }
 
 function resetSubTabs(prefix,name){
@@ -1047,6 +1133,123 @@ async function loadReminders(){
   }catch(e){console.error(e);}
 }
 
+// ===== APPOINTMENTS =====
+function setupAppointmentForm(){
+  const cSel=document.getElementById('apptCustomer');
+  const sSel=document.getElementById('apptService');
+  cSel.innerHTML='<option value="">-- Select Customer --</option>';
+  allCustomers.forEach(c=>cSel.innerHTML+=`<option value="${c.id}" data-mobile="${c.mobile||''}">${c.salutation||''} ${c.name}</option>`);
+  sSel.innerHTML='<option value="">-- Select Service --</option>';
+  allServices.forEach(s=>sSel.innerHTML+=`<option value="${s.id}">${s.name}</option>`);
+  // Set default date to today
+  document.getElementById('apptDate').value=new Date().toISOString().split('T')[0];
+}
+
+async function bookAppointment(){
+  const custSel=document.getElementById('apptCustomer');
+  const date=document.getElementById('apptDate').value;
+  const time=document.getElementById('apptTime').value;
+  const svcSel=document.getElementById('apptService');
+  if(!custSel.value)return toast('Select a customer','error');
+  if(!date)return toast('Select date','error');
+  if(!time)return toast('Select time','error');
+  try{
+    await sb('salon_appointments','POST',{
+      user_id:currentUser.id,
+      customer_id:custSel.value,
+      customer_name:custSel.options[custSel.selectedIndex].text,
+      appointment_date:date,
+      appointment_time:time,
+      service:svcSel.value?svcSel.options[svcSel.selectedIndex].text:'',
+      notes:document.getElementById('apptNotes').value.trim(),
+      status:document.getElementById('apptStatus').value
+    });
+    toast('Appointment booked! ✅','success');
+    custSel.value=''; svcSel.value='';
+    document.getElementById('apptNotes').value='';
+    document.getElementById('apptStatus').value='pending';
+    document.getElementById('apptDate').value=new Date().toISOString().split('T')[0];
+    document.getElementById('apptTime').value='';
+  }catch(e){toast('Failed to save','error');console.error(e);}
+}
+
+async function loadAppointments(){
+  try{
+    const today=new Date().toISOString().split('T')[0];
+    const rows=await sb('salon_appointments','GET',null,`?user_id=eq.${currentUser.id}&appointment_date=gte.${today}&order=appointment_date.asc,appointment_time.asc&select=*`);
+    const el=document.getElementById('apptList');
+    if(!rows||!rows.length){
+      el.innerHTML='<div class="empty-state"><div class="ei">📅</div><p>No upcoming appointments.</p></div>';
+      return;
+    }
+    el.innerHTML=rows.map(a=>{
+      const statusClass={'pending':'status-pending','confirmed':'status-confirmed','done':'status-done','cancelled':'status-cancelled'}[a.status]||'status-pending';
+      const timeStr=a.appointment_time?a.appointment_time.slice(0,5):'';
+      const mob=a.customer_mobile||'';
+      return `<div class="appt-card">
+        <div class="appt-card-top">
+          <div>
+            <h4>✂️ ${a.customer_name||'-'}</h4>
+            <p>📅 ${a.appointment_date} &nbsp;⏰ ${timeStr}</p>
+            <p>💇 ${a.service||'-'} ${a.notes?'| '+a.notes:''}</p>
+          </div>
+          <span class="appt-status ${statusClass}">${a.status}</span>
+        </div>
+        <div class="appt-actions">
+          ${a.status!=='done'?`<button class="appt-actions btn-done" onclick="updateApptStatus('${a.id}','done')">✅ Done</button>`:''}
+          ${a.status!=='cancelled'&&a.status!=='done'?`<button class="appt-actions btn-cancel" onclick="updateApptStatus('${a.id}','cancelled')">✕ Cancel</button>`:''}
+          ${a.status!=='confirmed'&&a.status!=='done'&&a.status!=='cancelled'?`<button class="appt-actions" style="background:#E3F2FD;color:#1565C0" onclick="updateApptStatus('${a.id}','confirmed')">👍 Confirm</button>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){console.error(e);}
+}
+
+async function updateApptStatus(id,status){
+  try{
+    await sb('salon_appointments','PATCH',{status},`?id=eq.${id}`);
+    toast(`Marked as ${status} ✅`,'success');
+    loadAppointments();
+  }catch(e){toast('Failed to update','error');}
+}
+
+async function loadApptReminders(){
+  const today=new Date().toISOString().split('T')[0];
+  const tomorrow=new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+  const tomorrowStr=tomorrow.toISOString().split('T')[0];
+  try{
+    const rows=await sb('salon_appointments','GET',null,`?user_id=eq.${currentUser.id}&appointment_date=in.(${today},${tomorrowStr})&status=in.(pending,confirmed)&order=appointment_date.asc,appointment_time.asc&select=*`);
+    const el=document.getElementById('apptReminderList');
+    if(!rows||!rows.length){
+      el.innerHTML='<div class="empty-state"><div class="ei">🔔</div><p>No appointments today<br>or tomorrow. All clear! ✅</p></div>';
+      return;
+    }
+    // Get customer mobiles
+    const custIds=[...new Set(rows.map(r=>r.customer_id))];
+    let custMap={};
+    if(custIds.length){
+      const c=await sb('salon_customers','GET',null,`?id=in.(${custIds.join(',')})&select=id,mobile`);
+      (c||[]).forEach(x=>custMap[x.id]=x.mobile);
+    }
+    el.innerHTML=rows.map(a=>{
+      const mob=custMap[a.customer_id]||'';
+      const timeStr=a.appointment_time?a.appointment_time.slice(0,5):'';
+      const isToday=a.appointment_date===today;
+      const dayWord=isToday?'today':'tomorrow';
+      const waMsg=encodeURIComponent(`Dear ${a.customer_name},\n\nYour appointment is ${dayWord} at ${timeStr}. We look forward to seeing you! ✂️\n\n${currentUser.shop||''}\n${currentUser.name||''}`);
+      return `<div class="rem-card" style="border-left-color:${isToday?'#E53935':'#1565C0'}">
+        <h4>${isToday?'📍 TODAY':'📅 TOMORROW'} — ${a.customer_name||'-'}</h4>
+        <p>⏰ ${timeStr} &nbsp;|&nbsp; 💇 ${a.service||'-'}</p>
+        ${a.notes?`<p>📝 ${a.notes}</p>`:''}
+        ${mob?`<div class="action-btns">
+          <a href="tel:${mob}" class="call-btn">📞 Call</a>
+          <a href="https://wa.me/91${mob}?text=${waMsg}" class="wa-btn" target="_blank">💬 WhatsApp</a>
+        </div>`:'<p style="font-size:11px;color:#90A4AE;margin-top:6px">No mobile on record</p>'}
+      </div>`;
+    }).join('');
+  }catch(e){console.error(e);}
+}
+
 // ===== UPGRADE & RAZORPAY =====
 let selectedUpgradePlan='yearly';
 
@@ -1163,7 +1366,7 @@ async function sendOTP(){
     if(!rows||!rows.length)return toast('Mobile not registered','error');
     forgotMobileNum=mobile;
     // Send OTP via 2Factor
-    const res=await fetch(`https://2factor.in/API/V1/${TWOFACTOR_KEY}/SMS/${mobile}/AUTOGEN`);
+    const res=await fetch(`https://2factor.in/API/V1/${TWOFACTOR_KEY}/SMS/${mobile}/AUTOGEN/SLNTRK`);
     const data=await res.json();
     if(data.Status==='Success'){
       otpSessionId=data.Details;
