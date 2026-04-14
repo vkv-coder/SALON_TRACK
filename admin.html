@@ -93,6 +93,9 @@
     .admin-body { padding: 16px; }
     .users-table { font-size: 11px; }
   }
+  .lang-btn { padding: 8px 18px; border: 2px solid var(--border); border-radius: 20px; background: white; color: var(--text); font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .lang-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+  .wa-send-btn { background: #E8F5E9; color: #1B5E20; border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -146,6 +149,22 @@
     </div>
 
     <!-- Users Table -->
+    <div class="table-card" style="margin-bottom:24px">
+      <div class="table-header">
+        <h2>📣 Send Promotion Message</h2>
+      </div>
+      <div style="padding:20px">
+        <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+          <button class="lang-btn active" id="langEn" onclick="selectLang('en')">🇬🇧 English</button>
+          <button class="lang-btn" id="langGu" onclick="selectLang('gu')">🇮🇳 Gujarati</button>
+          <button class="lang-btn" id="langHi" onclick="selectLang('hi')">🇮🇳 Hindi</button>
+        </div>
+        <textarea id="promoMsg" rows="8" style="width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--text);resize:vertical;outline:none;line-height:1.7"></textarea>
+        <p style="font-size:12px;color:var(--text-light);margin-top:8px">💡 Click WhatsApp button next to each user below to send with their name auto-filled.</p>
+      </div>
+    </div>
+
+    <!-- Users Table -->
     <div class="table-card">
       <div class="table-header">
         <h2>👤 All Registered Users</h2>
@@ -171,6 +190,7 @@
               <th>Days Left</th>
               <th>Registered</th>
               <th>Action</th>
+              <th>Send Msg</th>
             </tr>
           </thead>
           <tbody id="usersTableBody">
@@ -183,7 +203,56 @@
 </div>
 
 <script>
-const SUPA_URL='https://jqqnnkzozjskziaizajg.supabase.co';
+// ===== PROMO MESSAGES =====
+const promoMessages = {
+  en: `✂️ *SALON-TRACK* — Smart App for Your Salon!
+
+✅ Next visit reminder message sent to customers — automatically
+✅ Book & manage appointments with day-before WhatsApp alert — automatically
+✅ One tap WhatsApp reminder — no typing needed
+
+🎁 *15-day free trial — no payment needed*
+
+👉 https://vkv-coder.github.io/SALON_TRACK`,
+
+  gu: `✂️ *SALON-TRACK* — તમારા સલૂન માટે સ્માર્ટ એપ!
+
+✅ આગળની વિઝિટ માટે જાણકારીનો મેસેજ મોકલો — આપોઆપ
+✅ અપોઇન્ટમેન્ટ બુક કરો — એક દિવસ પહેલા WhatsApp એલર્ટ — આપોઆપ
+✅ એક ટચમાં WhatsApp રિમાઈન્ડર — કોઈ ટાઈપિંગ નહીં
+
+🎁 *15 દિવસ ફ્રી ટ્રાયલ — કોઈ પેમેન્ટ નહીં*
+
+👉 https://vkv-coder.github.io/SALON_TRACK`,
+
+  hi: `✂️ *SALON-TRACK* — आपके सैलून के लिए स्मार्ट ऐप!
+
+✅ अगली विज़िट के लिए जानकारी का मैसेज भेजें — अपने आप
+✅ अपॉइंटमेंट बुक करें — एक दिन पहले WhatsApp अलर्ट — अपने आप
+✅ एक टच में WhatsApp रिमाइंडर — कोई टाइपिंग नहीं
+
+🎁 *15 दिन फ्री ट्रायल — कोई पेमेंट नहीं*
+
+👉 https://vkv-coder.github.io/SALON_TRACK`
+};
+
+let currentLang = 'en';
+
+function selectLang(lang) {
+  currentLang = lang;
+  ['en','gu','hi'].forEach(l => document.getElementById('lang'+l.charAt(0).toUpperCase()+l.slice(1)).classList.toggle('active', l===lang));
+  document.getElementById('promoMsg').value = promoMessages[lang];
+}
+
+function buildWAMsg(userName) {
+  const base = promoMessages[currentLang];
+  const greeting = currentLang === 'en'
+    ? `Dear ${userName},\n\nThank you for downloading SALON-TRACK! Please start using it for the below benefits:\n\n`
+    : currentLang === 'gu'
+    ? `પ્રિય ${userName},\n\nSALON-TRACK ડાઉનલોડ કરવા બદલ આભાર! નીચેના ફાયદા માટે ઉપયોગ શરૂ કરો:\n\n`
+    : `प्रिय ${userName},\n\nSALON-TRACK डाउनलोड करने के लिए धन्यवाद! नीचे दिए गए फायदों के लिए उपयोग शुरू करें:\n\n`;
+  return encodeURIComponent(greeting + base);
+}
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcW5ua3pvempza3ppYWl6YWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Mjk1ODAsImV4cCI6MjA4ODUwNTU4MH0.sEYeWnm0dvuw8bLSVnQhqmgV8LB-pELjpuVIa3Us1Gg';
 const ADMIN_PW='@salon201';
 let allUsers=[];
@@ -211,6 +280,7 @@ function adminLogin(){
   if(pw===ADMIN_PW){
     document.getElementById('loginWrap').style.display='none';
     document.getElementById('adminWrap').style.display='block';
+    document.getElementById('promoMsg').value=promoMessages['en'];
     loadUsers();
   } else {
     document.getElementById('loginErr').textContent='Incorrect password. Try again.';
@@ -292,6 +362,9 @@ function renderUsers(users){
           onclick="toggleUser('${u.id}',${u.is_active})">
           ${u.is_active?'🚫 Deactivate':'✅ Activate'}
         </button>
+      </td>
+      <td>
+        ${u.mobile?`<a href="https://wa.me/91${u.mobile}?text=${buildWAMsg(u.name||'')}" target="_blank"><button class="wa-send-btn">💬 WhatsApp</button></a>`:'—'}
       </td>
     </tr>`;
   }).join('');
