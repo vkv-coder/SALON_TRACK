@@ -8,15 +8,13 @@
 <style>
   :root {
     --primary: #1565C0; --primary-dark: #0D47A1; --primary-light: #1976D2;
-    --accent: #42A5F5; --bg: #F0F6FF; --white: #fff;
+    --accent: #42A5F5; --bg: #F0F6FF;
     --text: #1A237E; --text-light: #546E7A; --border: #BBDEFB;
     --success: #2E7D32; --danger: #C62828; --warning: #F57F17;
     --shadow: 0 4px 20px rgba(21,101,192,0.13); --radius: 12px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
-  /* LOGIN */
   .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(160deg, #0D47A1, #1565C0, #42A5F5); }
   .login-card { background: white; border-radius: 20px; padding: 36px 32px; width: 360px; box-shadow: 0 24px 64px rgba(0,0,0,0.25); text-align: center; }
   .login-card .logo { font-size: 40px; margin-bottom: 8px; }
@@ -24,19 +22,13 @@
   .login-card p { font-size: 12px; color: var(--text-light); margin-bottom: 24px; }
   .login-card input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 15px; text-align: center; letter-spacing: 4px; color: var(--text); outline: none; margin-bottom: 14px; }
   .login-card input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(21,101,192,0.1); }
-  .login-card button { width: 100%; padding: 13px; background: linear-gradient(135deg, var(--primary-dark), var(--primary-light)); color: white; border: none; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .login-card .login-btn { width: 100%; padding: 13px; background: linear-gradient(135deg, var(--primary-dark), var(--primary-light)); color: white; border: none; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; }
   .login-error { color: #C62828; font-size: 13px; margin-top: 10px; }
-
-  /* ADMIN APP */
   .admin-wrap { display: none; }
   .admin-header { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); padding: 16px 28px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 12px rgba(13,71,161,0.3); }
   .admin-header h1 { font-family: 'Nunito', sans-serif; font-size: 22px; font-weight: 900; color: white; letter-spacing: 1px; }
-  .admin-header span { font-size: 12px; color: rgba(255,255,255,0.7); }
   .logout-btn { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 7px 16px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: 'Poppins', sans-serif; }
-
   .admin-body { padding: 24px 28px; max-width: 1200px; margin: 0 auto; }
-
-  /* STATS */
   .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
   .stat-card { background: white; border-radius: var(--radius); padding: 20px; text-align: center; box-shadow: var(--shadow); border: 1px solid var(--border); }
   .stat-card .sv { font-size: 32px; font-weight: 800; color: var(--primary); }
@@ -44,60 +36,44 @@
   .stat-card.green .sv { color: var(--success); }
   .stat-card.orange .sv { color: #E65100; }
   .stat-card.red .sv { color: var(--danger); }
-
-  /* TABLE */
-  .table-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; }
+  .table-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; margin-bottom: 24px; }
   .table-header { padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
   .table-header h2 { font-size: 16px; font-weight: 700; color: var(--primary-dark); }
-  .search-box { padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 13px; color: var(--text); outline: none; width: 220px; }
-  .search-box:focus { border-color: var(--primary); }
-
   .users-table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .users-table thead tr { background: var(--primary); color: white; }
   .users-table thead th { padding: 12px 14px; text-align: left; font-weight: 600; font-size: 12px; letter-spacing: 0.5px; white-space: nowrap; }
   .users-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
   .users-table tbody tr:hover { background: #F0F6FF; }
   .users-table tbody td { padding: 12px 14px; color: var(--text); vertical-align: middle; }
-
   .plan-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
   .plan-trial { background: #FFF9C4; color: #F57F17; }
   .plan-yearly { background: #E3F2FD; color: #1565C0; }
   .plan-lifetime { background: #E8F5E9; color: #2E7D32; }
   .plan-expired { background: #FFEBEE; color: #C62828; }
-
   .status-badge { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
   .status-active { background: #4CAF50; }
   .status-inactive { background: #F44336; }
-
-  .toggle-btn { padding: 6px 14px; border: none; border-radius: 6px; font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .toggle-btn { display:block; width:100%; padding: 6px 10px; border: none; border-radius: 6px; font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-bottom:4px; }
   .toggle-active { background: #FFEBEE; color: #C62828; }
   .toggle-inactive { background: #E8F5E9; color: #2E7D32; }
-
+  .toggle-extend { background: #E3F2FD; color: #1565C0; }
   .refresh-btn { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; }
-
   .toast { position: fixed; top: 20px; right: 20px; background: var(--primary-dark); color: white; padding: 12px 24px; border-radius: 10px; font-size: 13px; font-weight: 500; z-index: 9999; transform: translateX(200px); transition: transform 0.3s ease; box-shadow: var(--shadow); }
   .toast.show { transform: translateX(0); }
   .toast.success { background: var(--success); }
   .toast.error { background: var(--danger); }
-
   .loading { text-align: center; padding: 40px; color: var(--text-light); font-size: 14px; }
   .empty { text-align: center; padding: 40px; color: var(--text-light); }
-
   .days-left { font-size: 11px; }
   .days-ok { color: var(--success); }
   .days-warn { color: var(--warning); }
   .days-danger { color: var(--danger); }
-
-  @media(max-width:900px){
-    .stats-grid { grid-template-columns: 1fr 1fr; }
-    .admin-body { padding: 16px; }
-    .users-table { font-size: 11px; }
-  }
   .lang-btn { padding: 8px 18px; border: 2px solid var(--border); border-radius: 20px; background: white; color: var(--text); font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
   .lang-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
   .wa-send-btn { background: #E8F5E9; color: #1B5E20; border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; white-space: nowrap; }
   .ptab { flex:1; padding:12px; border:none; background:transparent; font-family:'Poppins',sans-serif; font-size:13px; font-weight:600; color:var(--text-light); cursor:pointer; transition:all 0.2s; border-bottom:3px solid transparent; margin-bottom:-2px; }
   .ptab.active { color:var(--primary); border-bottom-color:var(--primary); background:#F0F6FF; }
+  @media(max-width:900px){ .stats-grid { grid-template-columns: 1fr 1fr; } .admin-body { padding: 16px; } .users-table { font-size: 11px; } }
 </style>
 </head>
 <body>
@@ -110,8 +86,8 @@
     <div class="logo">✂️</div>
     <h1>SALON-TRACK</h1>
     <p>Admin Panel — Authorised Access Only</p>
-    <input type="password" id="adminPw" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')adminLogin()">
-    <button onclick="adminLogin()">Login to Admin Panel</button>
+    <input type="password" id="adminPw" placeholder="Enter admin password">
+    <button class="login-btn" id="loginBtn">Login to Admin Panel</button>
     <div class="login-error" id="loginErr"></div>
   </div>
 </div>
@@ -125,47 +101,32 @@
     </div>
     <div style="display:flex;align-items:center;gap:12px">
       <span style="color:rgba(255,255,255,0.8);font-size:13px" id="lastRefresh"></span>
-      <button class="logout-btn" onclick="adminLogout()">Logout</button>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
     </div>
   </div>
 
   <div class="admin-body">
-    <!-- Stats -->
     <div class="stats-grid">
-      <div class="stat-card">
-        <div class="sv" id="statTotal">-</div>
-        <div class="sl">Total Users</div>
-      </div>
-      <div class="stat-card green">
-        <div class="sv" id="statActive">-</div>
-        <div class="sl">Active Users</div>
-      </div>
-      <div class="stat-card orange">
-        <div class="sv" id="statPaid">-</div>
-        <div class="sl">Paid Users</div>
-      </div>
-      <div class="stat-card red">
-        <div class="sv" id="statInactive">-</div>
-        <div class="sl">Inactive / Blocked</div>
-      </div>
+      <div class="stat-card"><div class="sv" id="statTotal">-</div><div class="sl">Total Users</div></div>
+      <div class="stat-card green"><div class="sv" id="statActive">-</div><div class="sl">Active Users</div></div>
+      <div class="stat-card orange"><div class="sv" id="statPaid">-</div><div class="sl">Paid Users</div></div>
+      <div class="stat-card red"><div class="sv" id="statInactive">-</div><div class="sl">Inactive / Blocked</div></div>
     </div>
 
-    <!-- Promo Message Section -->
-    <div class="table-card" style="margin-bottom:24px">
-      <div class="table-header">
-        <h2>📣 Send Promotion Message</h2>
-      </div>
+    <!-- Promo -->
+    <div class="table-card">
+      <div class="table-header"><h2>📣 Send Promotion Message</h2></div>
       <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
         <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
-          <button class="lang-btn active" id="langEn" onclick="selectLang('en')">🇬🇧 English</button>
-          <button class="lang-btn" id="langGu" onclick="selectLang('gu')">🇮🇳 Gujarati</button>
-          <button class="lang-btn" id="langHi" onclick="selectLang('hi')">🇮🇳 Hindi</button>
+          <button class="lang-btn active" id="langEn">🇬🇧 English</button>
+          <button class="lang-btn" id="langGu">🇮🇳 Gujarati</button>
+          <button class="lang-btn" id="langHi">🇮🇳 Hindi</button>
         </div>
         <textarea id="promoMsg" rows="7" style="width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--text);resize:vertical;outline:none;line-height:1.7"></textarea>
       </div>
       <div style="display:flex;border-bottom:2px solid var(--border)">
-        <button class="ptab active" id="ptab-notstarted" onclick="switchPromoTab('notstarted')">🔔 Not Started Yet</button>
-        <button class="ptab" id="ptab-all" onclick="switchPromoTab('all')">👥 All Users</button>
+        <button class="ptab active" id="ptab-notstarted">🔔 Not Started Yet</button>
+        <button class="ptab" id="ptab-all">👥 All Users</button>
       </div>
       <div id="promoUserList" style="max-height:400px;overflow-y:auto">
         <p style="padding:20px;color:var(--text-light);text-align:center">Loading...</p>
@@ -176,30 +137,20 @@
     <div class="table-card">
       <div class="table-header">
         <h2>👤 All Registered Users</h2>
-        <button class="refresh-btn" onclick="loadUsers()">↻ Refresh</button>
+        <button class="refresh-btn" id="refreshBtn">↻ Refresh</button>
       </div>
       <div style="overflow-x:auto">
         <table class="users-table">
           <thead>
             <tr>
-              <th>#</th>
-              <th>Status</th>
-              <th>Name</th>
-              <th>Shop Name</th>
-              <th>Mobile</th>
-              <th>City</th>
-              <th>State</th>
-              <th>Plan</th>
-              <th>Trial Start</th>
-              <th>Expiry</th>
-              <th>Days Left</th>
-              <th>Registered</th>
-              <th>Action</th>
-              <th>Send Msg</th>
+              <th>#</th><th>Status</th><th>Name</th><th>Shop Name</th>
+              <th>Mobile</th><th>City</th><th>State</th><th>Plan</th>
+              <th>Trial Start</th><th>Expiry</th><th>Days Left</th>
+              <th>Registered</th><th>Actions</th><th>Send Msg</th>
             </tr>
           </thead>
           <tbody id="usersTableBody">
-            <tr><td colspan="13" class="loading">Loading users...</td></tr>
+            <tr><td colspan="14" class="loading">Loading users...</td></tr>
           </tbody>
         </table>
       </div>
@@ -211,11 +162,10 @@
 const SUPA_URL='https://jqqnnkzozjskziaizajg.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcW5ua3pvempza3ppYWl6YWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Mjk1ODAsImV4cCI6MjA4ODUwNTU4MH0.sEYeWnm0dvuw8bLSVnQhqmgV8LB-pELjpuVIa3Us1Gg';
 const ADMIN_PW='1';
-let allUsers=[];
+let allUsers=[], currentLang='en', promoTab='notstarted';
 
-// ===== PROMO MESSAGES =====
-const promoMessages = {
-  en: `✂️ *SALON-TRACK* — Smart App for Your Salon!
+const promoMessages={
+  en:`✂️ *SALON-TRACK* — Smart App for Your Salon!
 
 ✅ Next visit reminder message sent to customers — automatically
 ✅ Book & manage appointments with day-before WhatsApp alert — automatically
@@ -223,7 +173,7 @@ const promoMessages = {
 
 🎁 *15-day free trial — no payment needed*`,
 
-  gu: `✂️ *SALON-TRACK* — તમારા સલૂન માટે સ્માર્ટ એપ!
+  gu:`✂️ *SALON-TRACK* — તમારા સલૂન માટે સ્માર્ટ એપ!
 
 ✅ આગળની વિઝિટ માટે જાણકારીનો મેસેજ મોકલો — આપોઆપ
 ✅ અપોઇન્ટમેન્ટ બુક કરો — એક દિવસ પહેલા WhatsApp એલર્ટ — આપોઆપ
@@ -231,7 +181,7 @@ const promoMessages = {
 
 🎁 *15 દિવસ ફ્રી ટ્રાયલ — કોઈ પેમેન્ટ નહીં*`,
 
-  hi: `✂️ *SALON-TRACK* — आपके सैलून के लिए स्मार्ट ऐप!
+  hi:`✂️ *SALON-TRACK* — आपके सैलून के लिए स्मार्ट ऐप!
 
 ✅ अगली विज़िट के लिए जानकारी का मैसेज भेजें — अपने आप
 ✅ अपॉइंटमेंट बुक करें — एक दिन पहले WhatsApp अलर्ट — अपने आप
@@ -240,65 +190,10 @@ const promoMessages = {
 🎁 *15 दिन फ्री ट्रायल — कोई पेमेंट नहीं*`
 };
 
-let currentLang='en';
-
-function selectLang(lang){
-  currentLang=lang;
-  ['En','Gu','Hi'].forEach(l=>document.getElementById('lang'+l).classList.toggle('active',l.toLowerCase()===lang));
-  document.getElementById('promoMsg').value=promoMessages[lang];
-}
-
-function buildWAMsg(userName){
-  const base=promoMessages[currentLang];
-  const greeting=currentLang==='en'
-    ?`Dear ${userName},\n\nThank you for downloading SALON-TRACK! Please start using it for the below benefits:\n\n`
-    :currentLang==='gu'
-    ?`પ્રિય ${userName},\n\nSALON-TRACK ડાઉનલોડ કરવા બદલ આભાર! નીચેના ફાયદા માટે ઉપયોગ શરૂ કરો:\n\n`
-    :`प्रिय ${userName},\n\nSALON-TRACK डाउनलोड करने के लिए धन्यवाद! नीचे दिए गए फायदों के लिए उपयोग शुरू करें:\n\n`;
-  return encodeURIComponent(greeting+base);
-}
-
-// Promo tabs
-let promoTab='notstarted';
-function switchPromoTab(tab){
-  promoTab=tab;
-  document.getElementById('ptab-notstarted').classList.toggle('active',tab==='notstarted');
-  document.getElementById('ptab-all').classList.toggle('active',tab==='all');
-  renderPromoList();
-}
-
-function renderPromoList(){
-  const users = promoTab==='notstarted'
-    ? allUsers.filter(u=>!u.expiry_date)
-    : allUsers;
-  const el=document.getElementById('promoUserList');
-  if(!users.length){
-    el.innerHTML=`<p style="padding:20px;color:var(--text-light);text-align:center">
-      ${promoTab==='notstarted'?'🎉 All users have started using the app!':'No users found.'}
-    </p>`;
-    return;
-  }
-  el.innerHTML=users.map((u,i)=>`
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border)">
-      <div>
-        <div style="font-weight:600;font-size:14px;color:var(--text)">${i+1}. ${u.name||'-'}</div>
-        <div style="font-size:12px;color:var(--text-light)">${u.shop||''} &nbsp;|&nbsp; ${u.city||''} ${u.state||''} &nbsp;|&nbsp; 📱 ${u.mobile||'-'}</div>
-        <div style="font-size:11px;margin-top:2px">
-          <span style="background:${u.expiry_date?'#E3F2FD':'#FFF9C4'};color:${u.expiry_date?'#1565C0':'#F57F17'};padding:2px 8px;border-radius:20px;font-weight:600">
-            ${u.expiry_date?'Trial started':'Not started yet'}
-          </span>
-        </div>
-      </div>
-      ${u.mobile?`<a href="https://wa.me/91${u.mobile}?text=${buildWAMsg(u.name||'')}" target="_blank">
-        <button class="wa-send-btn">💬 WhatsApp</button>
-      </a>`:'<span style="font-size:12px;color:#90A4AE">No mobile</span>'}
-    </div>`).join('');
-}
-
 async function sb(table,method='GET',body=null,query=''){
   const url=`${SUPA_URL}/rest/v1/${table}${query}`;
   const headers={'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json','Accept-Profile':'public','Content-Profile':'public'};
-  if(method==='PATCH') headers['Prefer']='return=representation';
+  if(method==='PATCH'||method==='POST') headers['Prefer']='return=representation';
   const opts={method,headers};
   if(body) opts.body=JSON.stringify(body);
   const res=await fetch(url,opts);
@@ -342,33 +237,26 @@ async function loadUsers(){
     renderPromoList();
     document.getElementById('lastRefresh').textContent='Last refreshed: '+new Date().toLocaleTimeString('en-IN');
   }catch(e){
-    document.getElementById('usersTableBody').innerHTML='<tr><td colspan="14" class="loading">Failed to load users.</td></tr>';
+    document.getElementById('usersTableBody').innerHTML='<tr><td colspan="14" class="loading">Failed to load.</td></tr>';
     console.error(e);
   }
 }
 
 function updateStats(users){
-  const active=users.filter(u=>u.is_active).length;
-  const inactive=users.filter(u=>!u.is_active).length;
-  const paid=users.filter(u=>u.plan==='yearly'||u.plan==='lifetime').length;
   document.getElementById('statTotal').textContent=users.length;
-  document.getElementById('statActive').textContent=active;
-  document.getElementById('statPaid').textContent=paid;
-  document.getElementById('statInactive').textContent=inactive;
+  document.getElementById('statActive').textContent=users.filter(u=>u.is_active).length;
+  document.getElementById('statPaid').textContent=users.filter(u=>u.plan==='yearly'||u.plan==='lifetime').length;
+  document.getElementById('statInactive').textContent=users.filter(u=>!u.is_active).length;
 }
 
 function daysLeft(expiry){
-  if(!expiry)return null;
-  const diff=Math.ceil((new Date(expiry)-new Date())/(1000*60*60*24));
-  return diff;
+  if(!expiry) return null;
+  return Math.ceil((new Date(expiry)-new Date())/(1000*60*60*24));
 }
 
 function renderUsers(users){
   const tbody=document.getElementById('usersTableBody');
-  if(!users.length){
-    tbody.innerHTML='<tr><td colspan="13" class="empty">No users found.</td></tr>';
-    return;
-  }
+  if(!users.length){tbody.innerHTML='<tr><td colspan="14" class="empty">No users found.</td></tr>';return;}
   tbody.innerHTML=users.map((u,i)=>{
     const dl=daysLeft(u.expiry_date);
     let daysHtml='-';
@@ -377,15 +265,11 @@ function renderUsers(users){
       daysHtml=`<span class="days-left ${cls}">${dl>0?dl+' days':'Expired'}</span>`;
     }
     if(u.plan==='lifetime') daysHtml='<span class="days-left days-ok">∞ Lifetime</span>';
-
     const planClass={'trial':'plan-trial','yearly':'plan-yearly','lifetime':'plan-lifetime','expired':'plan-expired'}[u.plan]||'plan-trial';
-
+    const uid=u.id, uname=encodeURIComponent(u.name||''), uexp=encodeURIComponent(u.expiry_date||'');
     return `<tr>
       <td>${i+1}</td>
-      <td>
-        <span class="status-badge ${u.is_active?'status-active':'status-inactive'}"></span>
-        ${u.is_active?'Active':'Blocked'}
-      </td>
+      <td><span class="status-badge ${u.is_active?'status-active':'status-inactive'}"></span>${u.is_active?'Active':'Blocked'}</td>
       <td><strong>${u.name||'-'}</strong></td>
       <td>${u.shop||'-'}</td>
       <td>${u.mobile||'-'}</td>
@@ -397,65 +281,100 @@ function renderUsers(users){
       <td>${daysHtml}</td>
       <td>${u.created_at?new Date(u.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'-'}</td>
       <td>
-        <button class="toggle-btn ${u.is_active?'toggle-active':'toggle-inactive'}"
-          onclick="toggleUser('${u.id}',${u.is_active})">
-          ${u.is_active?'🚫 Deactivate':'✅ Activate'}
-        </button>
-        <button class="toggle-btn" style="background:#E8F5E9;color:#2E7D32;margin-top:4px" onclick="extendTrial('${u.id}','${u.name||''}','${u.expiry_date||''}')">
-          📅 Extend Trial
-        </button>
+        <button class="toggle-btn ${u.is_active?'toggle-active':'toggle-inactive'}" data-id="${uid}" data-active="${u.is_active}">${u.is_active?'🚫 Deactivate':'✅ Activate'}</button>
+        <button class="toggle-btn toggle-extend" data-id="${uid}" data-name="${uname}" data-exp="${uexp}">📅 Extend Trial</button>
       </td>
-      <td>
-        ${u.mobile?`<a href="https://wa.me/91${u.mobile}?text=${buildWAMsg(u.name||'')}" target="_blank"><button class="wa-send-btn">💬 WhatsApp</button></a>`:'—'}
-      </td>
+      <td>${u.mobile?`<a href="https://wa.me/91${u.mobile}?text=${buildWAMsg(u.name||'')}" target="_blank"><button class="wa-send-btn">💬 WhatsApp</button></a>`:'—'}</td>
     </tr>`;
   }).join('');
+
+  // Attach events
+  document.querySelectorAll('.toggle-btn[data-active]').forEach(btn=>{
+    btn.addEventListener('click',()=>toggleUser(btn.dataset.id, btn.dataset.active==='true'));
+  });
+  document.querySelectorAll('.toggle-extend').forEach(btn=>{
+    btn.addEventListener('click',()=>extendTrial(btn.dataset.id, decodeURIComponent(btn.dataset.name), decodeURIComponent(btn.dataset.exp)));
+  });
 }
 
-async function extendTrial(id, name, currentExpiry){
-  const days = prompt(`Extend trial for ${name}.\nEnter number of days to add:`, '15');
-  if(!days || isNaN(days) || parseInt(days)<=0) return;
+async function toggleUser(id,currentStatus){
+  const newStatus=!currentStatus;
+  if(!confirm(`${newStatus?'Activate':'Deactivate'} this user?`)) return;
   try{
-    // Calculate new expiry — extend from today if expired, else from current expiry
-    const base = currentExpiry && new Date(currentExpiry) > new Date()
-      ? new Date(currentExpiry)
-      : new Date();
-    base.setDate(base.getDate() + parseInt(days));
-    const newExpiry = base.toISOString().split('T')[0];
-    const startDate = new Date().toISOString().split('T')[0];
-    await sb('users','PATCH',{
-      expiry_date: newExpiry,
-      start_date: startDate,
-      plan: 'trial'
-    },`?id=eq.${id}`);
+    await sb('users','PATCH',{is_active:newStatus},`?id=eq.${id}`);
+    toast(`User ${newStatus?'activated':'deactivated'} ✅`,'success');
+    loadUsers();
+  }catch(e){toast('Failed to update','error');console.error(e);}
+}
+
+async function extendTrial(id,name,currentExpiry){
+  const days=prompt(`Extend trial for ${name}.\nEnter number of days to add:`,'15');
+  if(!days||isNaN(days)||parseInt(days)<=0) return;
+  try{
+    const base=currentExpiry&&new Date(currentExpiry)>new Date()?new Date(currentExpiry):new Date();
+    base.setDate(base.getDate()+parseInt(days));
+    const newExpiry=base.toISOString().split('T')[0];
+    await sb('users','PATCH',{expiry_date:newExpiry,start_date:new Date().toISOString().split('T')[0],plan:'trial'},`?id=eq.${id}`);
     toast(`Trial extended for ${name} until ${newExpiry} ✅`,'success');
     loadUsers();
   }catch(e){toast('Failed to extend trial','error');console.error(e);}
 }
-  const newStatus=!currentStatus;
-  const action=newStatus?'Activate':'Deactivate';
-  if(!confirm(`${action} this user?`))return;
-  try{
-    await sb('users','PATCH',{is_active:newStatus},`?id=eq.${id}`);
-    toast(`User ${action}d successfully ✅`,'success');
-    loadUsers();
-  }catch(e){toast('Failed to update user','error');console.error(e);}
+
+function buildWAMsg(userName){
+  const base=promoMessages[currentLang];
+  const greeting=currentLang==='en'
+    ?`Dear ${userName},\n\nThank you for downloading SALON-TRACK! Please start using it for the below benefits:\n\n`
+    :currentLang==='gu'
+    ?`પ્રિય ${userName},\n\nSALON-TRACK ડાઉનલોડ કરવા બદલ આભાર! નીચેના ફાયદા માટે ઉપયોગ શરૂ કરો:\n\n`
+    :`प्रिय ${userName},\n\nSALON-TRACK डाउनलोड करने के लिए धन्यवाद! नीचे दिए गए फायदों के लिए उपयोग शुरू करें:\n\n`;
+  return encodeURIComponent(greeting+base);
 }
 
-function filterUsers(){
-  const q=document.getElementById('searchBox').value.toLowerCase();
-  if(!q){renderUsers(allUsers);return;}
-  const filtered=allUsers.filter(u=>
-    (u.name||'').toLowerCase().includes(q)||
-    (u.mobile||'').includes(q)||
-    (u.shop||'').toLowerCase().includes(q)||
-    (u.city||'').toLowerCase().includes(q)
-  );
-  renderUsers(filtered);
+function selectLang(lang){
+  currentLang=lang;
+  ['En','Gu','Hi'].forEach(l=>document.getElementById('lang'+l).classList.toggle('active',l.toLowerCase()===lang));
+  document.getElementById('promoMsg').value=promoMessages[lang];
+  renderPromoList();
 }
 
-document.getElementById('adminPw').addEventListener('keydown',function(e){
-  if(e.key==='Enter')adminLogin();
+function switchPromoTab(tab){
+  promoTab=tab;
+  document.getElementById('ptab-notstarted').classList.toggle('active',tab==='notstarted');
+  document.getElementById('ptab-all').classList.toggle('active',tab==='all');
+  renderPromoList();
+}
+
+function renderPromoList(){
+  const users=promoTab==='notstarted'?allUsers.filter(u=>!u.expiry_date):allUsers;
+  const el=document.getElementById('promoUserList');
+  if(!users.length){
+    el.innerHTML=`<p style="padding:20px;color:var(--text-light);text-align:center">${promoTab==='notstarted'?'🎉 All users have started using the app!':'No users found.'}</p>`;
+    return;
+  }
+  el.innerHTML=users.map((u,i)=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-weight:600;font-size:14px">${i+1}. ${u.name||'-'}</div>
+        <div style="font-size:12px;color:var(--text-light)">${u.shop||''} | ${u.city||''} ${u.state||''} | 📱 ${u.mobile||'-'}</div>
+        <span style="background:${u.expiry_date?'#E3F2FD':'#FFF9C4'};color:${u.expiry_date?'#1565C0':'#F57F17'};padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700">
+          ${u.expiry_date?'Trial started':'Not started yet'}
+        </span>
+      </div>
+      ${u.mobile?`<a href="https://wa.me/91${u.mobile}?text=${buildWAMsg(u.name||'')}" target="_blank"><button class="wa-send-btn">💬 WhatsApp</button></a>`:'<span style="font-size:12px;color:#90A4AE">No mobile</span>'}
+    </div>`).join('');
+}
+
+// Wire up all events after DOM ready
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('loginBtn').addEventListener('click', adminLogin);
+  document.getElementById('adminPw').addEventListener('keydown',function(e){if(e.key==='Enter')adminLogin();});
+  document.getElementById('logoutBtn').addEventListener('click', adminLogout);
+  document.getElementById('refreshBtn').addEventListener('click', loadUsers);
+  document.getElementById('langEn').addEventListener('click',()=>selectLang('en'));
+  document.getElementById('langGu').addEventListener('click',()=>selectLang('gu'));
+  document.getElementById('langHi').addEventListener('click',()=>selectLang('hi'));
+  document.getElementById('ptab-notstarted').addEventListener('click',()=>switchPromoTab('notstarted'));
+  document.getElementById('ptab-all').addEventListener('click',()=>switchPromoTab('all'));
 });
 </script>
 </body>
