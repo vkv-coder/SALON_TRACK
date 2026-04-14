@@ -96,6 +96,8 @@
   .lang-btn { padding: 8px 18px; border: 2px solid var(--border); border-radius: 20px; background: white; color: var(--text); font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
   .lang-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
   .wa-send-btn { background: #E8F5E9; color: #1B5E20; border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; white-space: nowrap; }
+  .ptab { flex:1; padding:12px; border:none; background:transparent; font-family:'Poppins',sans-serif; font-size:13px; font-weight:600; color:var(--text-light); cursor:pointer; transition:all 0.2s; border-bottom:3px solid transparent; margin-bottom:-2px; }
+  .ptab.active { color:var(--primary); border-bottom-color:var(--primary); background:#F0F6FF; }
 </style>
 </head>
 <body>
@@ -148,19 +150,25 @@
       </div>
     </div>
 
-    <!-- Users Table -->
+    <!-- Promo Message Section -->
     <div class="table-card" style="margin-bottom:24px">
       <div class="table-header">
         <h2>📣 Send Promotion Message</h2>
       </div>
-      <div style="padding:20px">
-        <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
+        <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
           <button class="lang-btn active" id="langEn" onclick="selectLang('en')">🇬🇧 English</button>
           <button class="lang-btn" id="langGu" onclick="selectLang('gu')">🇮🇳 Gujarati</button>
           <button class="lang-btn" id="langHi" onclick="selectLang('hi')">🇮🇳 Hindi</button>
         </div>
-        <textarea id="promoMsg" rows="8" style="width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--text);resize:vertical;outline:none;line-height:1.7"></textarea>
-        <p style="font-size:12px;color:var(--text-light);margin-top:8px">💡 Click WhatsApp button next to each user below to send with their name auto-filled.</p>
+        <textarea id="promoMsg" rows="7" style="width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--text);resize:vertical;outline:none;line-height:1.7"></textarea>
+      </div>
+      <div style="display:flex;border-bottom:2px solid var(--border)">
+        <button class="ptab active" id="ptab-notstarted" onclick="switchPromoTab('notstarted')">🔔 Not Started Yet</button>
+        <button class="ptab" id="ptab-all" onclick="switchPromoTab('all')">👥 All Users</button>
+      </div>
+      <div id="promoUserList" style="max-height:400px;overflow-y:auto">
+        <p style="padding:20px;color:var(--text-light);text-align:center">Loading...</p>
       </div>
     </div>
 
@@ -168,10 +176,7 @@
     <div class="table-card">
       <div class="table-header">
         <h2>👤 All Registered Users</h2>
-        <div style="display:flex;gap:10px;align-items:center">
-          <input type="text" class="search-box" id="searchBox" placeholder="Search name / mobile / shop..." oninput="filterUsers()">
-          <button class="refresh-btn" onclick="loadUsers()">↻ Refresh</button>
-        </div>
+        <button class="refresh-btn" onclick="loadUsers()">↻ Refresh</button>
       </div>
       <div style="overflow-x:auto">
         <table class="users-table">
@@ -203,6 +208,11 @@
 </div>
 
 <script>
+const SUPA_URL='https://jqqnnkzozjskziaizajg.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcW5ua3pvempza3ppYWl6YWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Mjk1ODAsImV4cCI6MjA4ODUwNTU4MH0.sEYeWnm0dvuw8bLSVnQhqmgV8LB-pELjpuVIa3Us1Gg';
+const ADMIN_PW='@salon201';
+let allUsers=[];
+
 // ===== PROMO MESSAGES =====
 const promoMessages = {
   en: `✂️ *SALON-TRACK* — Smart App for Your Salon!
@@ -211,9 +221,7 @@ const promoMessages = {
 ✅ Book & manage appointments with day-before WhatsApp alert — automatically
 ✅ One tap WhatsApp reminder — no typing needed
 
-🎁 *15-day free trial — no payment needed*
-
-
+🎁 *15-day free trial — no payment needed*`,
 
   gu: `✂️ *SALON-TRACK* — તમારા સલૂન માટે સ્માર્ટ એપ!
 
@@ -221,8 +229,7 @@ const promoMessages = {
 ✅ અપોઇન્ટમેન્ટ બુક કરો — એક દિવસ પહેલા WhatsApp એલર્ટ — આપોઆપ
 ✅ એક ટચમાં WhatsApp રિમાઈન્ડર — કોઈ ટાઈપિંગ નહીં
 
-🎁 *15 દિવસ ફ્રી ટ્રાયલ — કોઈ પેમેન્ટ નહીં*
-
+🎁 *15 દિવસ ફ્રી ટ્રાયલ — કોઈ પેમેન્ટ નહીં*`,
 
   hi: `✂️ *SALON-TRACK* — आपके सैलून के लिए स्मार्ट ऐप!
 
@@ -230,31 +237,63 @@ const promoMessages = {
 ✅ अपॉइंटमेंट बुक करें — एक दिन पहले WhatsApp अलर्ट — अपने आप
 ✅ एक टच में WhatsApp रिमाइंडर — कोई टाइपिंग नहीं
 
-🎁 *15 दिन फ्री ट्रायल — कोई पेमेंट नहीं*
-
-
+🎁 *15 दिन फ्री ट्रायल — कोई पेमेंट नहीं*`
 };
 
-let currentLang = 'en';
+let currentLang='en';
 
-function selectLang(lang) {
-  currentLang = lang;
-  ['en','gu','hi'].forEach(l => document.getElementById('lang'+l.charAt(0).toUpperCase()+l.slice(1)).classList.toggle('active', l===lang));
-  document.getElementById('promoMsg').value = promoMessages[lang];
+function selectLang(lang){
+  currentLang=lang;
+  ['En','Gu','Hi'].forEach(l=>document.getElementById('lang'+l).classList.toggle('active',l.toLowerCase()===lang));
+  document.getElementById('promoMsg').value=promoMessages[lang];
 }
 
-function buildWAMsg(userName) {
-  const base = promoMessages[currentLang];
-  const greeting = currentLang === 'en'
-    ? `Dear ${userName},\n\nThank you for downloading SALON-TRACK! Please start using it for the below benefits:\n\n`
-    : currentLang === 'gu'
-    ? `પ્રિય ${userName},\n\nSALON-TRACK ડાઉનલોડ કરવા બદલ આભાર! નીચેના ફાયદા માટે ઉપયોગ શરૂ કરો:\n\n`
-    : `प्रिय ${userName},\n\nSALON-TRACK डाउनलोड करने के लिए धन्यवाद! नीचे दिए गए फायदों के लिए उपयोग शुरू करें:\n\n`;
-  return encodeURIComponent(greeting + base);
+function buildWAMsg(userName){
+  const base=promoMessages[currentLang];
+  const greeting=currentLang==='en'
+    ?`Dear ${userName},\n\nThank you for downloading SALON-TRACK! Please start using it for the below benefits:\n\n`
+    :currentLang==='gu'
+    ?`પ્રિય ${userName},\n\nSALON-TRACK ડાઉનલોડ કરવા બદલ આભાર! નીચેના ફાયદા માટે ઉપયોગ શરૂ કરો:\n\n`
+    :`प्रिय ${userName},\n\nSALON-TRACK डाउनलोड करने के लिए धन्यवाद! नीचे दिए गए फायदों के लिए उपयोग शुरू करें:\n\n`;
+  return encodeURIComponent(greeting+base);
 }
-const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcW5ua3pvempza3ppYWl6YWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Mjk1ODAsImV4cCI6MjA4ODUwNTU4MH0.sEYeWnm0dvuw8bLSVnQhqmgV8LB-pELjpuVIa3Us1Gg';
-const ADMIN_PW='@salon201';
-let allUsers=[];
+
+// Promo tabs
+let promoTab='notstarted';
+function switchPromoTab(tab){
+  promoTab=tab;
+  document.getElementById('ptab-notstarted').classList.toggle('active',tab==='notstarted');
+  document.getElementById('ptab-all').classList.toggle('active',tab==='all');
+  renderPromoList();
+}
+
+function renderPromoList(){
+  const users = promoTab==='notstarted'
+    ? allUsers.filter(u=>!u.expiry_date)
+    : allUsers;
+  const el=document.getElementById('promoUserList');
+  if(!users.length){
+    el.innerHTML=`<p style="padding:20px;color:var(--text-light);text-align:center">
+      ${promoTab==='notstarted'?'🎉 All users have started using the app!':'No users found.'}
+    </p>`;
+    return;
+  }
+  el.innerHTML=users.map((u,i)=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-weight:600;font-size:14px;color:var(--text)">${i+1}. ${u.name||'-'}</div>
+        <div style="font-size:12px;color:var(--text-light)">${u.shop||''} &nbsp;|&nbsp; ${u.city||''} ${u.state||''} &nbsp;|&nbsp; 📱 ${u.mobile||'-'}</div>
+        <div style="font-size:11px;margin-top:2px">
+          <span style="background:${u.expiry_date?'#E3F2FD':'#FFF9C4'};color:${u.expiry_date?'#1565C0':'#F57F17'};padding:2px 8px;border-radius:20px;font-weight:600">
+            ${u.expiry_date?'Trial started':'Not started yet'}
+          </span>
+        </div>
+      </div>
+      ${u.mobile?`<a href="https://wa.me/91${u.mobile}?text=${buildWAMsg(u.name||'')}" target="_blank">
+        <button class="wa-send-btn">💬 WhatsApp</button>
+      </a>`:'<span style="font-size:12px;color:#90A4AE">No mobile</span>'}
+    </div>`).join('');
+}
 
 async function sb(table,method='GET',body=null,query=''){
   const url=`${SUPA_URL}/rest/v1/${table}${query}`;
@@ -300,9 +339,10 @@ async function loadUsers(){
     allUsers=rows||[];
     updateStats(allUsers);
     renderUsers(allUsers);
+    renderPromoList();
     document.getElementById('lastRefresh').textContent='Last refreshed: '+new Date().toLocaleTimeString('en-IN');
   }catch(e){
-    document.getElementById('usersTableBody').innerHTML='<tr><td colspan="13" class="loading">Failed to load users.</td></tr>';
+    document.getElementById('usersTableBody').innerHTML='<tr><td colspan="14" class="loading">Failed to load users.</td></tr>';
     console.error(e);
   }
 }
