@@ -1,7 +1,7 @@
 {
   "name": "SALON Admin",
   "short_name": "SALON",
-  "start_url": "/SALON_TRACK/admin.html",
+  "start_url": "/SALON_TRACK/index.html",
   "display": "standalone",
   "background_color": "#1c1917",
   "theme_color": "#d97706",
