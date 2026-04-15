@@ -1,0 +1,16 @@
+{
+  "name": "SALON Admin",
+  "short_name": "SALON",
+  "start_url": "/SALON_TRACK/admin.html",
+  "display": "standalone",
+  "background_color": "#1c1917",
+  "theme_color": "#d97706",
+  "icons": [
+    {
+      "src": "salon-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
