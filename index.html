@@ -369,7 +369,7 @@
     <span class="logo-main">✂️</span>
     <div class="logo-sub-icons">💄 💅 🪞</div>
     <h1>SALON-TRACK</h1>
-    <p>15-DAY FREE TRIAL</p>
+    <p>30-DAY FREE TRIAL</p>
   </div>
   <div class="auth-card">
     <h2>Create Account</h2>
@@ -399,7 +399,7 @@
 <div class="screen paywall-bg" id="paywallScreen">
   <div style="font-size:64px;margin-bottom:14px">🔒</div>
   <h2>Trial Expired</h2>
-  <p>Your 15-day free trial has ended.<br>Choose a plan to continue.</p>
+  <p>Your 30-day free trial has ended.<br>Your data is safe — choose a plan to continue.</p>
   <div class="plan-cards">
     <div class="plan-card selected" id="planYearly" onclick="selectPlan('yearly')">
       <div><h3>Yearly Plan</h3><p>Renews every year</p></div>
@@ -812,7 +812,7 @@ async function doRegister(){
 }
 
 function checkAndLoad(user){
-  let daysLeft=15;
+  let daysLeft=30;
   if(user.expiry_date){
     const today=new Date(),expiry=new Date(user.expiry_date);
     daysLeft=Math.ceil((expiry-today)/(1000*60*60*24));
@@ -863,12 +863,12 @@ async function activateTrialIfNeeded(){
   if(!currentUser||currentUser.expiry_date) return;
   try{
     const start=new Date().toISOString().split('T')[0];
-    const expiry=new Date(); expiry.setDate(expiry.getDate()+15);
+    const expiry=new Date(); expiry.setDate(expiry.getDate()+30);
     const expiryStr=expiry.toISOString().split('T')[0];
     await sb('users','PATCH',{start_date:start,expiry_date:expiryStr},`?id=eq.${currentUser.id}`);
     currentUser.start_date=start;
     currentUser.expiry_date=expiryStr;
-    document.getElementById('hTrial').textContent=`🕐 Trial: 15 days left`;
+    document.getElementById('hTrial').textContent=`🕐 Trial: 30 days left`;
   }catch(e){console.error('Trial activation failed',e);}
 }
 
