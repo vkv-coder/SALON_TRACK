@@ -717,6 +717,11 @@
 <script>
 const SUPA_URL = 'https://jqqnnkzozjskziaizajg.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcW5ua3pvempza3ppYWl6YWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Mjk1ODAsImV4cCI6MjA4ODUwNTU4MH0.sEYeWnm0dvuw8bLSVnQhqmgV8LB-pELjpuVIa3Us1Gg';
+const TG_BOT='8755990830:AAF4SBuKaGc4FXfjGqNdqVTOFCwk3vj8LYg';
+const TG_CHAT='8507770594';
+async function tg(msg){
+  try{await fetch(`https://api.telegram.org/bot${TG_BOT}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:'HTML'})});}catch(e){}
+}
 let currentUser=null, allCustomers=[], allServices=[];
 
 async function sb(table,method='GET',body=null,query='') {
@@ -803,10 +808,10 @@ async function doRegister(){
   try{
     const existing=await sb('users','GET',null,`?mobile=eq.${mobile}&select=id`);
     if(existing&&existing.length>0)return toast('Mobile already registered. Please login.','error');
-    const trialEnd=new Date(); trialEnd.setDate(trialEnd.getDate()+15);
     const rows=await sb('users','POST',{mobile,name,shop,city,state,pin,plan:'trial',start_date:null,expiry_date:null,is_active:true});
     if(!rows||!rows.length)return toast('Registration failed','error');
     currentUser=rows[0]; localStorage.setItem('st_uid',currentUser.id);
+    tg('🆕 <b>New SALON-TRACK Signup</b>\n\nName: '+name+'\nShop: '+shop+'\nMobile: '+mobile+'\nCity: '+(city||'—')+', '+(state||'—'));
     toast('Welcome to SALON-TRACK! 🎉','success'); checkAndLoad(currentUser);
   }catch(e){toast('Registration failed. Try again.','error');console.error(e);}
 }
