@@ -717,10 +717,8 @@
 <script>
 const SUPA_URL = 'https://jqqnnkzozjskziaizajg.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcW5ua3pvempza3ppYWl6YWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Mjk1ODAsImV4cCI6MjA4ODUwNTU4MH0.sEYeWnm0dvuw8bLSVnQhqmgV8LB-pELjpuVIa3Us1Gg';
-const TG_BOT='8755990830:AAF4SBuKaGc4FXfjGqNdqVTOFCwk3vj8LYg';
-const TG_CHAT='8507770594';
 async function tg(msg){
-  try{await fetch(`https://api.telegram.org/bot${TG_BOT}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:'HTML'})});}catch(e){}
+  try{await fetch('https://telegram-notify.unigoods2026.workers.dev/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({msg})});}catch(e){}
 }
 let currentUser=null, allCustomers=[], allServices=[];
 
