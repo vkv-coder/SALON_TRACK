@@ -331,24 +331,6 @@
     <div class="auth-footer"><button class="link-btn" onclick="showScreen('loginScreen')">← Back to Login</button></div>
   </div>
 
-  <!-- Step 2 hidden - not used -->
-  <div id="forgot-step2" style="display:none"></div>
-
-  <!-- Step 3: Set New PIN -->
-  <div class="auth-card" id="forgot-step3" style="display:none">
-    <h2>Set New PIN</h2>
-    <p class="sub">Choose a new 4-digit PIN for your account</p>
-    <div class="form-group">
-      <label>New 4-Digit PIN</label>
-      <div class="pin-row">
-        <input type="number" class="pin-box" id="np1" maxlength="1" min="0" max="9">
-        <input type="number" class="pin-box" id="np2" maxlength="1" min="0" max="9">
-        <input type="number" class="pin-box" id="np3" maxlength="1" min="0" max="9">
-        <input type="number" class="pin-box" id="np4" maxlength="1" min="0" max="9">
-      </div>
-    </div>
-    <button class="btn btn-primary" onclick="resetPin()" style="margin-top:8px">Save New PIN →</button>
-  </div>
 </div>
 
 <!-- ===== REGISTER ===== -->
@@ -1334,42 +1316,28 @@ async function downloadCSV(){
 
 setupPinBoxes(['p1','p2','p3','p4']);
 setupPinBoxes(['rp1','rp2','rp3','rp4']);
-setupPinBoxes(['np1','np2','np3','np4']);
 autoLogin();
 
 // ===== FORGOT PIN =====
-const TWOFACTOR_KEY='6aa4f7ee-371f-11f1-9800-0200cd936042';
-let forgotMobileNum='';
-
-function showForgotStep(n){
-  ['forgot-step1','forgot-step2','forgot-step3'].forEach((id,i)=>{
-    document.getElementById(id).style.display=(i===n-1)?'block':'none';
-  });
-}
-
+// PIN resets are admin-verified, not self-service: this app has no email on
+// file for users (only name/mobile/shop/city/state), so there is no private
+// channel to send a self-service code to. Instead of setting the new PIN on
+// the spot (which let anyone who knew a mobile number take over the
+// account), this just alerts the admin, who verifies identity out-of-band
+// (phone/WhatsApp) and resets the PIN from the Admin Panel's "Reset PIN"
+// button. There is no longer any client-side path that can change another
+// user's PIN without that admin action.
 async function verifyForgotMobile(){
   const mobile=document.getElementById('forgotMobile').value.trim();
   if(mobile.length!==10)return toast('Enter valid 10-digit mobile','error');
   try{
-    const rows=await sb('users','GET',null,`?mobile=eq.${mobile}&select=id`);
+    const rows=await sb('users','GET',null,`?mobile=eq.${mobile}&select=id,name,shop,city`);
     if(!rows||!rows.length)return toast('Mobile not registered','error');
-    forgotMobileNum=mobile;
-    showForgotStep(3);
-    toast('Mobile verified! Set your new PIN ✅','success');
-  }catch(e){toast('Error verifying mobile','error');console.error(e);}
-}
-
-async function resetPin(){
-  const pin=['np1','np2','np3','np4'].map(id=>document.getElementById(id).value).join('');
-  if(pin.length!==4)return toast('Enter 4-digit PIN','error');
-  try{
-    await sb('users','PATCH',{pin},`?mobile=eq.${forgotMobileNum}`);
-    toast('PIN reset successfully! Please login ✅','success');
-    ['np1','np2','np3','np4'].forEach(id=>document.getElementById(id).value='');
+    const u=rows[0];
+    await tg('🔑 <b>PIN Reset Requested</b>\n\nName: '+(u.name||'—')+'\nShop: '+(u.shop||'—')+'\nMobile: '+mobile+'\nCity: '+(u.city||'—')+'\n\nVerify their identity, then reset their PIN from the SALON-TRACK Admin Panel.');
+    toast('Request received! We will verify your identity and reset your PIN shortly — you will be contacted on WhatsApp.','success');
     document.getElementById('forgotMobile').value='';
-    showForgotStep(1);
-    showScreen('loginScreen');
-  }catch(e){toast('Failed to reset PIN','error');console.error(e);}
+  }catch(e){toast('Error sending request','error');console.error(e);}
 }
 </script>
 </body>
