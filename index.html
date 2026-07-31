@@ -766,12 +766,11 @@ async function doLogin(){
   if(mobile.length!==10)return toast('Enter valid 10-digit mobile','error');
   if(pin.length!==4)return toast('Enter 4-digit PIN','error');
   try{
-    const rows=await sb('users','GET',null,`?mobile=eq.${mobile}&pin=eq.${pin}&select=*`);
-    if(!rows||!rows.length)return toast('Invalid mobile or PIN','error');
-    const user=rows[0];
-    if(!user.is_active)return toast('Account deactivated. Contact support.','error');
-    currentUser=user; localStorage.setItem('st_uid',user.id); checkAndLoad(user);
-  }catch(e){toast('Login failed. Try again.','error');console.error(e);}
+    const rows=await sb('rpc/st_login','POST',{p_mobile:mobile,p_pin:pin});
+    const user=rows&&rows[0];
+    if(!user)return toast('Invalid mobile or PIN','error');
+    currentUser=user; localStorage.setItem('st_session',JSON.stringify(user)); checkAndLoad(user);
+  }catch(e){toast('Invalid mobile or PIN','error');console.error(e);}
 }
 
 async function doRegister(){
@@ -788,9 +787,11 @@ async function doRegister(){
   try{
     const existing=await sb('users','GET',null,`?mobile=eq.${mobile}&select=id`);
     if(existing&&existing.length>0)return toast('Mobile already registered. Please login.','error');
-    const rows=await sb('users','POST',{mobile,name,shop,city,state,pin,plan:'trial',start_date:null,expiry_date:null,is_active:true});
+    const rows=await sb('users','POST',{mobile,name,shop,city,state,pin,plan:'trial',start_date:null,expiry_date:null,is_active:true},'?select=id,mobile,plan,start_date,expiry_date,name,shop,city,state,is_active');
     if(!rows||!rows.length)return toast('Registration failed','error');
-    currentUser=rows[0]; localStorage.setItem('st_uid',currentUser.id);
+    const loginRows=await sb('rpc/st_login','POST',{p_mobile:mobile,p_pin:pin});
+    currentUser=loginRows&&loginRows[0]; if(!currentUser)return toast('Registration succeeded, please log in','error');
+    localStorage.setItem('st_session',JSON.stringify(currentUser));
     tg('🆕 <b>New SALON-TRACK Signup</b>\n\nName: '+name+'\nShop: '+shop+'\nMobile: '+mobile+'\nCity: '+(city||'—')+', '+(state||'—'));
     toast('Welcome to SALON-TRACK! 🎉','success'); checkAndLoad(currentUser);
   }catch(e){toast('Registration failed. Try again.','error');console.error(e);}
@@ -837,11 +838,17 @@ function checkAndLoad(user){
   loadAllMasterData();
 }
 
-function doLogout(){currentUser=null;localStorage.removeItem('st_uid');allCustomers=[];allServices=[];['p1','p2','p3','p4'].forEach(id=>document.getElementById(id).value='');document.getElementById('loginMobile').value='';showScreen('loginScreen');}
+function doLogout(){currentUser=null;localStorage.removeItem('st_session');allCustomers=[];allServices=[];['p1','p2','p3','p4'].forEach(id=>document.getElementById(id).value='');document.getElementById('loginMobile').value='';showScreen('loginScreen');}
 
 async function autoLogin(){
-  const uid=localStorage.getItem('st_uid');if(!uid)return;
-  try{const rows=await sb('users','GET',null,`?id=eq.${uid}&select=*`);if(rows&&rows.length>0&&rows[0].is_active){currentUser=rows[0];checkAndLoad(currentUser);}}catch(e){console.error(e);}
+  const saved=localStorage.getItem('st_session');if(!saved)return;
+  const savedUser=JSON.parse(saved);
+  try{
+    const rows=await sb('rpc/st_get_profile','POST',{p_token:savedUser.session_token});
+    const profile=rows&&rows[0];
+    if(profile&&profile.is_active){currentUser=Object.assign({},profile,{session_token:savedUser.session_token});checkAndLoad(currentUser);}
+    else{localStorage.removeItem('st_session');}
+  }catch(e){console.error(e);localStorage.removeItem('st_session');}
 }
 
 async function activateTrialIfNeeded(){
@@ -850,16 +857,17 @@ async function activateTrialIfNeeded(){
     const start=new Date().toISOString().split('T')[0];
     const expiry=new Date(); expiry.setDate(expiry.getDate()+30);
     const expiryStr=expiry.toISOString().split('T')[0];
-    await sb('users','PATCH',{start_date:start,expiry_date:expiryStr},`?id=eq.${currentUser.id}`);
+    await sb('rpc/st_activate_trial','POST',{p_token:currentUser.session_token,p_start:start,p_expiry:expiryStr});
     currentUser.start_date=start;
     currentUser.expiry_date=expiryStr;
+    localStorage.setItem('st_session',JSON.stringify(currentUser));
     document.getElementById('hTrial').textContent=`🕐 Trial: 30 days left`;
   }catch(e){console.error('Trial activation failed',e);}
 }
 
 async function loadAllMasterData(){
   try{
-    const[custs,svcs]=await Promise.all([sb('salon_customers','GET',null,`?user_id=eq.${currentUser.id}&order=name.asc&select=*`),sb('salon_services','GET',null,`?user_id=eq.${currentUser.id}&order=name.asc&select=*`)]);
+    const[custs,svcs]=await Promise.all([sb('rpc/st_get_customers','POST',{p_token:currentUser.session_token}),sb('rpc/st_get_services','POST',{p_token:currentUser.session_token})]);
     allCustomers=custs||[]; allServices=svcs||[];
   }catch(e){console.error(e);}
 }
@@ -867,7 +875,7 @@ async function loadAllMasterData(){
 // CUSTOMER TABLE
 async function loadCustomerTable(){
   try{
-    const rows=await sb('salon_customers','GET',null,`?user_id=eq.${currentUser.id}&order=name.asc&select=*`);
+    const rows=await sb('rpc/st_get_customers','POST',{p_token:currentUser.session_token});
     allCustomers=rows||[];
     const tbody=document.getElementById('customerTableBody');
     if(!allCustomers.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-light)">No customers yet. Add from the Add tab.</td></tr>';return;}
@@ -888,7 +896,7 @@ async function addCustomer(){
   const name=document.getElementById('custName').value.trim();
   if(!name)return toast('Customer name required','error');
   try{
-    await sb('salon_customers','POST',{user_id:currentUser.id,salutation:document.getElementById('custSalutation').value,name,mobile:document.getElementById('custMobile').value.trim(),address:document.getElementById('custAddress').value.trim(),birthday:document.getElementById('custBirthday').value||null,anniversary:document.getElementById('custAnniversary').value||null,notes:document.getElementById('custNotes').value.trim()});
+    await sb('rpc/st_add_customer','POST',{p_token:currentUser.session_token,p_salutation:document.getElementById('custSalutation').value,p_name:name,p_mobile:document.getElementById('custMobile').value.trim(),p_address:document.getElementById('custAddress').value.trim(),p_birthday:document.getElementById('custBirthday').value||null,p_anniversary:document.getElementById('custAnniversary').value||null,p_notes:document.getElementById('custNotes').value.trim()});
     await activateTrialIfNeeded();
     toast('Customer saved! ✅','success');
     ['custName','custMobile','custAddress','custBirthday','custAnniversary','custNotes'].forEach(id=>document.getElementById(id).value='');
@@ -899,7 +907,7 @@ async function addCustomer(){
 // SERVICE
 async function loadServiceList(){
   try{
-    const rows=await sb('salon_services','GET',null,`?user_id=eq.${currentUser.id}&order=name.asc&select=*`);
+    const rows=await sb('rpc/st_get_services','POST',{p_token:currentUser.session_token});
     allServices=rows||[];
     const el=document.getElementById('serviceList');
     if(!allServices.length){el.innerHTML='<div class="empty-state"><div class="ei">💇</div><p>No services yet.<br>Add from the Add tab.</p></div>';return;}
@@ -917,7 +925,7 @@ async function addService(){
   if(!name)return toast('Service name required','error');
   if(!rate)return toast('Rate required','error');
   try{
-    await sb('salon_services','POST',{user_id:currentUser.id,name,rate:parseFloat(rate)});
+    await sb('rpc/st_add_service','POST',{p_token:currentUser.session_token,p_name:name,p_rate:parseFloat(rate)});
     await activateTrialIfNeeded();
     toast('Service saved! ✅','success');
     ['svcName','svcRate'].forEach(id=>document.getElementById(id).value='');
@@ -1031,15 +1039,15 @@ async function addVisit(){
     let dueDate=null;
     if(remDays){const d=new Date(date);d.setDate(d.getDate()+remDays);dueDate=d.toISOString().split('T')[0];}
     lines.push({
-      user_id:currentUser.id, customer_id:custSel.value,
-      customer_name:custName.replace(/\(.*\)/,'').trim(),
-      visit_date:date, service:svcSel.options[svcSel.selectedIndex].text,
-      amount:parseFloat(amt), reminder_days:remDays, due_date:dueDate
+      p_token:currentUser.session_token, p_customer_id:custSel.value,
+      p_customer_name:custName.replace(/\(.*\)/,'').trim(),
+      p_visit_date:date, p_service:svcSel.options[svcSel.selectedIndex].text,
+      p_amount:parseFloat(amt), p_reminder_days:remDays, p_due_date:dueDate
     });
   }
   if(!lines.length)return toast('Add at least one service','error');
   try{
-    for(const line of lines) await sb('salon_visits','POST',line);
+    for(const line of lines) await sb('rpc/st_add_visit','POST',line);
     await activateTrialIfNeeded();
     toast(`Visit saved! ${lines.length} service${lines.length>1?'s':''} recorded ✅`,'success');
     setupVisitForm();
@@ -1050,7 +1058,7 @@ async function addVisit(){
 async function loadTodayReport(){
   const today=new Date().toISOString().split('T')[0];
   try{
-    const rows=await sb('salon_visits','GET',null,`?user_id=eq.${currentUser.id}&visit_date=eq.${today}&order=created_at.desc&select=*`);
+    const rows=await sb('rpc/st_get_visits_range','POST',{p_token:currentUser.session_token,p_from:today,p_to:today});
     const visits=rows||[],total=visits.reduce((s,v)=>s+(v.amount||0),0);
     document.getElementById('todayVisits').textContent=visits.length;
     document.getElementById('todayTotal').textContent=total.toLocaleString('en-IN');
@@ -1062,7 +1070,7 @@ async function loadRangeReport(){
   const from=document.getElementById('reportFrom').value,to=document.getElementById('reportTo').value;
   if(!from||!to)return toast('Select both dates','error');
   try{
-    const rows=await sb('salon_visits','GET',null,`?user_id=eq.${currentUser.id}&visit_date=gte.${from}&visit_date=lte.${to}&order=visit_date.desc&select=*`);
+    const rows=await sb('rpc/st_get_visits_range','POST',{p_token:currentUser.session_token,p_from:from,p_to:to});
     const visits=rows||[],total=visits.reduce((s,v)=>s+(v.amount||0),0);
     document.getElementById('rangeVisits').textContent=visits.length;
     document.getElementById('rangeTotal').textContent=total.toLocaleString('en-IN');
@@ -1086,12 +1094,12 @@ async function loadReminders(){
   const today=new Date().toISOString().split('T')[0];
   const in3=new Date();in3.setDate(in3.getDate()+3);const in3Str=in3.toISOString().split('T')[0];
   try{
-    const rows=await sb('salon_visits','GET',null,`?user_id=eq.${currentUser.id}&due_date=gte.${today}&due_date=lte.${in3Str}&order=due_date.asc&select=*`);
+    const rows=await sb('rpc/st_get_visits_due','POST',{p_token:currentUser.session_token,p_from:today,p_to:in3Str});
     const el=document.getElementById('reminderList');
     if(!rows||!rows.length){el.innerHTML='<div class="empty-state"><div class="ei">🔔</div><p>No reminders due<br>in the next 3 days. All good! ✅</p></div>';return;}
     const custIds=[...new Set(rows.map(r=>r.customer_id))];
     let custMap={};
-    if(custIds.length){const c=await sb('salon_customers','GET',null,`?id=in.(${custIds.join(',')})&select=id,mobile`);(c||[]).forEach(x=>custMap[x.id]=x.mobile);}
+    if(custIds.length){const c=await sb('rpc/st_get_customer_mobiles','POST',{p_token:currentUser.session_token,p_ids:custIds});(c||[]).forEach(x=>custMap[x.id]=x.mobile);}
     el.innerHTML=rows.map(v=>{
       const mob=custMap[v.customer_id]||'';
       const lastVisit=v.visit_date?new Date(v.visit_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'';
@@ -1126,15 +1134,15 @@ async function bookAppointment(){
   if(!date)return toast('Select date','error');
   if(!time)return toast('Select time','error');
   try{
-    await sb('salon_appointments','POST',{
-      user_id:currentUser.id,
-      customer_id:custSel.value,
-      customer_name:custSel.options[custSel.selectedIndex].text,
-      appointment_date:date,
-      appointment_time:time,
-      service:svcSel.value?svcSel.options[svcSel.selectedIndex].text:'',
-      notes:document.getElementById('apptNotes').value.trim(),
-      status:document.getElementById('apptStatus').value
+    await sb('rpc/st_add_appointment','POST',{
+      p_token:currentUser.session_token,
+      p_customer_id:custSel.value,
+      p_customer_name:custSel.options[custSel.selectedIndex].text,
+      p_appointment_date:date,
+      p_appointment_time:time,
+      p_service:svcSel.value?svcSel.options[svcSel.selectedIndex].text:'',
+      p_notes:document.getElementById('apptNotes').value.trim(),
+      p_status:document.getElementById('apptStatus').value
     });
     toast('Appointment booked! ✅','success');
     custSel.value=''; svcSel.value='';
@@ -1148,7 +1156,7 @@ async function bookAppointment(){
 async function loadAppointments(){
   try{
     const today=new Date().toISOString().split('T')[0];
-    const rows=await sb('salon_appointments','GET',null,`?user_id=eq.${currentUser.id}&appointment_date=gte.${today}&order=appointment_date.asc,appointment_time.asc&select=*`);
+    const rows=await sb('rpc/st_get_appointments_from','POST',{p_token:currentUser.session_token,p_from_date:today});
     const el=document.getElementById('apptList');
     if(!rows||!rows.length){
       el.innerHTML='<div class="empty-state"><div class="ei">📅</div><p>No upcoming appointments.</p></div>';
@@ -1179,7 +1187,7 @@ async function loadAppointments(){
 
 async function updateApptStatus(id,status){
   try{
-    await sb('salon_appointments','PATCH',{status},`?id=eq.${id}`);
+    await sb('rpc/st_update_appointment_status','POST',{p_token:currentUser.session_token,p_id:id,p_status:status});
     toast(`Marked as ${status} ✅`,'success');
     loadAppointments();
   }catch(e){toast('Failed to update','error');}
@@ -1190,7 +1198,7 @@ async function loadApptReminders(){
   const tomorrow=new Date(); tomorrow.setDate(tomorrow.getDate()+1);
   const tomorrowStr=tomorrow.toISOString().split('T')[0];
   try{
-    const rows=await sb('salon_appointments','GET',null,`?user_id=eq.${currentUser.id}&appointment_date=in.(${today},${tomorrowStr})&status=in.(pending,confirmed)&order=appointment_date.asc,appointment_time.asc&select=*`);
+    const rows=await sb('rpc/st_get_appointments_reminders','POST',{p_token:currentUser.session_token,p_dates:[today,tomorrowStr]});
     const el=document.getElementById('apptReminderList');
     if(!rows||!rows.length){
       el.innerHTML='<div class="empty-state"><div class="ei">🔔</div><p>No appointments today<br>or tomorrow. All clear! ✅</p></div>';
@@ -1200,7 +1208,7 @@ async function loadApptReminders(){
     const custIds=[...new Set(rows.map(r=>r.customer_id))];
     let custMap={};
     if(custIds.length){
-      const c=await sb('salon_customers','GET',null,`?id=in.(${custIds.join(',')})&select=id,mobile`);
+      const c=await sb('rpc/st_get_customer_mobiles','POST',{p_token:currentUser.session_token,p_ids:custIds});
       (c||[]).forEach(x=>custMap[x.id]=x.mobile);
     }
     el.innerHTML=rows.map(a=>{
@@ -1263,10 +1271,7 @@ async function handlePaymentSuccess(response, plan, amount){
     if(plan==='yearly') expiry.setFullYear(expiry.getFullYear()+1);
     else expiry.setFullYear(2099);
     const expiryStr=expiry.toISOString().split('T')[0];
-    await sb('users','PATCH',{
-      plan, expiry_date:expiryStr,
-      start_date:currentUser.start_date||new Date().toISOString().split('T')[0]
-    },`?id=eq.${currentUser.id}`);
+    await sb('rpc/st_apply_payment','POST',{p_token:currentUser.session_token,p_plan:plan,p_expiry:expiryStr,p_razorpay_payment_id:response.razorpay_payment_id||null});
     currentUser.plan=plan;
     currentUser.expiry_date=expiryStr;
     toast(`Payment successful! ${plan==='lifetime'?'Welcome Lifetime Member ⭐':'Yearly plan activated ✅'}`,'success');
@@ -1286,7 +1291,7 @@ async function downloadCSV(){
   const to=document.getElementById('reportTo').value;
   if(!from||!to)return toast('Select date range first','error');
   try{
-    const rows=await sb('salon_visits','GET',null,`?user_id=eq.${currentUser.id}&visit_date=gte.${from}&visit_date=lte.${to}&order=visit_date.desc&select=*`);
+    const rows=await sb('rpc/st_get_visits_range','POST',{p_token:currentUser.session_token,p_from:from,p_to:to});
     if(!rows||!rows.length)return toast('No data to download','error');
     const headers=['Visit Date','Customer Name','Service','Amount (₹)','Reminder Days','Due Date'];
     const csvRows=[headers.join(',')];

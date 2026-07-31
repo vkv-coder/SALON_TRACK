@@ -209,17 +209,15 @@ function toast(msg,type=''){
   setTimeout(()=>t.classList.remove('show'),3000);
 }
 
+let adminPw='';
 async function adminLogin(){
   const pw=document.getElementById('adminPw').value;
   const errEl=document.getElementById('loginErr');
   errEl.textContent='Checking...';
   try{
-    const res=await fetch('https://telegram-notify.unigoods2026.workers.dev/',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({action:'checkSalonTrackPin',pin:pw})
-    });
-    const data=await res.json();
-    if(data.valid){
+    const valid=await sb('rpc/st_admin_check_password','POST',{p_password:pw});
+    if(valid){
+      adminPw=pw;
       errEl.textContent='';
       document.getElementById('loginWrap').style.display='none';
       document.getElementById('adminWrap').style.display='block';
@@ -241,7 +239,7 @@ function adminLogout(){
 
 async function loadUsers(){
   try{
-    const rows=await sb('users','GET',null,'?order=created_at.desc&select=*');
+    const rows=await sb('rpc/st_admin_list_users','POST',{p_password:adminPw});
     allUsers=rows||[];
     updateStats(allUsers);
     renderUsers(allUsers);
@@ -319,7 +317,7 @@ async function resetUserPin(id,name,mobile){
   if(!confirm(`Reset PIN for ${name}? Only do this after verifying it's really them (call/WhatsApp).`)) return;
   const newPin=String(Math.floor(1000+Math.random()*9000));
   try{
-    await sb('users','PATCH',{pin:newPin},`?id=eq.${id}`);
+    await sb('rpc/st_admin_reset_pin','POST',{p_id:id,p_new_pin:newPin,p_password:adminPw});
     toast(`New PIN set for ${name}: ${newPin}`,'success');
     if(mobile){
       const msg=encodeURIComponent(`Hi ${name}, your SALON-TRACK PIN has been reset.\n\nYour new PIN is: ${newPin}\n\nPlease log in and keep it safe.`);
@@ -333,7 +331,7 @@ async function toggleUser(id,currentStatus){
   const newStatus=!currentStatus;
   if(!confirm(`${newStatus?'Activate':'Deactivate'} this user?`)) return;
   try{
-    await sb('users','PATCH',{is_active:newStatus},`?id=eq.${id}`);
+    await sb('rpc/st_admin_toggle_active','POST',{p_id:id,p_is_active:newStatus,p_password:adminPw});
     toast(`User ${newStatus?'activated':'deactivated'} ✅`,'success');
     loadUsers();
   }catch(e){toast('Failed to update','error');console.error(e);}
@@ -346,7 +344,7 @@ async function extendTrial(id,name,currentExpiry){
     const base=currentExpiry&&new Date(currentExpiry)>new Date()?new Date(currentExpiry):new Date();
     base.setDate(base.getDate()+parseInt(days));
     const newExpiry=base.toISOString().split('T')[0];
-    await sb('users','PATCH',{expiry_date:newExpiry,start_date:new Date().toISOString().split('T')[0],plan:'trial'},`?id=eq.${id}`);
+    await sb('rpc/st_admin_extend_trial','POST',{p_id:id,p_start:new Date().toISOString().split('T')[0],p_expiry:newExpiry,p_password:adminPw});
     toast(`Trial extended for ${name} until ${newExpiry} ✅`,'success');
     loadUsers();
   }catch(e){toast('Failed to extend trial','error');console.error(e);}
