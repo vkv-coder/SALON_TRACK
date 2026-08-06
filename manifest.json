@@ -1,7 +1,7 @@
 {
   "name": "SALON Track",
   "short_name": "SALON",
-  "start_url": "/SALON_TRACK/index.html",
+  "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#1c1917",
   "theme_color": "#d97706",

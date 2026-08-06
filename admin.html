@@ -406,6 +406,12 @@ document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('ptab-notstarted').addEventListener('click',()=>switchPromoTab('notstarted'));
   document.getElementById('ptab-all').addEventListener('click',()=>switchPromoTab('all'));
 });
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
 </script>
 </body>
 </html>

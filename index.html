@@ -1344,6 +1344,12 @@ async function verifyForgotMobile(){
     document.getElementById('forgotMobile').value='';
   }catch(e){toast('Error sending request','error');console.error(e);}
 }
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
 </script>
 </body>
 </html>
