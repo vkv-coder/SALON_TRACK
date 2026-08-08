@@ -375,6 +375,19 @@
     <button class="btn btn-primary" onclick="doRegister()" style="margin-top:10px">Create Account →</button>
     <div class="auth-footer">Already registered? <button class="link-btn" onclick="showScreen('loginScreen')">Login</button></div>
   </div>
+  <div class="auth-card" style="margin-top:12px;padding:16px 18px;cursor:pointer" onclick="const b=document.getElementById('hiwBody');b.style.display=b.style.display==='none'?'block':'none';">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h2 style="margin:0">ℹ️ How SALON-TRACK works</h2>
+      <span style="color:var(--primary);font-weight:700">▾</span>
+    </div>
+    <div id="hiwBody" style="display:none;margin-top:10px;font-size:12.5px;color:var(--text-light);line-height:1.7">
+      <p><b>1.</b> Register with your mobile number — no approval needed, you're in instantly.</p>
+      <p><b>2.</b> Your 30-day free trial clock starts the moment you add your first customer, service or visit.</p>
+      <p><b>3.</b> Use it fully free for 30 days — customers, services, visits, reminders & appointments, all included.</p>
+      <p><b>4.</b> As your trial nears its end, we'll reach out to arrange your Yearly (₹250) or Lifetime (₹1001) plan — or extend your trial.</p>
+      <p><b>5.</b> Forgot your PIN? Tap "Forgot PIN" — we verify your identity and reset it for you.</p>
+    </div>
+  </div>
 </div>
 
 <!-- ===== PAYWALL ===== -->
@@ -828,6 +841,10 @@ function checkAndLoad(user){
   } else {
     lbl.textContent=user.expiry_date?`🕐 Trial: ${daysLeft} days left`:'🎁 Trial (not started)';
     sub.textContent='Upgrade anytime for full access';
+    if(user.expiry_date&&daysLeft<=3){
+      card.style.background='linear-gradient(135deg,#E65100,#FF6F00)';
+      sub.textContent=daysLeft>0?`⚠️ Trial ends in ${daysLeft} day${daysLeft!==1?'s':''}! Contact vkvcoder.support@gmail.com to continue.`:'⚠️ Trial ended. Contact vkvcoder.support@gmail.com to continue.';
+    }
   }
 
   const todayStr=new Date().toISOString().split('T')[0];
