@@ -254,7 +254,7 @@
       <div class="up-price">₹1,001</div>
     </div>
   </div>
-  <button class="btn" style="background:white;color:var(--primary-dark);font-weight:700;margin-bottom:14px" onclick="initiatePayment()">Pay Securely via Razorpay →</button>
+  <button class="btn" style="background:white;color:var(--primary-dark);font-weight:700;margin-bottom:14px" onclick="contactToPay(selectedUpgradePlan)">📧 Contact to Upgrade →</button>
   <button class="link-btn" style="color:rgba(255,255,255,0.65)" onclick="goHome()">← Back to App</button>
 </div>
 
@@ -405,7 +405,7 @@
       <div class="plan-price">₹1,001</div>
     </div>
   </div>
-  <button class="btn btn-white" onclick="initiatePayment()">Pay & Continue →</button>
+  <button class="btn btn-white" onclick="contactToPay(selectedPlan)">📧 Contact to Continue →</button>
   <br><br>
   <button class="link-btn" style="color:rgba(255,255,255,0.65)" onclick="doLogout()">Logout</button>
 </div>
@@ -712,6 +712,18 @@
 <script>
 const SUPA_URL = 'https://jqqnnkzozjskziaizajg.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcW5ua3pvempza3ppYWl6YWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Mjk1ODAsImV4cCI6MjA4ODUwNTU4MH0.sEYeWnm0dvuw8bLSVnQhqmgV8LB-pELjpuVIa3Us1Gg';
+// Online checkout isn't hooked up to a live payout account yet — route
+// upgrade requests to email so payment can be arranged directly instead.
+function contactToPay(plan){
+  const label=plan==='lifetime'?'Lifetime Plan':'Yearly Plan';
+  const price=plan==='lifetime'?'₹1,001 one-time':'₹250/year';
+  const name=(currentUser&&currentUser.name)||'';
+  const shop=(currentUser&&currentUser.shop)||'';
+  const mobile=(currentUser&&currentUser.mobile)||'';
+  const subject=encodeURIComponent('SALON-TRACK — '+label+' upgrade');
+  const body=encodeURIComponent('Name: '+name+'\nShop: '+shop+'\nMobile: '+mobile+'\nPlan requested: '+label+' ('+price+')\n\nPlease share payment details.');
+  window.location.href='mailto:vkvcoder.support@gmail.com?subject='+subject+'&body='+body;
+}
 async function tg(msg){
   try{await fetch('https://telegram-notify.unigoods2026.workers.dev/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({msg})});}catch(e){}
 }
